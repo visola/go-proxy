@@ -4,17 +4,27 @@ import (
 	"io/ioutil"
 	"os/user"
 	"path"
+	"sort"
+	"strings"
 
 	"gopkg.in/yaml.v2"
 )
 
 type proxyConfig struct {
-	Static []staticConfiguration
+	Static []mapping
+	Proxy  []mapping
 }
 
-type staticConfiguration struct {
+type mapping struct {
 	From string
 	To   string
+}
+
+type configMapping struct {
+	from   string
+	origin string
+	proxy  bool
+	to     string
 }
 
 func getConfigDirectory() (string, error) {
@@ -25,7 +35,7 @@ func getConfigDirectory() (string, error) {
 	return user.HomeDir + "/.go-proxy", nil
 }
 
-func getConfigurations() ([]proxyConfig, error) {
+func getConfigurations() ([]configMapping, error) {
 	configDir, configDirErr := getConfigDirectory()
 	if configDirErr != nil {
 		panic(configDirErr)
@@ -36,15 +46,43 @@ func getConfigurations() ([]proxyConfig, error) {
 		panic(filesErr)
 	}
 
-	var configurations = make([]proxyConfig, 0)
+	var configurations = make([]configMapping, 0)
+
 	for _, file := range files {
 		config, configErr := readConfiguration(path.Join(configDir, file.Name()))
 		if configErr != nil {
 			return nil, configErr
 		}
-		configurations = append(configurations, config)
+
+		for _, staticConfig := range config.Static {
+			configurations = append(configurations, configMapping{
+				from:   staticConfig.From,
+				to:     staticConfig.To,
+				origin: file.Name(),
+				proxy:  false,
+			})
+		}
+
+		for _, staticConfig := range config.Proxy {
+			configurations = append(configurations, configMapping{
+				from:   staticConfig.From,
+				to:     staticConfig.To,
+				origin: file.Name(),
+				proxy:  true,
+			})
+		}
 	}
 
+	sort.Slice(configurations, func(i, j int) bool {
+		pathI := strings.ToLower(configurations[i].from)
+		pathJ := strings.ToLower(configurations[j].from)
+
+		if len(pathI) == len(pathJ) {
+			return strings.Compare(pathI, pathJ) < 0
+		}
+
+		return len(pathI) > len(pathJ)
+	})
 	return configurations, nil
 }
 
