@@ -17,7 +17,7 @@ var configurations []configMapping
 
 func proxyRequest(req *http.Request, w http.ResponseWriter, mapping configMapping) {
 	oldPath := req.URL.Path
-	newPath := mapping.to + "/" + oldPath[len(mapping.from):]
+	newPath := mapping.To + "/" + oldPath[len(mapping.From):]
 
 	newURL, parseErr := url.Parse(newPath)
 	if parseErr != nil {
@@ -25,7 +25,7 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, mapping configMappin
 		return
 	}
 
-	log.Printf("Proxying '%s' to '%s' for '%s'\n", req.URL.String(), newURL.String(), mapping.origin)
+	log.Printf("Proxying '%s' to '%s' for '%s'\n", req.URL.String(), newURL.String(), mapping.Origin)
 
 	newReq, newReqErr := http.NewRequest(req.Method, newURL.String(), req.Body)
 	if newReqErr != nil {
@@ -66,8 +66,8 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, mapping configMappin
 
 			// Fix location headers to point to proxy
 			if strings.ToLower(name) == "location" {
-				if strings.HasPrefix(value, mapping.to) {
-					value = "https://localhost:3443/" + value[len(mapping.to):]
+				if strings.HasPrefix(value, mapping.To) {
+					value = "https://localhost:3443/" + value[len(mapping.To):]
 				}
 			}
 			w.Header().Set(name, value)
@@ -100,8 +100,8 @@ func requestHandler(w http.ResponseWriter, req *http.Request) {
 	var served string
 
 	for _, config := range configurations {
-		if strings.HasPrefix(path, config.from) {
-			if config.proxy {
+		if strings.HasPrefix(path, config.From) {
+			if config.Proxy {
 				proxyRequest(req, w, config)
 			} else {
 				serveStaticFile(req, w, config)
@@ -117,7 +117,7 @@ func requestHandler(w http.ResponseWriter, req *http.Request) {
 
 func serveStaticFile(req *http.Request, w http.ResponseWriter, mapping configMapping) {
 	oldPath := req.URL.Path
-	newPath := path.Join(mapping.to, oldPath[len(mapping.from):])
+	newPath := path.Join(mapping.To, oldPath[len(mapping.From):])
 
 	file, err := os.Open(newPath)
 
@@ -133,7 +133,7 @@ func serveStaticFile(req *http.Request, w http.ResponseWriter, mapping configMap
 
 	defer file.Close()
 
-	log.Printf("Serving '%s' for '%s', from '%s'", newPath, req.URL.Path, mapping.origin)
+	log.Printf("Serving '%s' for '%s', from '%s'", newPath, req.URL.Path, mapping.Origin)
 
 	buffer := make([]byte, 512)
 	loopCount := 0
@@ -189,7 +189,7 @@ func main() {
 	}
 
 	for _, config := range configurations {
-		fmt.Printf("From: %s\n", config.from)
+		fmt.Printf("From: %s\n", config.From)
 	}
 
 	startAdminServer()

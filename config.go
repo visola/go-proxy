@@ -21,10 +21,10 @@ type mapping struct {
 }
 
 type configMapping struct {
-	from   string
-	origin string
-	proxy  bool
-	to     string
+	From   string `json:"from"`
+	Origin string `json:"origin"`
+	Proxy  bool   `json:"proxy"`
+	To     string `json:"to"`
 }
 
 func getConfigDirectory() (string, error) {
@@ -56,26 +56,26 @@ func getConfigurations() ([]configMapping, error) {
 
 		for _, staticConfig := range config.Static {
 			configurations = append(configurations, configMapping{
-				from:   staticConfig.From,
-				to:     staticConfig.To,
-				origin: file.Name(),
-				proxy:  false,
+				From:   staticConfig.From,
+				To:     staticConfig.To,
+				Origin: file.Name(),
+				Proxy:  false,
 			})
 		}
 
 		for _, staticConfig := range config.Proxy {
 			configurations = append(configurations, configMapping{
-				from:   staticConfig.From,
-				to:     staticConfig.To,
-				origin: file.Name(),
-				proxy:  true,
+				From:   staticConfig.From,
+				To:     staticConfig.To,
+				Origin: file.Name(),
+				Proxy:  true,
 			})
 		}
 	}
 
 	sort.Slice(configurations, func(i, j int) bool {
-		pathI := strings.ToLower(configurations[i].from)
-		pathJ := strings.ToLower(configurations[j].from)
+		pathI := strings.ToLower(configurations[i].From)
+		pathJ := strings.ToLower(configurations[j].From)
 
 		if len(pathI) == len(pathJ) {
 			return strings.Compare(pathI, pathJ) < 0

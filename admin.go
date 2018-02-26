@@ -1,11 +1,21 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/gobuffalo/packr"
 )
+
+func handleConfigurations(w http.ResponseWriter, req *http.Request) {
+	json, jsonError := json.Marshal(configurations)
+	if jsonError != nil {
+		internalError(req, w, jsonError)
+	}
+	w.Header().Add("Content-Type", "application/json")
+	w.Write([]byte(json))
+}
 
 func startAdminServer() {
 	box := packr.NewBox("./dist")
@@ -18,5 +28,6 @@ func startAdminServer() {
 
 	adminServer := http.NewServeMux()
 	adminServer.Handle("/", http.FileServer(box))
+	adminServer.HandleFunc("/configurations", handleConfigurations)
 	http.ListenAndServe(":1234", adminServer)
 }
