@@ -5,3 +5,7 @@
 [prune]
   go-tests = true
   unused-packages = true
+
+[[constraint]]
+  name = "github.com/gobuffalo/packr"
+  version = "1.10.4"
