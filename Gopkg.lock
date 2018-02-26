@@ -2,6 +2,18 @@
 
 
 [[projects]]
+  name = "github.com/gobuffalo/packr"
+  packages = ["."]
+  revision = "6434a292ac52e6964adebfdce3f9ce6d9f16be01"
+  version = "v1.10.4"
+
+[[projects]]
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
+
+[[projects]]
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   revision = "7f97868eec74b32b0982dd158a51a446d1da7eb5"
@@ -10,6 +22,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "bbb168ed7f43b40cf4f75a1bccce6a8f8f9755d21b499eafd1bbe8f92fe1420b"
+  inputs-digest = "1ecd6b514b32d530593b427637bb711518fa47a36889f20d0019ca46b1b2084f"
   solver-name = "gps-cdcl"
   solver-version = 1

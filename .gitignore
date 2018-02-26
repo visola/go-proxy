@@ -1,1 +1,5 @@
+.cache/
+dist/
+main-packr.go
+node_modules/
 vendor/

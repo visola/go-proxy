@@ -192,6 +192,7 @@ func main() {
 		fmt.Printf("From: %s\n", config.from)
 	}
 
+	startAdminServer()
 	err := http.ListenAndServeTLS(":3443", certFile, keyFile, nil)
 	if err != nil {
 		panic(err)
