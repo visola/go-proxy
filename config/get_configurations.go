@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"io/ioutil"
@@ -10,32 +10,14 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type proxyConfig struct {
-	Static []mapping
-	Proxy  []mapping
-}
+var configurations []Mapping
 
-type mapping struct {
-	From string
-	To   string
-}
-
-type configMapping struct {
-	From   string `json:"from"`
-	Origin string `json:"origin"`
-	Proxy  bool   `json:"proxy"`
-	To     string `json:"to"`
-}
-
-func getConfigDirectory() (string, error) {
-	user, err := user.Current()
-	if err != nil {
-		return "", err
+// GetConfigurations load all configurations.
+func GetConfigurations() ([]Mapping, error) {
+	if configurations != nil {
+		return configurations, nil
 	}
-	return user.HomeDir + "/.go-proxy", nil
-}
 
-func getConfigurations() ([]configMapping, error) {
 	configDir, configDirErr := getConfigDirectory()
 	if configDirErr != nil {
 		panic(configDirErr)
@@ -46,7 +28,7 @@ func getConfigurations() ([]configMapping, error) {
 		panic(filesErr)
 	}
 
-	var configurations = make([]configMapping, 0)
+	configurations = make([]Mapping, 0)
 
 	for _, file := range files {
 		config, configErr := readConfiguration(path.Join(configDir, file.Name()))
@@ -55,7 +37,7 @@ func getConfigurations() ([]configMapping, error) {
 		}
 
 		for _, staticConfig := range config.Static {
-			configurations = append(configurations, configMapping{
+			configurations = append(configurations, Mapping{
 				From:   staticConfig.From,
 				To:     staticConfig.To,
 				Origin: file.Name(),
@@ -64,7 +46,7 @@ func getConfigurations() ([]configMapping, error) {
 		}
 
 		for _, staticConfig := range config.Proxy {
-			configurations = append(configurations, configMapping{
+			configurations = append(configurations, Mapping{
 				From:   staticConfig.From,
 				To:     staticConfig.To,
 				Origin: file.Name(),
@@ -96,4 +78,12 @@ func readConfiguration(file string) (loadedConfig proxyConfig, err error) {
 
 	err = yaml.Unmarshal(yamlContent, &loadedConfig)
 	return loadedConfig, err
+}
+
+func getConfigDirectory() (string, error) {
+	user, err := user.Current()
+	if err != nil {
+		return "", err
+	}
+	return user.HomeDir + "/.go-proxy", nil
 }
