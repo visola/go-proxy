@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/visola/go-proxy/config"
+	myhttp "github.com/visola/go-proxy/http"
 )
 
 // StartProxyServer starts the proxy server
@@ -29,7 +30,7 @@ func requestHandler(w http.ResponseWriter, req *http.Request) {
 
 	configurations, configError := config.GetConfigurations()
 	if configError != nil {
-		internalError(req, w, configError)
+		myhttp.InternalError(req, w, configError)
 		return
 	}
 
@@ -45,6 +46,6 @@ func requestHandler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if served == "" {
-		notFound(req, w, path)
+		myhttp.NotFound(req, w, path)
 	}
 }

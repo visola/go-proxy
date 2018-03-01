@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/visola/go-proxy/config"
+	myhttp "github.com/visola/go-proxy/http"
 )
 
 func proxyRequest(req *http.Request, w http.ResponseWriter, mapping config.Mapping) {
@@ -16,7 +17,7 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, mapping config.Mappi
 
 	newURL, parseErr := url.Parse(newPath)
 	if parseErr != nil {
-		internalError(req, w, parseErr)
+		myhttp.InternalError(req, w, parseErr)
 		return
 	}
 
@@ -24,7 +25,7 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, mapping config.Mappi
 
 	newReq, newReqErr := http.NewRequest(req.Method, newURL.String(), req.Body)
 	if newReqErr != nil {
-		internalError(req, w, newReqErr)
+		myhttp.InternalError(req, w, newReqErr)
 		return
 	}
 
@@ -49,7 +50,7 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, mapping config.Mappi
 	resp, respErr := client.Do(newReq)
 
 	if respErr != nil {
-		internalError(req, w, respErr)
+		myhttp.InternalError(req, w, respErr)
 		return
 	}
 
@@ -77,7 +78,7 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, mapping config.Mappi
 		bytesRead, readError := resp.Body.Read(buffer)
 
 		if readError != nil && readError != io.EOF {
-			internalError(req, w, readError)
+			myhttp.InternalError(req, w, readError)
 			return
 		}
 
