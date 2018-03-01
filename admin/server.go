@@ -7,8 +7,13 @@ import (
 	"net/http"
 
 	"github.com/visola/go-proxy/config"
+	myhttp "github.com/visola/go-proxy/http"
 
 	"github.com/gobuffalo/packr"
+)
+
+const (
+	adminServerPort = 1234
 )
 
 // StartAdminServer starts the admin server
@@ -25,26 +30,25 @@ func StartAdminServer() error {
 		return errors.New("No files loaded from box")
 	}
 
-	fmt.Println("Opening admin server at: http://localhost:1234")
+	fmt.Printf("Opening admin server at: http://localhost:%d", adminServerPort)
 
 	adminServer := http.NewServeMux()
 	adminServer.Handle("/", http.FileServer(box))
 	adminServer.HandleFunc("/configurations", handleConfigurations)
-	return http.ListenAndServe(":1234", adminServer)
+
+	return http.ListenAndServe(fmt.Sprintf(":%d", adminServerPort), adminServer)
 }
 
 func handleConfigurations(w http.ResponseWriter, req *http.Request) {
 	configurations, configError := config.GetConfigurations()
 	if configError != nil {
-		// internalError(req, w, configError)
-		w.WriteHeader(500)
+		myhttp.InternalError(req, w, configError)
 		return
 	}
 
 	json, jsonError := json.Marshal(configurations)
 	if jsonError != nil {
-		// internalError(req, w, jsonError)
-		w.WriteHeader(500)
+		myhttp.InternalError(req, w, jsonError)
 		return
 	}
 

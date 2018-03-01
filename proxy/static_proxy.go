@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 
 	"github.com/visola/go-proxy/config"
+	myhttp "github.com/visola/go-proxy/http"
 )
 
 func serveStaticFile(req *http.Request, w http.ResponseWriter, mapping config.Mapping) {
@@ -19,12 +20,12 @@ func serveStaticFile(req *http.Request, w http.ResponseWriter, mapping config.Ma
 	file, err := os.Open(newPath)
 
 	if err == os.ErrNotExist {
-		notFound(req, w, newPath)
+		myhttp.NotFound(req, w, newPath)
 		return
 	}
 
 	if err != nil {
-		internalError(req, w, err)
+		myhttp.InternalError(req, w, err)
 		return
 	}
 
@@ -38,7 +39,7 @@ func serveStaticFile(req *http.Request, w http.ResponseWriter, mapping config.Ma
 		bytesRead, readError := file.Read(buffer)
 
 		if readError != nil && readError != io.EOF {
-			internalError(req, w, readError)
+			myhttp.InternalError(req, w, readError)
 		}
 
 		if bytesRead == 0 {
