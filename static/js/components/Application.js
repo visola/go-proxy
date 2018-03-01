@@ -16,15 +16,27 @@ export default class Application extends React.Component {
   }
 
   renderConfigurations() {
-    return this.props.configurations.collection.map((config, index) => {
-      return <li key={index}>
+    let index = 0;
+    const result = [];
+    for (let origin in this.props.configurations.mappings) {
+      const mappings = this.props.configurations.mappings[origin];
+      index += 1;
+      result.push(<li key={index}>
         <span className="field">
-          <label>Origin:</label><span>{config.origin}</span>
+          <label>Origin:</label><span>{origin}</span>
         </span>
-        <span className="field">
-          <label>{config.proxy ? 'proxy' : 'static'}</label> {config.from} => {config.to
-        }</span>
-      </li>
-    });
+        <ul>
+          {mappings.map((m) => this.renderMapping(m))}
+        </ul>
+      </li>);
+    }
+
+    return result;
+  }
+
+  renderMapping(mapping) {
+    return <span className="field" key={mapping.from}>
+      <label>{mapping.proxy ? 'proxy' : 'static'}</label> {mapping.from} => {mapping.to}
+    </span>;
   }
 }
