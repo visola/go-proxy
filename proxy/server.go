@@ -29,7 +29,7 @@ func StartProxyServer() error {
 
 func requestHandler(w http.ResponseWriter, req *http.Request) {
 	proxiedRequest := statistics.ProxiedRequest{
-		StartTime:     time.Now().UnixNano(),
+		StartTime:     getTime(),
 		RequestedPath: req.URL.Path,
 	}
 
@@ -38,7 +38,7 @@ func requestHandler(w http.ResponseWriter, req *http.Request) {
 	configurations, configError := config.GetConfigurations()
 	if configError != nil {
 		myhttp.InternalError(req, w, configError)
-		proxiedRequest.EndTime = time.Now().UnixNano()
+		proxiedRequest.EndTime = getTime()
 		proxiedRequest.Error = configError.Error()
 		proxiedRequest.ResponseCode = http.StatusInternalServerError
 		statistics.AddProxiedRequest(proxiedRequest)
@@ -62,7 +62,7 @@ func requestHandler(w http.ResponseWriter, req *http.Request) {
 	if handlingError == os.ErrNotExist {
 		myhttp.NotFound(req, w, response.proxiedTo)
 
-		proxiedRequest.EndTime = time.Now().UnixNano()
+		proxiedRequest.EndTime = getTime()
 		proxiedRequest.Error = handlingError.Error()
 		proxiedRequest.ProxiedTo = response.proxiedTo
 		proxiedRequest.ResponseCode = http.StatusNotFound
@@ -73,20 +73,26 @@ func requestHandler(w http.ResponseWriter, req *http.Request) {
 	if handlingError != nil {
 		myhttp.InternalError(req, w, configError)
 
-		proxiedRequest.EndTime = time.Now().UnixNano()
+		proxiedRequest.EndTime = getTime()
 		proxiedRequest.Error = handlingError.Error()
 		proxiedRequest.ResponseCode = http.StatusInternalServerError
 		statistics.AddProxiedRequest(proxiedRequest)
 		return
 	}
 
-	proxiedRequest.EndTime = time.Now().UnixNano()
+	proxiedRequest.EndTime = getTime()
+
 	if response == nil {
 		proxiedRequest.ResponseCode = http.StatusNotFound
 		myhttp.NotFound(req, w, path)
 	} else {
-		proxiedRequest.ResponseCode = http.StatusOK
+		proxiedRequest.ProxiedTo = response.proxiedTo
+		proxiedRequest.ResponseCode = response.responseCode
 	}
 
 	statistics.AddProxiedRequest(proxiedRequest)
+}
+
+func getTime() int64 {
+	return time.Now().UnixNano() / int64(time.Millisecond)
 }

@@ -19,6 +19,7 @@ const maxRequestsToKeep = 1000
 
 var (
 	channel         = make(chan ProxiedRequest)
+	listeners       = make([]func(ProxiedRequest), 0)
 	proxiedRequests = make([]ProxiedRequest, 0)
 	reading         = false
 )
@@ -34,6 +35,12 @@ func GetProxiedRequests() []ProxiedRequest {
 	return proxiedRequests
 }
 
+// OnRequestProxied will register the callback to be called when a new request
+// is proxied.
+func OnRequestProxied(callback func(ProxiedRequest)) {
+	listeners = append(listeners, callback)
+}
+
 func addToArray() {
 	if reading == true {
 		return
@@ -41,7 +48,13 @@ func addToArray() {
 
 	reading = true
 	for {
-		proxiedRequests = append(proxiedRequests, <-channel)
+		proxiedRequest := <-channel
+		proxiedRequests = append(proxiedRequests, proxiedRequest)
+
+		for _, listener := range listeners {
+			listener(proxiedRequest)
+		}
+
 		if len(proxiedRequests) > maxRequestsToKeep {
 			proxiedRequests = proxiedRequests[1:]
 		}
