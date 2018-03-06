@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os/user"
 	"path"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -31,6 +32,10 @@ func GetConfigurations() ([]Mapping, error) {
 	configurations = make([]Mapping, 0)
 
 	for _, file := range files {
+		if filepath.Ext(file.Name()) != ".yml" && filepath.Ext(file.Name()) != ".yaml" {
+			continue
+		}
+
 		config, configErr := readConfiguration(path.Join(configDir, file.Name()))
 		if configErr != nil {
 			return nil, configErr
