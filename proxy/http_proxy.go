@@ -1,32 +1,47 @@
 package proxy
 
 import (
+	"bytes"
+	"fmt"
 	"io"
-	"log"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/visola/go-proxy/config"
-	myhttp "github.com/visola/go-proxy/http"
 )
 
-func proxyRequest(req *http.Request, w http.ResponseWriter, mapping config.Mapping) {
+var urlToProxy = fmt.Sprintf("https://localhost:%d", port)
+
+func proxyRequest(req *http.Request, w http.ResponseWriter, mapping config.Mapping) (*proxyResponse, error) {
 	oldPath := req.URL.Path
 	newPath := mapping.To + "/" + oldPath[len(mapping.From):]
 
-	newURL, parseErr := url.Parse(newPath)
+	newURL, parseErr := url.Parse(fmt.Sprintf("%s?%s", newPath, req.URL.RawQuery))
 	if parseErr != nil {
-		myhttp.InternalError(req, w, parseErr)
-		return
+		return &proxyResponse{
+			proxiedTo:    newPath,
+			responseCode: http.StatusInternalServerError,
+		}, parseErr
 	}
 
-	log.Printf("Proxying '%s' to '%s' for '%s'\n", req.URL.String(), newURL.String(), mapping.Origin)
+	defer req.Body.Close()
+	bodyInBytes, readBodyErr := ioutil.ReadAll(req.Body)
 
-	newReq, newReqErr := http.NewRequest(req.Method, newURL.String(), req.Body)
+	if readBodyErr != nil {
+		return &proxyResponse{
+			proxiedTo:    newPath,
+			responseCode: http.StatusInternalServerError,
+		}, readBodyErr
+	}
+
+	newReq, newReqErr := http.NewRequest(req.Method, newURL.String(), bytes.NewBuffer(bodyInBytes))
 	if newReqErr != nil {
-		myhttp.InternalError(req, w, newReqErr)
-		return
+		return &proxyResponse{
+			proxiedTo:    newPath,
+			responseCode: http.StatusInternalServerError,
+		}, newReqErr
 	}
 
 	// Copy request headers
@@ -36,22 +51,20 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, mapping config.Mappi
 		}
 	}
 
-	// Copy request cookies
-	for _, cookie := range req.Cookies() {
-		newReq.AddCookie(cookie)
-	}
-
 	client := &http.Client{
 		// Do not auto-follow redirects
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
 		},
 	}
+
 	resp, respErr := client.Do(newReq)
 
 	if respErr != nil {
-		myhttp.InternalError(req, w, respErr)
-		return
+		return &proxyResponse{
+			proxiedTo:    newPath,
+			responseCode: http.StatusInternalServerError,
+		}, respErr
 	}
 
 	defer resp.Body.Close()
@@ -63,10 +76,10 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, mapping config.Mappi
 			// Fix location headers to point to proxy
 			if strings.ToLower(name) == "location" {
 				if strings.HasPrefix(value, mapping.To) {
-					value = "https://localhost:3443/" + value[len(mapping.To):]
+					value = urlToProxy + value[len(mapping.To):]
 				}
 			}
-			w.Header().Set(name, value)
+			w.Header().Add(name, value)
 		}
 	}
 
@@ -78,8 +91,10 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, mapping config.Mappi
 		bytesRead, readError := resp.Body.Read(buffer)
 
 		if readError != nil && readError != io.EOF {
-			myhttp.InternalError(req, w, readError)
-			return
+			return &proxyResponse{
+				proxiedTo:    newPath,
+				responseCode: http.StatusInternalServerError,
+			}, readError
 		}
 
 		if bytesRead == 0 {
@@ -88,4 +103,9 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, mapping config.Mappi
 
 		w.Write(buffer[:bytesRead])
 	}
+
+	return &proxyResponse{
+		proxiedTo:    newPath,
+		responseCode: resp.StatusCode,
+	}, nil
 }

@@ -2,7 +2,7 @@ import axios from 'axios';
 import { action, observable } from 'mobx';
 
 export default class Configurations {
-  @observable mappings = [];
+  @observable mappings = {};
 
   @action
   fetch() {

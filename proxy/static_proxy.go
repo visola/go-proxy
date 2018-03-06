@@ -2,7 +2,6 @@ package proxy
 
 import (
 	"io"
-	"log"
 	"mime"
 	"net/http"
 	"os"
@@ -10,28 +9,29 @@ import (
 	"path/filepath"
 
 	"github.com/visola/go-proxy/config"
-	myhttp "github.com/visola/go-proxy/http"
 )
 
-func serveStaticFile(req *http.Request, w http.ResponseWriter, mapping config.Mapping) {
+func serveStaticFile(req *http.Request, w http.ResponseWriter, mapping config.Mapping) (*proxyResponse, error) {
 	oldPath := req.URL.Path
 	newPath := path.Join(mapping.To, oldPath[len(mapping.From):])
 
 	file, err := os.Open(newPath)
 
 	if err == os.ErrNotExist {
-		myhttp.NotFound(req, w, newPath)
-		return
+		return &proxyResponse{
+			responseCode: http.StatusNotFound,
+			proxiedTo:    newPath,
+		}, nil
 	}
 
 	if err != nil {
-		myhttp.InternalError(req, w, err)
-		return
+		return &proxyResponse{
+			responseCode: http.StatusInternalServerError,
+			proxiedTo:    newPath,
+		}, err
 	}
 
 	defer file.Close()
-
-	log.Printf("Serving '%s' for '%s', from '%s'", newPath, req.URL.Path, mapping.Origin)
 
 	buffer := make([]byte, 512)
 	loopCount := 0
@@ -39,7 +39,10 @@ func serveStaticFile(req *http.Request, w http.ResponseWriter, mapping config.Ma
 		bytesRead, readError := file.Read(buffer)
 
 		if readError != nil && readError != io.EOF {
-			myhttp.InternalError(req, w, readError)
+			return &proxyResponse{
+				responseCode: http.StatusInternalServerError,
+				proxiedTo:    newPath,
+			}, readError
 		}
 
 		if bytesRead == 0 {
@@ -59,4 +62,9 @@ func serveStaticFile(req *http.Request, w http.ResponseWriter, mapping config.Ma
 		w.Header().Set("Content-Type", contentType)
 		w.Write(buffer[:bytesRead])
 	}
+
+	return &proxyResponse{
+		responseCode: http.StatusOK,
+		proxiedTo:    newPath,
+	}, nil
 }
