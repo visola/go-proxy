@@ -18,7 +18,7 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, mapping config.Mappi
 	oldPath := req.URL.Path
 	newPath := mapping.To + "/" + oldPath[len(mapping.From):]
 
-	newURL, parseErr := url.Parse(newPath)
+	newURL, parseErr := url.Parse(fmt.Sprintf("%s?%s", newPath, req.URL.RawQuery))
 	if parseErr != nil {
 		return &proxyResponse{
 			proxiedTo:    newPath,
