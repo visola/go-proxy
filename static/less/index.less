@@ -1,7 +1,36 @@
+body {
+  padding: 10px;
+}
+
 .field {
   display: block;
 
   > label {
     padding-right: 5px;
+  }
+}
+
+.requestList {
+  & > div {
+    border: 1px solid black;
+    height: 400px;
+    overflow-y: scroll;
+    width: 800px;
+
+    table {
+      white-space: nowrap;
+    }
+
+    tbody > tr {
+      cursor: pointer;
+    }
+
+    tbody > tr:hover {
+      background: #ffffee;
+    }
+  }
+
+  * {
+    font-size: 1.2rem;
   }
 }

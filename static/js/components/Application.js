@@ -52,10 +52,8 @@ export default class Application extends React.Component {
 
   renderRequest(request, index) {
     return <tr key={index}>
-      <td>{request.responseCode}</td>
-      <td>{request.endTime - request.startTime}ms</td>
-      <td>{request.requestedPath}</td>
-      <td>{request.proxiedTo}</td>
+      <td>{request.method}</td>
+      <td>{request.requestedURL}</td>
     </tr>;
   }
 
@@ -63,27 +61,27 @@ export default class Application extends React.Component {
     let total = this.props.proxiedRequests.requests.length;
     let requests = this.props.proxiedRequests.requests.slice(Math.max(total - 50, 1));
     requests.reverse();
-    return <div>
+    return <div className="requestList">
       <h3>Last 50 requests:</h3>
-      <table className="table">
-        <thead>
-          <tr>
-            <th>Status</th>
-            <th>Duration</th>
-            <th>Original Path</th>
-            <th>Proxied to</th>
-          </tr>
-        </thead>
-        <tbody>
-          {requests.map((r, i) => this.renderRequest(r, i))}
-        </tbody>
-      </table>
+      <div>
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Requested URL</th>
+            </tr>
+          </thead>
+          <tbody>
+            {requests.map((r, i) => this.renderRequest(r, i))}
+          </tbody>
+        </table>
+      </div>
     </div>;
   }
 
   renderStatistics() {
     const dataArray  = this.props.proxiedRequests.requestsPerTimeBucket.slice();
-    return <LineChart width={1024} height={200} data={dataArray}>
+    return <LineChart width={800} height={200} data={dataArray}>
       <XAxis dataKey="startString" />
       <YAxis />
       <Line activeDot={true} dataKey="count" fill="#8884d8" isAnimationActive={false} dot={false} />
