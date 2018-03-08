@@ -25,7 +25,7 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, mapping config.Mappi
 	newURL, parseErr := url.Parse(fmt.Sprintf("%s?%s", newPath, req.URL.RawQuery))
 	if parseErr != nil {
 		return &proxyResponse{
-			proxiedTo:    newPath,
+			executedURL:  newPath,
 			responseCode: http.StatusInternalServerError,
 		}, parseErr
 	}
@@ -35,7 +35,7 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, mapping config.Mappi
 
 	if readBodyErr != nil {
 		return &proxyResponse{
-			proxiedTo:    newPath,
+			executedURL:  newPath,
 			responseCode: http.StatusInternalServerError,
 		}, readBodyErr
 	}
@@ -43,7 +43,7 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, mapping config.Mappi
 	newReq, newReqErr := http.NewRequest(req.Method, newURL.String(), bytes.NewBuffer(bodyInBytes))
 	if newReqErr != nil {
 		return &proxyResponse{
-			proxiedTo:    newPath,
+			executedURL:  newPath,
 			responseCode: http.StatusInternalServerError,
 		}, newReqErr
 	}
@@ -66,7 +66,7 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, mapping config.Mappi
 
 	if respErr != nil {
 		return &proxyResponse{
-			proxiedTo:    newPath,
+			executedURL:  newPath,
 			responseCode: http.StatusInternalServerError,
 		}, respErr
 	}
@@ -96,7 +96,7 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, mapping config.Mappi
 
 		if readError != nil && readError != io.EOF {
 			return &proxyResponse{
-				proxiedTo:    newPath,
+				executedURL:  newPath,
 				responseCode: http.StatusInternalServerError,
 			}, readError
 		}
@@ -109,7 +109,7 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, mapping config.Mappi
 	}
 
 	return &proxyResponse{
-		proxiedTo:    newPath,
+		executedURL:  newPath,
 		responseCode: resp.StatusCode,
 	}, nil
 }

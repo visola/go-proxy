@@ -20,14 +20,14 @@ func serveStaticFile(req *http.Request, w http.ResponseWriter, mapping config.Ma
 	if err == os.ErrNotExist {
 		return &proxyResponse{
 			responseCode: http.StatusNotFound,
-			proxiedTo:    newPath,
+			executedURL:  newPath,
 		}, nil
 	}
 
 	if err != nil {
 		return &proxyResponse{
 			responseCode: http.StatusInternalServerError,
-			proxiedTo:    newPath,
+			executedURL:  newPath,
 		}, err
 	}
 
@@ -41,7 +41,7 @@ func serveStaticFile(req *http.Request, w http.ResponseWriter, mapping config.Ma
 		if readError != nil && readError != io.EOF {
 			return &proxyResponse{
 				responseCode: http.StatusInternalServerError,
-				proxiedTo:    newPath,
+				executedURL:  newPath,
 			}, readError
 		}
 
@@ -65,6 +65,6 @@ func serveStaticFile(req *http.Request, w http.ResponseWriter, mapping config.Ma
 
 	return &proxyResponse{
 		responseCode: http.StatusOK,
-		proxiedTo:    newPath,
+		executedURL:  newPath,
 	}, nil
 }

@@ -1,6 +1,18 @@
 package proxy
 
+import (
+	"bytes"
+)
+
 type proxyResponse struct {
-	proxiedTo    string
+	executedURL  string
 	responseCode int
+}
+
+type closeableByteBuffer struct {
+	*bytes.Buffer
+}
+
+func (bb closeableByteBuffer) Close() error {
+	return nil
 }

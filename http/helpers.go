@@ -7,6 +7,10 @@ import (
 
 // NotFound sends an HTTP 404 response with a text/plain message
 func NotFound(req *http.Request, w http.ResponseWriter, path string) {
+	if path == "" {
+		path = req.URL.String()
+	}
+
 	w.WriteHeader(http.StatusNotFound)
 	w.Header().Set("Content-Type", "text/plain")
 	w.Write([]byte(fmt.Sprintf("Sorry, nothing here for: '%s'\n", path)))
