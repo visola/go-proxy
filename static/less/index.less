@@ -10,16 +10,23 @@ body {
   }
 }
 
-.requestList {
-  & > div {
+.modal {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.request-body {
+  width: 100%;
+  white-space: normal;
+}
+
+.request-list {
+  & > table {
     border: 1px solid black;
+    font-size: 1.2rem;
     height: 400px;
     overflow-y: scroll;
+    white-space: nowrap;
     width: 800px;
-
-    table {
-      white-space: nowrap;
-    }
 
     tbody > tr {
       cursor: pointer;
@@ -28,9 +35,5 @@ body {
     tbody > tr:hover {
       background: #ffffee;
     }
-  }
-
-  * {
-    font-size: 1.2rem;
   }
 }

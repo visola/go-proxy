@@ -3,6 +3,9 @@ import { inject, observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import React from 'react';
 
+import Modal from './Modal';
+import ProxiedRequestForm from './ProxiedRequestForm';
+
 function toMillis(value) {
   return Math.round( value / 1000 );
 }
@@ -13,6 +16,13 @@ export default class Application extends React.Component {
   static propTypes = {
     configurations: PropTypes.object.isRequired,
     proxiedRequests: PropTypes.object.isRequired,
+  }
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      selectedRequest: null,
+    }
   }
 
   render() {
@@ -50,8 +60,20 @@ export default class Application extends React.Component {
     </span>;
   }
 
+  renderModal() {
+    const { selectedRequest } = this.state;
+
+    if (!selectedRequest) {
+      return null;
+    }
+
+    return <Modal title="Selected Request" onClose={() => this.setState({ selectedRequest: null})}>
+      <ProxiedRequestForm request={selectedRequest} />
+    </Modal>;
+  }
+
   renderRequest(request, index) {
-    return <tr key={index}>
+    return <tr key={index} onClick={() => this.showRequest(request)}>
       <td>{request.method}</td>
       <td>{request.requestedURL}</td>
     </tr>;
@@ -61,21 +83,20 @@ export default class Application extends React.Component {
     let total = this.props.proxiedRequests.requests.length;
     let requests = this.props.proxiedRequests.requests.slice(Math.max(total - 50, 1));
     requests.reverse();
-    return <div className="requestList">
+    return <div className="request-list">
       <h3>Last 50 requests:</h3>
-      <div>
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Method</th>
-              <th>Requested URL</th>
-            </tr>
-          </thead>
-          <tbody>
-            {requests.map((r, i) => this.renderRequest(r, i))}
-          </tbody>
-        </table>
-      </div>
+      <table className="table">
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Requested URL</th>
+          </tr>
+        </thead>
+        <tbody>
+          {requests.map((r, i) => this.renderRequest(r, i))}
+        </tbody>
+      </table>
+      {this.renderModal()}
     </div>;
   }
 
@@ -86,5 +107,9 @@ export default class Application extends React.Component {
       <YAxis />
       <Line activeDot={true} dataKey="count" fill="#8884d8" isAnimationActive={false} dot={false} />
     </LineChart>;
+  }
+
+  showRequest(request) {
+    this.setState({ selectedRequest: request });
   }
 }
