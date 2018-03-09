@@ -12,9 +12,11 @@ export default class ProxiedRequestForm extends React.Component {
     super(props);
     this.state = {
       showRequest: false,
+      showResponse: false,
     }
 
     this.toggleRequestData = this.toggleRequestData.bind(this);
+    this.toggleResponseData = this.toggleResponseData.bind(this);
   }
 
   render() {
@@ -24,7 +26,8 @@ export default class ProxiedRequestForm extends React.Component {
       <Field label="Requested path:" value={request.requestedURL} />
       <Field label="Executed path:" value={request.executedURL} />
       <Field label="Status:" value={request.responseCode} />
-      {this.renderRequestData(request)}
+      {this.renderHTTPData("Request", this.state.showRequest, this.toggleRequestData, request.requestData)}
+      {this.renderHTTPData("Response", this.state.showResponse, this.toggleResponseData, request.responseData)}
     </div>;
   }
 
@@ -51,25 +54,29 @@ export default class ProxiedRequestForm extends React.Component {
     return <ul>{renderedHeaders}</ul>;
   }
 
-  renderRequestData(request) {
-    if (!this.state.showRequest) {
-      return <h3 onClick={this.toggleRequestData}>
+  renderHTTPData(title, expanded, toggleExpand, requestData) {
+    if (!expanded) {
+      return <h3 onClick={toggleExpand}>
         <span className="glyphicon glyphicon-chevron-down" />
-        Request
+        {title}
       </h3>;
     }
 
     return <div>
-      <h3 onClick={this.toggleRequestData}>
+      <h3 onClick={toggleExpand}>
         <span className="glyphicon glyphicon-chevron-up" />
-        Request
+        {title}
       </h3>
-      {this.renderHeaders(request.requestData.headers)}
-      {this.renderBody(request.requestData.body)}
+      {this.renderHeaders(requestData.headers)}
+      {this.renderBody(requestData.body)}
     </div>;
   }
 
   toggleRequestData() {
     this.setState({ showRequest: !this.state.showRequest });
+  }
+
+  toggleResponseData() {
+    this.setState({ showResponse: !this.state.showResponse });
   }
 }
