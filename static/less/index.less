@@ -1,7 +1,54 @@
+body {
+  padding: 10px;
+}
+
 .field {
   display: block;
 
   > label {
     padding-right: 5px;
+  }
+}
+
+.modal {
+  background: rgba(0, 0, 0, 0.5);
+
+  .modal-dialog {
+    width: 90%;
+  }
+
+  .modal-body {
+    max-height: 500px;
+    overflow-y: scroll;
+  }
+}
+
+.request {
+  .field * {
+    font-size: 1.2rem;
+  }
+}
+
+.request-body {
+  width: 100%;
+  white-space: normal;
+}
+
+.request-list {
+  & > table {
+    border: 1px solid black;
+    font-size: 1.2rem;
+    height: 400px;
+    overflow-y: scroll;
+    white-space: nowrap;
+    width: 800px;
+
+    tbody > tr {
+      cursor: pointer;
+    }
+
+    tbody > tr:hover {
+      background: #ffffee;
+    }
   }
 }

@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/visola/go-proxy/config"
+	myhttp "github.com/visola/go-proxy/http"
 )
 
 func serveStaticFile(req *http.Request, w http.ResponseWriter, mapping config.Mapping) (*proxyResponse, error) {
@@ -19,29 +20,33 @@ func serveStaticFile(req *http.Request, w http.ResponseWriter, mapping config.Ma
 
 	if err == os.ErrNotExist {
 		return &proxyResponse{
+			executedURL:  newPath,
 			responseCode: http.StatusNotFound,
-			proxiedTo:    newPath,
 		}, nil
 	}
 
 	if err != nil {
 		return &proxyResponse{
+			executedURL:  newPath,
 			responseCode: http.StatusInternalServerError,
-			proxiedTo:    newPath,
 		}, err
 	}
 
 	defer file.Close()
 
+	headers := make(map[string][]string)
 	buffer := make([]byte, 512)
+	contentType := ""
 	loopCount := 0
+	responseBytes := make([]byte, 0)
+
 	for {
 		bytesRead, readError := file.Read(buffer)
 
 		if readError != nil && readError != io.EOF {
 			return &proxyResponse{
+				executedURL:  newPath,
 				responseCode: http.StatusInternalServerError,
-				proxiedTo:    newPath,
 			}, readError
 		}
 
@@ -51,20 +56,29 @@ func serveStaticFile(req *http.Request, w http.ResponseWriter, mapping config.Ma
 
 		loopCount++
 
-		contentType := ""
 		if loopCount == 1 {
 			contentType = mime.TypeByExtension(filepath.Ext(file.Name()))
 			if contentType == "" {
 				contentType = http.DetectContentType(buffer)
 			}
+
+			headers["Content-Type"] = []string{contentType}
+			w.Header().Set("Content-Type", contentType)
 		}
 
-		w.Header().Set("Content-Type", contentType)
+		responseBytes = append(responseBytes, buffer[:bytesRead]...)
 		w.Write(buffer[:bytesRead])
 	}
 
+	bodyString := "Binary Data"
+	if myhttp.IsText(contentType) {
+		bodyString = string(responseBytes)
+	}
+
 	return &proxyResponse{
+		body:         bodyString,
+		executedURL:  newPath,
+		headers:      headers,
 		responseCode: http.StatusOK,
-		proxiedTo:    newPath,
 	}, nil
 }

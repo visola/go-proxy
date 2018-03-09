@@ -6,13 +6,22 @@ import (
 
 // ProxiedRequest represents a request that was proxied
 type ProxiedRequest struct {
-	EndTime       int64          `json:"endTime"`
-	Error         string         `json:"error"`
-	Mapping       config.Mapping `json:"mapping"`
-	ProxiedTo     string         `json:"proxiedTo"`
-	ResponseCode  int            `json:"responseCode"`
-	RequestedPath string         `json:"requestedPath"`
-	StartTime     int64          `json:"startTime"`
+	EndTime      int64          `json:"endTime,omitempty"`
+	Error        string         `json:"error,omitempty"`
+	ExecutedURL  string         `json:"executedURL,omitempty"`
+	Mapping      config.Mapping `json:"mapping,omitempty"`
+	RequestData  HTTPData       `json:"requestData,omitempty"`
+	Method       string         `json:"method,omitempty"`
+	ResponseCode int            `json:"responseCode,omitempty"`
+	ResponseData HTTPData       `json:"responseData,omitempty"`
+	RequestedURL string         `json:"requestedURL,omitempty"`
+	StartTime    int64          `json:"startTime,omitempty"`
+}
+
+// HTTPData represents data sent or received in an HTTP call
+type HTTPData struct {
+	Headers map[string][]string `json:"headers,omitempty"`
+	Body    string              `json:"body,omitempty"`
 }
 
 const maxRequestsToKeep = 1000
