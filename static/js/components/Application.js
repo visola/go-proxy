@@ -3,6 +3,7 @@ import { inject, observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import React from 'react';
 
+import Field from './Field';
 import Modal from './Modal';
 import ProxiedRequestForm from './ProxiedRequestForm';
 
@@ -42,9 +43,7 @@ export default class Application extends React.Component {
       const mappings = this.props.configurations.mappings[origin];
       index += 1;
       result.push(<li key={index}>
-        <span className="field">
-          <label>Origin:</label><span>{origin}</span>
-        </span>
+        <Field label="Origin:" value={origin} />
         <ul>
           {mappings.map((m) => this.renderMapping(m))}
         </ul>
@@ -55,9 +54,11 @@ export default class Application extends React.Component {
   }
 
   renderMapping(mapping) {
-    return <span className="field" key={mapping.from}>
-      <label>{mapping.proxy ? 'proxy' : 'static'}</label> {mapping.from} => {mapping.to}
-    </span>;
+    return <Field
+      key={mapping.from}
+      label={mapping.proxy ? 'proxy' : 'static'}
+      value={`${mapping.from} => ${mapping.to}`}
+    />;
   }
 
   renderModal() {

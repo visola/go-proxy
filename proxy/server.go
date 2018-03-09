@@ -101,21 +101,20 @@ func getData(req *http.Request) (statistics.HTTPData, error) {
 	result := statistics.HTTPData{}
 	result.Headers = req.Header
 
-	if req.Body != nil {
+	defer req.Body.Close()
+	body, bodyErr := ioutil.ReadAll(req.Body)
+	if bodyErr != nil {
+		return result, bodyErr
+	}
+
+	if len(body) != 0 {
 		if isText(req.Header["Content-Type"]) {
-			defer req.Body.Close()
-
-			body, bodyErr := ioutil.ReadAll(req.Body)
-			if bodyErr != nil {
-				return result, bodyErr
-			}
-
 			result.Body = string(body)
 
 			// Rewind the body
 			req.Body = closeableByteBuffer{bytes.NewBuffer(body)}
 		} else {
-			result.Body = "N/A - Binary data"
+			result.Body = "Binary"
 		}
 	}
 
