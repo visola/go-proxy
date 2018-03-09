@@ -16,13 +16,6 @@ import (
 
 var port = 33443
 
-var textMimeTypes = [...]string{
-	"application/json",
-	"application/x-www-form-urlencoded",
-	"text/html",
-	"text/plain",
-}
-
 // StartProxyServer starts the proxy server
 func StartProxyServer() error {
 	certFile := os.Getenv("GO_PROXY_CERT_FILE")
@@ -63,6 +56,10 @@ func requestHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	proxiedRequest.ResponseData = statistics.HTTPData{
+		Body:    response.body,
+		Headers: response.headers,
+	}
 	proxiedRequest.ExecutedURL = response.executedURL
 	proxiedRequest.ResponseCode = response.responseCode
 	proxiedRequest.EndTime = getTime()
@@ -108,7 +105,7 @@ func getData(req *http.Request) (statistics.HTTPData, error) {
 	}
 
 	if len(body) != 0 {
-		if isText(req.Header["Content-Type"]) {
+		if myhttp.IsText(req.Header["Content-Type"]...) {
 			result.Body = string(body)
 
 			// Rewind the body
@@ -145,16 +142,4 @@ func initializeHandling(req *http.Request, w http.ResponseWriter) (statistics.Pr
 
 	config, configError := config.GetConfigurations()
 	return proxiedRequest, config, configError
-}
-
-func isText(contentTypes []string) bool {
-	for _, contentType := range contentTypes {
-		for _, textMimeType := range textMimeTypes {
-			if strings.HasPrefix(strings.ToLower(contentType), textMimeType) {
-				return true
-			}
-		}
-	}
-
-	return false
 }

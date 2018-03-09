@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"bytes"
+	"compress/gzip"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -10,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/visola/go-proxy/config"
+	myhttp "github.com/visola/go-proxy/http"
 )
 
 var urlToProxy = fmt.Sprintf("https://localhost:%d", port)
@@ -90,6 +92,7 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, mapping config.Mappi
 	// Copy status
 	w.WriteHeader(resp.StatusCode)
 
+	responseBytes := make([]byte, 0)
 	buffer := make([]byte, 512)
 	for {
 		bytesRead, readError := resp.Body.Read(buffer)
@@ -105,11 +108,25 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, mapping config.Mappi
 			break
 		}
 
+		responseBytes = append(responseBytes, buffer[:bytesRead]...)
 		w.Write(buffer[:bytesRead])
 	}
 
+	bodyString := "Binary"
+	if myhttp.IsText(resp.Header["Content-Type"]...) {
+		if myhttp.IsGzipped(resp.Header["Content-Encoding"]...) {
+			gzippedReader, _ := gzip.NewReader(bytes.NewReader(responseBytes))
+			ungzippedBytes, _ := ioutil.ReadAll(gzippedReader)
+			bodyString = string(ungzippedBytes)
+		} else {
+			bodyString = string(responseBytes)
+		}
+	}
+
 	return &proxyResponse{
+		body:         bodyString,
 		executedURL:  newPath,
+		headers:      resp.Header,
 		responseCode: resp.StatusCode,
 	}, nil
 }

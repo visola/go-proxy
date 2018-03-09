@@ -5,7 +5,9 @@ import (
 )
 
 type proxyResponse struct {
+	body         string
 	executedURL  string
+	headers      map[string][]string
 	responseCode int
 }
 
