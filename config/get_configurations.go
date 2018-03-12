@@ -13,6 +13,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+const stateFileName = ".current_state"
+
 var configurations []DynamicMapping
 
 // GetConfigurations get all configurations or load them if not loaded so far
@@ -24,6 +26,24 @@ func GetConfigurations() ([]DynamicMapping, error) {
 	var err error
 	configurations, err = getCurrentState()
 	return configurations, err
+}
+
+// SetStatus change the status of a configuration and save the new state to
+// disk so that it will get loaded on next start
+func SetStatus(mappingID string, status bool) error {
+	_, err := GetConfigurations()
+	if err != nil {
+		return err
+	}
+
+	// TODO - Make sure this change is atomic
+	for index, config := range configurations {
+		if config.MappingID == mappingID {
+			configurations[index].Active = status
+			break
+		}
+	}
+	return storeCurrentState()
 }
 
 func getConfigDirectory() (string, error) {
@@ -70,7 +90,7 @@ func getStoredState() (map[string]DynamicMapping, error) {
 		return nil, configDirErr
 	}
 
-	currentStateFile, curretnStateFileErr := os.Open(path.Join(configDir, ".current_state"))
+	currentStateFile, curretnStateFileErr := os.Open(path.Join(configDir, stateFileName))
 	if os.IsNotExist(curretnStateFileErr) {
 		return make(map[string]DynamicMapping, 0), nil
 	}
@@ -163,4 +183,26 @@ func sortConfigurations(configurations []Mapping) {
 
 		return len(pathI) > len(pathJ)
 	})
+}
+
+func storeCurrentState() error {
+	toStore := make(map[string]DynamicMapping)
+	for _, config := range configurations {
+		toStore[config.MappingID] = config
+	}
+
+	// Force reload
+	configurations = nil
+
+	data, dataErr := json.Marshal(toStore)
+	if dataErr != nil {
+		return dataErr
+	}
+
+	configDir, configDirErr := getConfigDirectory()
+	if configDirErr != nil {
+		return configDirErr
+	}
+
+	return ioutil.WriteFile(path.Join(configDir, stateFileName), data, 0644)
 }

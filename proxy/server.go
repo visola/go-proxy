@@ -68,7 +68,7 @@ func requestHandler(w http.ResponseWriter, req *http.Request) {
 
 func findConfiguration(req *http.Request, configurations []config.DynamicMapping) *config.DynamicMapping {
 	for _, config := range configurations {
-		if strings.HasPrefix(req.URL.Path, config.From) {
+		if config.Active && strings.HasPrefix(req.URL.Path, config.From) {
 			return &config
 		}
 	}
