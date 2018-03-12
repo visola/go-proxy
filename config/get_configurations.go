@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"os"
 	"os/user"
@@ -12,16 +13,16 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var configurations []Mapping
+var configurations []DynamicMapping
 
 // GetConfigurations get all configurations or load them if not loaded so far
-func GetConfigurations() ([]Mapping, error) {
+func GetConfigurations() ([]DynamicMapping, error) {
 	if configurations != nil {
 		return configurations, nil
 	}
 
 	var err error
-	configurations, err = loadAllConfigurations()
+	configurations, err = getCurrentState()
 	return configurations, err
 }
 
@@ -31,6 +32,65 @@ func getConfigDirectory() (string, error) {
 		return "", err
 	}
 	return user.HomeDir + "/.go-proxy", nil
+}
+
+func getCurrentState() ([]DynamicMapping, error) {
+	staticConfigs, staticConfigErr := loadAllConfigurations()
+	if staticConfigErr != nil {
+		return nil, staticConfigErr
+	}
+
+	storedStates, storedStateErr := getStoredState()
+	if storedStateErr != nil {
+		return nil, storedStateErr
+	}
+
+	result := make([]DynamicMapping, len(staticConfigs))
+	for index, staticConfig := range staticConfigs {
+		if storedState, exists := storedStates[staticConfig.MappingID]; exists {
+			result[index] = storedState
+		} else {
+			result[index] = DynamicMapping{
+				Active:    true,
+				From:      staticConfig.From,
+				MappingID: staticConfig.MappingID,
+				Origin:    staticConfig.Origin,
+				Proxy:     staticConfig.Proxy,
+				To:        staticConfig.To,
+			}
+		}
+	}
+
+	return result, nil
+}
+
+func getStoredState() (map[string]DynamicMapping, error) {
+	configDir, configDirErr := getConfigDirectory()
+	if configDirErr != nil {
+		return nil, configDirErr
+	}
+
+	currentStateFile, curretnStateFileErr := os.Open(path.Join(configDir, ".current_state"))
+	if os.IsNotExist(curretnStateFileErr) {
+		return make(map[string]DynamicMapping, 0), nil
+	}
+
+	if curretnStateFileErr != nil {
+		return nil, curretnStateFileErr
+	}
+
+	currentStateData, readErr := ioutil.ReadAll(currentStateFile)
+	if readErr != nil {
+		return nil, readErr
+	}
+
+	var result map[string]DynamicMapping
+	unmarshalErr := json.Unmarshal(currentStateData, &result)
+	if unmarshalErr != nil {
+		return nil, unmarshalErr
+	}
+
+	return result, nil
 }
 
 func loadAllConfigurations() ([]Mapping, error) {
@@ -44,7 +104,7 @@ func loadAllConfigurations() ([]Mapping, error) {
 		panic(filesErr)
 	}
 
-	configurations = make([]Mapping, 0)
+	configurations := make([]Mapping, 0)
 	for _, file := range files {
 		if filepath.Ext(file.Name()) != ".yml" && filepath.Ext(file.Name()) != ".yaml" {
 			continue
@@ -62,7 +122,7 @@ func loadAllConfigurations() ([]Mapping, error) {
 }
 
 func loadConfigurations(configDir string, file os.FileInfo) ([]Mapping, error) {
-	configurations = make([]Mapping, 0)
+	configurations := make([]Mapping, 0)
 
 	config, configErr := readConfiguration(path.Join(configDir, file.Name()))
 	if configErr != nil {

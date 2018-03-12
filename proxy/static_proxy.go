@@ -12,7 +12,7 @@ import (
 	myhttp "github.com/visola/go-proxy/http"
 )
 
-func serveStaticFile(req *http.Request, w http.ResponseWriter, mapping config.Mapping) (*proxyResponse, error) {
+func serveStaticFile(req *http.Request, w http.ResponseWriter, mapping config.DynamicMapping) (*proxyResponse, error) {
 	oldPath := req.URL.Path
 	newPath := path.Join(mapping.To, oldPath[len(mapping.From):])
 
