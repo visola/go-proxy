@@ -66,9 +66,9 @@ func requestHandler(w http.ResponseWriter, req *http.Request) {
 	statistics.AddProxiedRequest(proxiedRequest)
 }
 
-func findConfiguration(req *http.Request, configurations []config.Mapping) *config.Mapping {
+func findConfiguration(req *http.Request, configurations []config.DynamicMapping) *config.DynamicMapping {
 	for _, config := range configurations {
-		if strings.HasPrefix(req.URL.Path, config.From) {
+		if config.Active && strings.HasPrefix(req.URL.Path, config.From) {
 			return &config
 		}
 	}
@@ -122,7 +122,7 @@ func getTime() int64 {
 	return time.Now().UnixNano() / int64(time.Millisecond)
 }
 
-func handleRequest(req *http.Request, w http.ResponseWriter, config *config.Mapping) (*proxyResponse, error) {
+func handleRequest(req *http.Request, w http.ResponseWriter, config *config.DynamicMapping) (*proxyResponse, error) {
 	if config.Proxy {
 		return proxyRequest(req, w, *config)
 	}
@@ -130,7 +130,7 @@ func handleRequest(req *http.Request, w http.ResponseWriter, config *config.Mapp
 	return serveStaticFile(req, w, *config)
 }
 
-func initializeHandling(req *http.Request, w http.ResponseWriter) (statistics.ProxiedRequest, []config.Mapping, error) {
+func initializeHandling(req *http.Request, w http.ResponseWriter) (statistics.ProxiedRequest, []config.DynamicMapping, error) {
 	reqData, _ := getData(req)
 
 	proxiedRequest := statistics.ProxiedRequest{

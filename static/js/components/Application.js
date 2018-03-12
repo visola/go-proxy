@@ -3,6 +3,7 @@ import { inject, observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import React from 'react';
 
+import Configurations from './Configurations';
 import Field from './Field';
 import Modal from './Modal';
 import ProxiedRequestForm from './ProxiedRequestForm';
@@ -11,11 +12,10 @@ function toMillis(value) {
   return Math.round( value / 1000 );
 }
 
-@inject('configurations', 'proxiedRequests')
+@inject('proxiedRequests')
 @observer
 export default class Application extends React.Component {
   static propTypes = {
-    configurations: PropTypes.object.isRequired,
     proxiedRequests: PropTypes.object.isRequired,
   }
 
@@ -29,36 +29,9 @@ export default class Application extends React.Component {
   render() {
     return <div>
       {this.renderStatistics()}
-      <ul>
-        {this.renderConfigurations()}
-      </ul>
+      <Configurations />
       {this.renderRequests()}
     </div>;
-  }
-
-  renderConfigurations() {
-    let index = 0;
-    const result = [];
-    for (let origin in this.props.configurations.mappings) {
-      const mappings = this.props.configurations.mappings[origin];
-      index += 1;
-      result.push(<li key={index}>
-        <Field label="Origin:" value={origin} />
-        <ul>
-          {mappings.map((m) => this.renderMapping(m))}
-        </ul>
-      </li>);
-    }
-
-    return result;
-  }
-
-  renderMapping(mapping) {
-    return <Field
-      key={mapping.from}
-      label={mapping.proxy ? 'proxy' : 'static'}
-      value={`${mapping.from} => ${mapping.to}`}
-    />;
   }
 
   renderModal() {

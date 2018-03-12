@@ -8,7 +8,7 @@ export default class Field extends React.Component {
       PropTypes.string,
       PropTypes.number,
       PropTypes.bool,
-    ]).isRequired
+    ])
   }
 
   render() {
