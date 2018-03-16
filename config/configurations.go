@@ -76,6 +76,7 @@ func getCurrentState() ([]DynamicMapping, error) {
 				MappingID: staticConfig.MappingID,
 				Origin:    staticConfig.Origin,
 				Proxy:     staticConfig.Proxy,
+				Regexp:    staticConfig.Regexp,
 				To:        staticConfig.To,
 			}
 		}
@@ -176,6 +177,14 @@ func sortConfigurations(configurations []Mapping) {
 	sort.Slice(configurations, func(i, j int) bool {
 		pathI := strings.ToLower(configurations[i].From)
 		pathJ := strings.ToLower(configurations[j].From)
+
+		if pathI == "" {
+			pathI = strings.ToLower(configurations[i].Regexp)
+		}
+
+		if pathJ == "" {
+			pathJ = strings.ToLower(configurations[j].Regexp)
+		}
 
 		if len(pathI) == len(pathJ) {
 			return strings.Compare(pathI, pathJ) < 0

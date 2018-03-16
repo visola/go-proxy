@@ -12,6 +12,7 @@ type DynamicMapping struct {
 	MappingID string `json:"mappingID"`
 	Origin    string `json:"origin"`
 	Proxy     bool   `json:"proxy"`
+	Regexp    string `json:"regexp"`
 	To        string `json:"to"`
 }
 
@@ -21,6 +22,7 @@ type Mapping struct {
 	MappingID string `json:"mappingID"`
 	Origin    string `json:"origin"`
 	Proxy     bool   `json:"proxy"`
+	Regexp    string `json:"regexp"`
 	To        string `json:"to"`
 }
 
@@ -31,6 +33,7 @@ func fromYAMLMapping(loaded mapping, origin string, proxy bool) Mapping {
 		To:     loaded.To,
 		Origin: origin,
 		Proxy:  proxy,
+		Regexp: loaded.Regexp,
 	}
 
 	newMapping.MappingID = generateID(newMapping)
@@ -39,6 +42,6 @@ func fromYAMLMapping(loaded mapping, origin string, proxy bool) Mapping {
 
 func generateID(mapping Mapping) string {
 	hasher := sha1.New()
-	hasher.Write([]byte(mapping.Origin + mapping.From + mapping.To))
+	hasher.Write([]byte(mapping.Origin + mapping.From + mapping.To + mapping.Regexp))
 	return base64.URLEncoding.EncodeToString(hasher.Sum(nil))
 }

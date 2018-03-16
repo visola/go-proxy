@@ -46,7 +46,7 @@ export default class Configurations extends React.Component {
         type="checkbox"
       />&nbsp;
       <label>{mapping.proxy ? 'proxy' : 'static'}</label>
-      <span>{`${mapping.from} => ${mapping.to}`}</span>
+      <span>{`${mapping.from || mapping.regexp} => ${mapping.to}`}</span>
     </div>;
   }
 }
