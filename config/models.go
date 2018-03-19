@@ -5,17 +5,6 @@ import (
 	"encoding/base64"
 )
 
-// DynamicMapping represents a mapping that can be active or not
-type DynamicMapping struct {
-	Active    bool   `json:"active"`
-	From      string `json:"from"`
-	MappingID string `json:"mappingID"`
-	Origin    string `json:"origin"`
-	Proxy     bool   `json:"proxy"`
-	Regexp    string `json:"regexp"`
-	To        string `json:"to"`
-}
-
 // Mapping represents a mapping configuration loaded from some file.
 type Mapping struct {
 	From      string `json:"from"`

@@ -16,9 +16,12 @@ import (
 
 var urlToProxy = fmt.Sprintf("https://localhost:%d", port)
 
-func proxyRequest(req *http.Request, w http.ResponseWriter, mapping config.DynamicMapping) (*proxyResponse, error) {
-	oldPath := req.URL.Path
-	newPath := mapping.To + "/" + oldPath[len(mapping.From):]
+func proxyRequest(req *http.Request, w http.ResponseWriter, match *config.MatchResult) (*proxyResponse, error) {
+	mapping := match.Mapping
+	newPath := mapping.To + "/" + match.NewPath[len(mapping.From):]
+	if strings.HasPrefix(match.NewPath, "http") {
+		newPath = match.NewPath
+	}
 
 	if strings.HasSuffix(newPath, "/") {
 		newPath = newPath[:len(newPath)-1]

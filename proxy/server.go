@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/visola/go-proxy/config"
@@ -37,14 +36,14 @@ func requestHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	config := findConfiguration(req, configurations)
+	match := matchConfiguration(req, configurations)
 
-	if config == nil {
+	if match == nil {
 		finalizeWithNotFound(req, w, proxiedRequest, "")
 		return
 	}
 
-	response, handlingError := handleRequest(req, w, config)
+	response, handlingError := handleRequest(req, w, match)
 
 	if handlingError == os.ErrNotExist {
 		finalizeWithNotFound(req, w, proxiedRequest, response.executedURL)
@@ -66,21 +65,11 @@ func requestHandler(w http.ResponseWriter, req *http.Request) {
 	statistics.AddProxiedRequest(proxiedRequest)
 }
 
-func findConfiguration(req *http.Request, configurations []config.DynamicMapping) *config.DynamicMapping {
-	for _, config := range configurations {
-		if config.Active && strings.HasPrefix(req.URL.Path, config.From) {
-			return &config
-		}
-	}
-
-	return nil
-}
-
 func finalizeWithError(req *http.Request, w http.ResponseWriter, proxiedRequest statistics.ProxiedRequest, err error) {
 	myhttp.InternalError(req, w, err)
 	proxiedRequest.EndTime = getTime()
 	proxiedRequest.Error = err.Error()
-	proxiedRequest.ResponseCode = http.StatusNotFound
+	proxiedRequest.ResponseCode = http.StatusInternalServerError
 	statistics.AddProxiedRequest(proxiedRequest)
 	return
 }
@@ -122,12 +111,12 @@ func getTime() int64 {
 	return time.Now().UnixNano() / int64(time.Millisecond)
 }
 
-func handleRequest(req *http.Request, w http.ResponseWriter, config *config.DynamicMapping) (*proxyResponse, error) {
-	if config.Proxy {
-		return proxyRequest(req, w, *config)
+func handleRequest(req *http.Request, w http.ResponseWriter, match *config.MatchResult) (*proxyResponse, error) {
+	if match.Mapping.Proxy {
+		return proxyRequest(req, w, match)
 	}
 
-	return serveStaticFile(req, w, *config)
+	return serveStaticFile(req, w, match)
 }
 
 func initializeHandling(req *http.Request, w http.ResponseWriter) (statistics.ProxiedRequest, []config.DynamicMapping, error) {
