@@ -6,6 +6,7 @@ type proxyConfig struct {
 }
 
 type mapping struct {
-	From string
-	To   string
+	From   string
+	Regexp string
+	To     string
 }
