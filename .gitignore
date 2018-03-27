@@ -1,6 +1,6 @@
 .cache/
 *.code-workspace
 dist/
-main-packr.go
 node_modules/
+*-packr.go
 vendor/
