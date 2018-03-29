@@ -1,5 +1,7 @@
 ## go-proxy
 
+[![Maintainability](https://api.codeclimate.com/v1/badges/0f398d3937f55ddcfc70/maintainability)](https://codeclimate.com/github/visola/go-proxy/maintainability)
+
 ## Local development and Building
 
 ### Pre-requisites
