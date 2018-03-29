@@ -1,3 +1,4 @@
+import { Icon } from 'semantic-ui-react'
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -57,15 +58,15 @@ export default class ProxiedRequestForm extends React.Component {
   renderHTTPData(title, expanded, toggleExpand, requestData) {
     if (!expanded) {
       return <h3 onClick={toggleExpand}>
-        <span className="glyphicon glyphicon-chevron-down" />
         {title}
+        <Icon name="plus square outline" />
       </h3>;
     }
 
     return <div>
       <h3 onClick={toggleExpand}>
-        <span className="glyphicon glyphicon-chevron-up" />
         {title}
+        <Icon name="minus square outline" />
       </h3>
       {this.renderHeaders(requestData.headers)}
       {this.renderBody(requestData.body)}
