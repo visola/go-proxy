@@ -14,8 +14,6 @@ import (
 	myhttp "github.com/visola/go-proxy/http"
 )
 
-var urlToProxy = fmt.Sprintf("https://localhost:%d", port)
-
 func proxyRequest(req *http.Request, w http.ResponseWriter, match *config.MatchResult) (*proxyResponse, error) {
 	mapping := match.Mapping
 	newPath := mapping.To + "/" + match.NewPath[len(mapping.From):]
@@ -85,7 +83,7 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, match *config.MatchR
 			// Fix location headers to point to proxy
 			if strings.ToLower(name) == "location" {
 				if strings.HasPrefix(value, mapping.To) {
-					value = urlToProxy + value[len(mapping.To):]
+					value = GetURL() + value[len(mapping.To):]
 				}
 			}
 			w.Header().Add(name, value)
