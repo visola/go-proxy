@@ -18,7 +18,7 @@ export default class ProxiedRequests {
   @observable statusSeen = new Set();
 
   constructor() {
-    const socket = new WebSocket("ws://localhost:1234/requests");
+    const socket = new WebSocket(`ws://${window.location.host}/requests`);
     socket.onmessage = (message) => {
       this.addRequest(JSON.parse(message.data));
     };
