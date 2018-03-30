@@ -13,8 +13,6 @@ import (
 	"github.com/visola/go-proxy/statistics"
 )
 
-var port = 33443
-
 // StartProxyServer starts the proxy server
 func StartProxyServer() error {
 	certFile := os.Getenv("GO_PROXY_CERT_FILE")
@@ -23,9 +21,14 @@ func StartProxyServer() error {
 	proxyServer := http.NewServeMux()
 	proxyServer.HandleFunc("/", requestHandler)
 
-	fmt.Printf("Starting proxy at: https://localhost:%d\n", port)
-	bindError := http.ListenAndServeTLS(fmt.Sprintf(":%d", port), certFile, keyFile, proxyServer)
-	return bindError
+	if certFile == "" || keyFile == "" {
+		fmt.Printf("Starting proxy at: %s\n", GetURL())
+		return http.ListenAndServe(fmt.Sprintf(":%d", port), proxyServer)
+	}
+
+	isSSL = true
+	fmt.Printf("Starting proxy at: %s\n", GetURL())
+	return http.ListenAndServeTLS(fmt.Sprintf(":%d", port), certFile, keyFile, proxyServer)
 }
 
 func requestHandler(w http.ResponseWriter, req *http.Request) {
