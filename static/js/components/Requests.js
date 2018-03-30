@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import ProxiedRequestForm from './ProxiedRequestForm';
+import RequestFilter from './RequestFilter';
 
 @inject('proxiedRequests')
 @observer
@@ -30,6 +31,7 @@ export default class Requests extends React.Component {
   render() {
     return <div>
       {this.renderStatistics()}
+      <RequestFilter />
       {this.renderRequests()}
     </div>;
   }
@@ -64,8 +66,8 @@ export default class Requests extends React.Component {
   }
 
   renderRequests() {
-    let total = this.props.proxiedRequests.requests.length;
-    let requests = this.props.proxiedRequests.requests.slice(Math.max(total - 50, 1));
+    let total = this.props.proxiedRequests.filtered.length;
+    let requests = this.props.proxiedRequests.filtered.slice(Math.max(total - 50, 1));
     requests.reverse();
     return <div className="request-list">
       <Table>

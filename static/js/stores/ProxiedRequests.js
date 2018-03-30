@@ -6,7 +6,13 @@ const interval = 1000;
 const bucketCount = 600;
 const maxRequestsToKeep = 2000;
 
+function isSelected (value = '', filterString = '') {
+  return value.indexOf(filterString) >= 0;
+}
+
 export default class ProxiedRequests {
+  @observable filter = '';
+  @observable filtered = [];
   @observable requests = [];
   @observable requestsPerTimeBucket = [];
   @observable statusSeen = new Set();
@@ -23,6 +29,9 @@ export default class ProxiedRequests {
 
   @action
   addRequest(request) {
+    if (isSelected(request.requestedURL, this.filter)) {
+      this.filtered.push(request);
+    }
     this.requests.push(request);
   }
 
@@ -35,11 +44,13 @@ export default class ProxiedRequests {
     }
     buckets.reverse();
 
-    if (this.requests.length > maxRequestsToKeep) {
-      this.requests = this.requests.slice(this.requests.length - maxRequestsToKeep);
+    let requests = this.filtered;
+    if (requests.length > maxRequestsToKeep) {
+      this.filtered = requests.slice(requests.length - maxRequestsToKeep);
+      requests = this.filtered;
     }
 
-    this.requests.forEach((r) => {
+    requests.forEach((r) => {
       for(let i = 0; i < buckets.length; i += 1) {
         const { start, end } = buckets[i];
         if (r.startTime >= start && r.startTime < end) {
@@ -54,8 +65,19 @@ export default class ProxiedRequests {
   @action
   fetchRequests() {
     return axios.get("/requests")
-      .then(({data}) => {
-        this.requests = data;
-      });
+      .then(({data}) => this.setCollection(data));
+  }
+
+  @action
+  setCollection(data) {
+    this.requests = data;
+    this.filtered = data.filter((v) => isSelected(v.requestedURL, this.filter));
+  }
+
+  @action
+  setFilter(newValue) {
+    this.filter = newValue;
+    this.filtered = this.requests.filter((v) => isSelected(v.requestedURL, this.filter));
+    this.calculateRequestsPerTimeBucket();
   }
 }
