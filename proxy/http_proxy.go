@@ -83,7 +83,7 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, match *mapping.Match
 			// Fix location headers to point to proxy
 			if strings.ToLower(name) == "location" {
 				if strings.HasPrefix(value, mapping.To) {
-					value = GetURL() + value[len(mapping.To):]
+					value = req.URL.Host + value[len(mapping.To):]
 				}
 			}
 			w.Header().Add(name, value)
