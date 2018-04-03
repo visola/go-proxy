@@ -3,7 +3,7 @@ import axios from 'axios';
 import moment from 'moment';
 
 const interval = 1000;
-const bucketCount = 600;
+const bucketCount = 300;
 const maxRequestsToKeep = 2000;
 
 function isSelected (value = '', filterString = '') {

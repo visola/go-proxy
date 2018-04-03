@@ -1,12 +1,12 @@
-import Configurations from './Configurations';
+import Mappings from './Mappings';
 import ProxiedRequests from './ProxiedRequests';
 
-const configurations = new Configurations();
-configurations.fetch();
+const mappings = new Mappings();
+mappings.fetch();
 
 const proxiedRequests = new ProxiedRequests();
 
 export default {
-  configurations,
+  mappings,
   proxiedRequests,
 };

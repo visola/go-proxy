@@ -3,16 +3,16 @@ package proxy
 import (
 	"net/http"
 
-	"github.com/visola/go-proxy/config"
+	"github.com/visola/go-proxy/mapping"
 )
 
-func matchConfiguration(req *http.Request, configurations []config.DynamicMapping) *config.MatchResult {
-	for _, config := range configurations {
-		if !config.Active {
+func matchMapping(req *http.Request, mappings []mapping.DynamicMapping) *mapping.MatchResult {
+	for _, mapping := range mappings {
+		if !mapping.Active {
 			continue
 		}
 
-		matchResult := config.Match(req)
+		matchResult := mapping.Match(req)
 		if matchResult != nil {
 			return matchResult
 		}

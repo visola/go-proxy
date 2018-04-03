@@ -8,8 +8,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/visola/go-proxy/config"
 	myhttp "github.com/visola/go-proxy/http"
+	"github.com/visola/go-proxy/mapping"
 	"github.com/visola/go-proxy/statistics"
 )
 
@@ -32,14 +32,14 @@ func StartProxyServer() error {
 }
 
 func requestHandler(w http.ResponseWriter, req *http.Request) {
-	proxiedRequest, configurations, configError := initializeHandling(req, w)
+	proxiedRequest, mappings, mappingError := initializeHandling(req, w)
 
-	if configError != nil {
-		finalizeWithError(req, w, proxiedRequest, configError)
+	if mappingError != nil {
+		finalizeWithError(req, w, proxiedRequest, mappingError)
 		return
 	}
 
-	match := matchConfiguration(req, configurations)
+	match := matchMapping(req, mappings)
 
 	if match == nil {
 		finalizeWithNotFound(req, w, proxiedRequest, "")
@@ -114,7 +114,7 @@ func getTime() int64 {
 	return time.Now().UnixNano() / int64(time.Millisecond)
 }
 
-func handleRequest(req *http.Request, w http.ResponseWriter, match *config.MatchResult) (*proxyResponse, error) {
+func handleRequest(req *http.Request, w http.ResponseWriter, match *mapping.MatchResult) (*proxyResponse, error) {
 	if match.Mapping.Proxy {
 		return proxyRequest(req, w, match)
 	}
@@ -122,7 +122,7 @@ func handleRequest(req *http.Request, w http.ResponseWriter, match *config.Match
 	return serveStaticFile(req, w, match)
 }
 
-func initializeHandling(req *http.Request, w http.ResponseWriter) (statistics.ProxiedRequest, []config.DynamicMapping, error) {
+func initializeHandling(req *http.Request, w http.ResponseWriter) (statistics.ProxiedRequest, []mapping.DynamicMapping, error) {
 	reqData, _ := getData(req)
 
 	proxiedRequest := statistics.ProxiedRequest{
@@ -132,6 +132,6 @@ func initializeHandling(req *http.Request, w http.ResponseWriter) (statistics.Pr
 		StartTime:    getTime(),
 	}
 
-	config, configError := config.GetConfigurations()
-	return proxiedRequest, config, configError
+	mapping, mappingError := mapping.GetMappings()
+	return proxiedRequest, mapping, mappingError
 }

@@ -10,11 +10,11 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/visola/go-proxy/config"
 	myhttp "github.com/visola/go-proxy/http"
+	"github.com/visola/go-proxy/mapping"
 )
 
-func proxyRequest(req *http.Request, w http.ResponseWriter, match *config.MatchResult) (*proxyResponse, error) {
+func proxyRequest(req *http.Request, w http.ResponseWriter, match *mapping.MatchResult) (*proxyResponse, error) {
 	mapping := match.Mapping
 	newPath := mapping.To + "/" + match.NewPath[len(mapping.From):]
 	if strings.HasPrefix(match.NewPath, "http") {
