@@ -1,5 +1,7 @@
+build/
 .cache/
 *.code-workspace
+.DS_Store
 dist/
 node_modules/
 *-packr.go
