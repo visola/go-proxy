@@ -2,4 +2,7 @@
 set -ex
 
 PACKAGES=$(go list ./... | grep -v /vendor/)
-go test $PACKAGES
+for package in ${PACKAGES}
+do
+  go test $package
+done
