@@ -1,6 +1,6 @@
-package config
+package mapping
 
-type proxyConfig struct {
+type yamlMapping struct {
 	Static []mapping
 	Proxy  []mapping
 }

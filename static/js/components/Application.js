@@ -1,12 +1,12 @@
 import { Menu } from 'semantic-ui-react';
 import React from 'react';
 
-import Configurations from './Configurations';
+import Mappings from './Mappings';
 import Requests from './Requests';
 
 const tabs = [
   { id: 'requests', label: 'Requests', component: Requests },
-  { id: 'mappings', label: 'Mappings', component: Configurations },
+  { id: 'mappings', label: 'Mappings', component: Mappings },
 ]
 
 export default class Application extends React.Component {

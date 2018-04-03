@@ -4,28 +4,28 @@ import React from 'react';
 
 import Field from './Field';
 
-@inject('configurations')
+@inject('mappings')
 @observer
-export default class Configurations extends React.Component {
+export default class Mappings extends React.Component {
   static propTypes = {
-    configurations: PropTypes.object.isRequired,
+    mappings: PropTypes.object.isRequired,
   }
 
   handleStatusChange(mapping, e) {
-    this.props.configurations.updateMapping(mapping.mappingID, e.target.checked);
+    this.props.mappings.updateMapping(mapping.mappingID, e.target.checked);
   }
 
   render() {
     return <ul>
-      {this.renderConfigurations()}
+      {this.renderMappings()}
     </ul>;
   }
 
-  renderConfigurations() {
+  renderMappings() {
     let index = 0;
     const result = [];
-    for (let origin in this.props.configurations.mappings) {
-      const mappings = this.props.configurations.mappings[origin];
+    for (let origin in this.props.mappings.mappings) {
+      const mappings = this.props.mappings.mappings[origin];
       index += 1;
       result.push(<li key={index}>
         <Field label="Origin:" value={origin} />

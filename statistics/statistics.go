@@ -1,21 +1,21 @@
 package statistics
 
 import (
-	"github.com/visola/go-proxy/config"
+	"github.com/visola/go-proxy/mapping"
 )
 
 // ProxiedRequest represents a request that was proxied
 type ProxiedRequest struct {
-	EndTime      int64          `json:"endTime,omitempty"`
-	Error        string         `json:"error,omitempty"`
-	ExecutedURL  string         `json:"executedURL,omitempty"`
-	Mapping      config.Mapping `json:"mapping,omitempty"`
-	RequestData  HTTPData       `json:"requestData,omitempty"`
-	Method       string         `json:"method,omitempty"`
-	ResponseCode int            `json:"responseCode,omitempty"`
-	ResponseData HTTPData       `json:"responseData,omitempty"`
-	RequestedURL string         `json:"requestedURL,omitempty"`
-	StartTime    int64          `json:"startTime,omitempty"`
+	EndTime      int64           `json:"endTime,omitempty"`
+	Error        string          `json:"error,omitempty"`
+	ExecutedURL  string          `json:"executedURL,omitempty"`
+	Mapping      mapping.Mapping `json:"mapping,omitempty"`
+	RequestData  HTTPData        `json:"requestData,omitempty"`
+	Method       string          `json:"method,omitempty"`
+	ResponseCode int             `json:"responseCode,omitempty"`
+	ResponseData HTTPData        `json:"responseData,omitempty"`
+	RequestedURL string          `json:"requestedURL,omitempty"`
+	StartTime    int64           `json:"startTime,omitempty"`
 }
 
 // HTTPData represents data sent or received in an HTTP call

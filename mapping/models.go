@@ -1,4 +1,4 @@
-package config
+package mapping
 
 import (
 	"crypto/sha1"
@@ -15,7 +15,7 @@ type Mapping struct {
 	To        string `json:"to"`
 }
 
-// fromYAMLMapping creates a new mapping from a mapping loaded from a YAML config
+// fromYAMLMapping creates a new mapping from a mapping loaded from a YAML file
 func fromYAMLMapping(loaded mapping, origin string, proxy bool) Mapping {
 	newMapping := Mapping{
 		From:   loaded.From,
