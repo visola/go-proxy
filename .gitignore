@@ -1,6 +1,7 @@
 build/
 .cache/
 *.code-workspace
+c.out
 .DS_Store
 dist/
 node_modules/
