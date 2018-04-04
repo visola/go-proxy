@@ -4,6 +4,7 @@ set -ex
 npm install
 npm run bundle
 
+go get -u github.com/gobuffalo/packr/...
 packr clean
 packr
 
