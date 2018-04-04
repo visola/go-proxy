@@ -1,6 +1,10 @@
 #!/bin/bash
 set -ex
 
+if [ -f cc-test-reporter ]; then
+  ./cc-test-reporter before-build
+fi
+
 COVERAGE_OUTPUT=build/coverage.out
 TEMP_COVERAGE=build/temp_cover.out
 
@@ -19,3 +23,7 @@ do
     rm $TEMP_COVERAGE
   fi
 done
+
+if [ -f cc-test-reporter ]; then
+  ./cc-test-reporter after-build
+fi
