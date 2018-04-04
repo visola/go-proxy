@@ -1,6 +1,7 @@
 package mapping
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -25,7 +26,7 @@ type MatchResult struct {
 	Parts   []string
 }
 
-// Match tests if the mapping matches the specific request. If it does it will
+// Match tests if the mapping matches the specific request. If it does, it will
 // return a match result, otherwise it will return nil.
 func (mapping *DynamicMapping) Match(req *http.Request) *MatchResult {
 	if mapping.From != "" && strings.HasPrefix(req.URL.Path, mapping.From) {
@@ -54,6 +55,26 @@ func (mapping *DynamicMapping) Match(req *http.Request) *MatchResult {
 				NewPath: newPath,
 				Parts:   matched,
 			}
+		}
+	}
+
+	return nil
+}
+
+// Validate make sure that the mapping is correctly setup
+func (mapping *DynamicMapping) Validate() error {
+	if mapping.From == "" && mapping.Regexp == "" {
+		return errors.New("Either `from` or `regexp` need to be present")
+	}
+
+	if mapping.To == "" {
+		return errors.New("Missing value for `to`")
+	}
+
+	if mapping.Regexp != "" {
+		_, err := regexp.Compile(mapping.Regexp)
+		if err != nil {
+			return fmt.Errorf("Error compiling regexp: '%s'\n%s", mapping.Regexp, err)
 		}
 	}
 
