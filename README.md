@@ -2,6 +2,8 @@
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/0f398d3937f55ddcfc70/maintainability)](https://codeclimate.com/github/visola/go-proxy/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/0f398d3937f55ddcfc70/test_coverage)](https://codeclimate.com/github/visola/go-proxy/test_coverage)
+[![Build Status](https://travis-ci.org/visola/go-proxy.svg?branch=master)](https://travis-ci.org/visola/go-proxy)
+![GitHub release](https://img.shields.io/github/release/visola/go-proxy.svg)
 
 A proxy to aid developers to run and debug multiple services or frontends locally.
 
