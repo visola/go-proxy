@@ -1,6 +1,12 @@
 #!/bin/bash
 set -ex
 
+npm install
+npm run bundle
+
+packr clean
+packr
+
 build_and_zip() {
   PACKAGE_DIR=build/$3_$2
   mkdir $PACKAGE_DIR
