@@ -13,4 +13,4 @@ script:
   - ./bin/run.sh
 
 after_script:
-  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+  - ./cc-test-reporter after-build --exit-code build/cover.out
