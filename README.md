@@ -11,6 +11,7 @@ A proxy to aid developers to run and debug multiple services or frontends locall
   <img width="1000px" src="doc/go-proxy-demo.gif" />
 </p>
 
+
 ## Getting Started
 
 1. Download a release for your specific operating system and architecture [here](https://github.com/visola/go-proxy/releases)
