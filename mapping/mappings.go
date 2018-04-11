@@ -2,6 +2,7 @@ package mapping
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/user"
@@ -80,6 +81,11 @@ func getCurrentState() ([]DynamicMapping, error) {
 				To:        staticMapping.To,
 			}
 		}
+
+		validationErr := result[index].Validate()
+		if validationErr != nil {
+			return nil, fmt.Errorf("Error in mapping from file: %s\n%s", result[index].Origin, validationErr)
+		}
 	}
 
 	return result, nil
@@ -117,12 +123,12 @@ func getStoredState() (map[string]DynamicMapping, error) {
 func loadAllMappings() ([]Mapping, error) {
 	mappingDir, mappingDirErr := getMappingDirectory()
 	if mappingDirErr != nil {
-		panic(mappingDirErr)
+		return nil, mappingDirErr
 	}
 
 	files, filesErr := ioutil.ReadDir(mappingDir)
 	if filesErr != nil {
-		panic(filesErr)
+		return nil, filesErr
 	}
 
 	mappings := make([]Mapping, 0)
@@ -147,7 +153,7 @@ func loadMappings(mappingDir string, file os.FileInfo) ([]Mapping, error) {
 
 	mapping, mappingErr := readMapping(path.Join(mappingDir, file.Name()))
 	if mappingErr != nil {
-		return nil, mappingErr
+		return nil, fmt.Errorf("Error while reading configuration file: %s\n%s", file.Name(), mappingErr)
 	}
 
 	for _, staticMapping := range mapping.Static {
