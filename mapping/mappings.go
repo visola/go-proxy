@@ -74,6 +74,7 @@ func getCurrentState() ([]DynamicMapping, error) {
 			result[index] = DynamicMapping{
 				Active:    true,
 				From:      staticMapping.From,
+				Inject:    staticMapping.Inject,
 				MappingID: staticMapping.MappingID,
 				Origin:    staticMapping.Origin,
 				Proxy:     staticMapping.Proxy,
