@@ -2,8 +2,10 @@ build/
 .cache/
 *.code-workspace
 c.out
-.DS_Store
+debug
 dist/
+.DS_Store
 node_modules/
 *-packr.go
 vendor/
+.vscode/

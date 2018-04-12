@@ -58,6 +58,11 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, match *mapping.Match
 		}
 	}
 
+	// Inject headers if any, overwrite headers passed before
+	for name, value := range mapping.Inject.Headers {
+		newReq.Header.Set(name, value)
+	}
+
 	client := &http.Client{
 		// Do not auto-follow redirects
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {

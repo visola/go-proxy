@@ -70,6 +70,17 @@ proxy:
     to: http://127.0.0.1:3000/static/js$1
 ```
 
+If you need to inject headers into a proxied request, you can do it using the `inject` attribute. The following is an example:
+
+```yaml
+proxy:
+  - regexp: /some/path/(.*)
+    to: http://my.other.server.com/path/$1
+    inject:
+      headers:
+        AUTH_TOKEN: V2hhdCB3ZXJlIHlvdSB0aGlua2luZz8=
+```
+
 ## Building go-proxy
 
 ### Pre-requisites

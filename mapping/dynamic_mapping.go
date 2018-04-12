@@ -10,13 +10,14 @@ import (
 
 // DynamicMapping represents a mapping that can be active or not
 type DynamicMapping struct {
-	Active    bool   `json:"active"`
-	From      string `json:"from"`
-	MappingID string `json:"mappingID"`
-	Origin    string `json:"origin"`
-	Proxy     bool   `json:"proxy"`
-	Regexp    string `json:"regexp"`
-	To        string `json:"to"`
+	Active    bool      `json:"active"`
+	From      string    `json:"from"`
+	Inject    Injection `json:"injection"`
+	MappingID string    `json:"mappingID"`
+	Origin    string    `json:"origin"`
+	Proxy     bool      `json:"proxy"`
+	Regexp    string    `json:"regexp"`
+	To        string    `json:"to"`
 }
 
 // MatchResult stores the result for a mapping that matched a request
@@ -76,6 +77,10 @@ func (mapping *DynamicMapping) Validate() error {
 		if err != nil {
 			return fmt.Errorf("Error compiling regexp: '%s'\n%s", mapping.Regexp, err)
 		}
+	}
+
+	if len(mapping.Inject.Headers) > 0 && !mapping.Proxy {
+		return errors.New("Inject is only available for proxy mappings")
 	}
 
 	return nil

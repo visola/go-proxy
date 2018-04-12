@@ -58,6 +58,10 @@ func requestHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	for name, value := range match.Mapping.Inject.Headers {
+		proxiedRequest.RequestData.Headers[name] = []string{value}
+	}
+
 	proxiedRequest.ResponseData = statistics.HTTPData{
 		Body:    response.body,
 		Headers: response.headers,

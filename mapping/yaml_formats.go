@@ -7,6 +7,7 @@ type yamlMapping struct {
 
 type mapping struct {
 	From   string
+	Inject Injection
 	Regexp string
 	To     string
 }
