@@ -9,6 +9,10 @@ packr clean
 packr
 
 build_and_zip() {
+  # $1 -> operating system
+  # $2 -> architecture
+  # $3 -> OS alias, used in the output file name
+  # $4 -> Optional extension with ".", e.g.: .exe
   PACKAGE_DIR=build/$3_$2
   PACKAGE_FILE=$PACKAGE_DIR/go-proxy$4
   mkdir $PACKAGE_DIR
