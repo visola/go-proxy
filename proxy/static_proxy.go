@@ -8,8 +8,8 @@ import (
 	"path"
 	"path/filepath"
 
-	myhttp "github.com/visola/go-proxy/http"
-	"github.com/visola/go-proxy/mapping"
+	myhttp "github.com/Everbridge/go-proxy/http"
+	"github.com/Everbridge/go-proxy/mapping"
 )
 
 func serveStaticFile(req *http.Request, w http.ResponseWriter, match *mapping.MatchResult) (*proxyResponse, error) {

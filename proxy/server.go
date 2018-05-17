@@ -8,9 +8,9 @@ import (
 	"os"
 	"time"
 
-	myhttp "github.com/visola/go-proxy/http"
-	"github.com/visola/go-proxy/mapping"
-	"github.com/visola/go-proxy/statistics"
+	myhttp "github.com/Everbridge/go-proxy/http"
+	"github.com/Everbridge/go-proxy/mapping"
+	"github.com/Everbridge/go-proxy/statistics"
 )
 
 // StartProxyServer starts the proxy server

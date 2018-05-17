@@ -3,9 +3,9 @@ package admin
 import (
 	"net/http"
 
+	myhttp "github.com/Everbridge/go-proxy/http"
 	"github.com/gorilla/mux"
-	myhttp "github.com/visola/go-proxy/http"
-	"github.com/visola/go-proxy/mapping"
+	"github.com/Everbridge/go-proxy/mapping"
 )
 
 func handleGetMappings(w http.ResponseWriter, req *http.Request) {
