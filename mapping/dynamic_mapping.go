@@ -62,7 +62,7 @@ func (mapping *DynamicMapping) Match(req *http.Request) *MatchResult {
 	return nil
 }
 
-// Validate make sure that the mapping is correctly setup
+// Validate makes sure that the a mapping is correctly setup
 func (mapping *DynamicMapping) Validate() error {
 	if mapping.From == "" && mapping.Regexp == "" {
 		return errors.New("Either `from` or `regexp` need to be present")
