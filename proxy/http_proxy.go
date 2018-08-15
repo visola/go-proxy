@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 
 	myhttp "github.com/Everbridge/go-proxy/http"
@@ -21,9 +22,9 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, match *mapping.Match
 		newPath = match.NewPath
 	}
 
-	if strings.HasSuffix(newPath, "/") {
-		newPath = newPath[:len(newPath)-1]
-	}
+	// Remove extra dangling /, ignore errors here since this regexp was tested before
+	findExtraDanglingSlash, _ := regexp.Compile("/{2,}$")
+	newPath = findExtraDanglingSlash.ReplaceAllLiteralString(newPath, "/")
 
 	newURL, parseErr := url.Parse(fmt.Sprintf("%s?%s", newPath, req.URL.RawQuery))
 	if parseErr != nil {
