@@ -24,21 +24,34 @@ func GetMappings() ([]Mapping, error) {
 	return mappings, err
 }
 
-// SetStatus change the status of a mapping and save the new state to
-// disk so that it will get loaded on next start
-func SetStatus(mappingID string, status bool) error {
+// Set sets a mapping from its previous value to a new value
+func Set(mappingID string, mapping Mapping) error {
 	_, err := GetMappings()
 	if err != nil {
 		return err
 	}
 
+	mapping.MappingID = generateID(mapping)
+
 	// TODO - Make sure this change is atomic
-	for index, mapping := range mappings {
-		if mapping.MappingID == mappingID {
-			mappings[index].Active = status
+	for index, toBeReplaced := range mappings {
+		if toBeReplaced.MappingID == mappingID {
+			mappings[index] = mapping
 			break
 		}
 	}
+	return storeCurrentState()
+}
+
+// SetAll sets all the mappings to a current new state
+func SetAll(newMappings []Mapping) error {
+	_, err := GetMappings()
+	if err != nil {
+		return err
+	}
+
+	// Replace all
+	mappings = newMappings
 	return storeCurrentState()
 }
 
