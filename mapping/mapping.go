@@ -11,6 +11,7 @@ import (
 // Mapping represents a mapping that can be active or not
 type Mapping struct {
 	Active    bool      `json:"active"`
+	Before    string    `json:"before"`
 	From      string    `json:"from"`
 	Inject    Injection `json:"injection"`
 	MappingID string    `json:"mappingID"`

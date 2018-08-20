@@ -7,8 +7,6 @@ import (
 	"os/user"
 	"path"
 	"path/filepath"
-	"sort"
-	"strings"
 )
 
 const stateFileName = ".current_state"
@@ -106,27 +104,6 @@ func loadAllMappings() ([]Mapping, error) {
 
 	sortMappings(mappings)
 	return mappings, nil
-}
-
-func sortMappings(mappings []Mapping) {
-	sort.Slice(mappings, func(i, j int) bool {
-		pathI := strings.ToLower(mappings[i].From)
-		pathJ := strings.ToLower(mappings[j].From)
-
-		if pathI == "" {
-			pathI = strings.ToLower(mappings[i].Regexp)
-		}
-
-		if pathJ == "" {
-			pathJ = strings.ToLower(mappings[j].Regexp)
-		}
-
-		if len(pathI) == len(pathJ) {
-			return strings.Compare(pathI, pathJ) < 0
-		}
-
-		return len(pathI) > len(pathJ)
-	})
 }
 
 func storeCurrentState() error {
