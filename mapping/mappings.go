@@ -10,8 +10,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-
-	"gopkg.in/yaml.v2"
 )
 
 const stateFileName = ".current_state"
@@ -138,7 +136,7 @@ func loadAllMappings() ([]Mapping, error) {
 			continue
 		}
 
-		loadedMappings, loadingErr := loadMappings(mappingDir, file)
+		loadedMappings, loadingErr := loadMappingsFromFiles(mappingDir, file)
 		if loadingErr != nil {
 			return nil, loadingErr
 		}
@@ -147,37 +145,6 @@ func loadAllMappings() ([]Mapping, error) {
 
 	sortMappings(mappings)
 	return mappings, nil
-}
-
-func loadMappings(mappingDir string, file os.FileInfo) ([]Mapping, error) {
-	mappings := make([]Mapping, 0)
-
-	mapping, mappingErr := readMapping(path.Join(mappingDir, file.Name()))
-	if mappingErr != nil {
-		return nil, fmt.Errorf("Error while reading configuration file: %s\n%s", file.Name(), mappingErr)
-	}
-
-	for _, staticMapping := range mapping.Static {
-		mappings = append(mappings, fromYAMLMapping(staticMapping, file.Name(), false))
-	}
-
-	for _, staticMapping := range mapping.Proxy {
-		mappings = append(mappings, fromYAMLMapping(staticMapping, file.Name(), true))
-	}
-
-	return mappings, nil
-}
-
-func readMapping(file string) (loadedMapping yamlMapping, err error) {
-	var yamlContent []byte
-	yamlContent, err = ioutil.ReadFile(file)
-
-	if err != nil {
-		return loadedMapping, err
-	}
-
-	err = yaml.Unmarshal(yamlContent, &loadedMapping)
-	return loadedMapping, err
 }
 
 func sortMappings(mappings []Mapping) {
