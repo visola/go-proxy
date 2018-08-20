@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"os"
 	"os/user"
 	"path"
 	"path/filepath"
@@ -14,10 +13,10 @@ import (
 
 const stateFileName = ".current_state"
 
-var mappings []DynamicMapping
+var mappings []Mapping
 
 // GetMappings get all mappings or load them if not loaded so far
-func GetMappings() ([]DynamicMapping, error) {
+func GetMappings() ([]Mapping, error) {
 	if mappings != nil {
 		return mappings, nil
 	}
@@ -53,67 +52,29 @@ func getMappingDirectory() (string, error) {
 	return user.HomeDir + "/.go-proxy", nil
 }
 
-func getCurrentState() ([]DynamicMapping, error) {
-	staticMappings, staticMappingErr := loadAllMappings()
-	if staticMappingErr != nil {
-		return nil, staticMappingErr
+func getCurrentState() ([]Mapping, error) {
+	mappingsFromFiles, mappingsFromFilesErr := loadAllMappings()
+	if mappingsFromFilesErr != nil {
+		return nil, mappingsFromFilesErr
 	}
 
-	storedStates, storedStateErr := getStoredState()
-	if storedStateErr != nil {
-		return nil, storedStateErr
+	mappingsFromStore, mappingsFromStoreErr := getStoredState()
+	if mappingsFromStoreErr != nil {
+		return nil, mappingsFromStoreErr
 	}
 
-	result := make([]DynamicMapping, len(staticMappings))
-	for index, staticMapping := range staticMappings {
-		if storedState, exists := storedStates[staticMapping.MappingID]; exists {
-			result[index] = storedState
+	result := make([]Mapping, len(mappingsFromFiles))
+	for index, mappingFromFiles := range mappingsFromFiles {
+		if mappingFromStore, exists := mappingsFromStore[mappingFromFiles.MappingID]; exists {
+			result[index] = mappingFromStore
 		} else {
-			result[index] = DynamicMapping{
-				Active:    true,
-				From:      staticMapping.From,
-				Inject:    staticMapping.Inject,
-				MappingID: staticMapping.MappingID,
-				Origin:    staticMapping.Origin,
-				Proxy:     staticMapping.Proxy,
-				Regexp:    staticMapping.Regexp,
-				To:        staticMapping.To,
-			}
+			result[index] = mappingFromFiles
 		}
 
 		validationErr := result[index].Validate()
 		if validationErr != nil {
 			return nil, fmt.Errorf("Error in mapping from file: %s\n%s", result[index].Origin, validationErr)
 		}
-	}
-
-	return result, nil
-}
-
-func getStoredState() (map[string]DynamicMapping, error) {
-	mappingDir, mappingDirErr := getMappingDirectory()
-	if mappingDirErr != nil {
-		return nil, mappingDirErr
-	}
-
-	currentStateFile, currentStateFileErr := os.Open(path.Join(mappingDir, stateFileName))
-	if os.IsNotExist(currentStateFileErr) {
-		return make(map[string]DynamicMapping, 0), nil
-	}
-
-	if currentStateFileErr != nil {
-		return nil, currentStateFileErr
-	}
-
-	currentStateData, readErr := ioutil.ReadAll(currentStateFile)
-	if readErr != nil {
-		return nil, readErr
-	}
-
-	var result map[string]DynamicMapping
-	unmarshalErr := json.Unmarshal(currentStateData, &result)
-	if unmarshalErr != nil {
-		return nil, unmarshalErr
 	}
 
 	return result, nil
@@ -169,7 +130,7 @@ func sortMappings(mappings []Mapping) {
 }
 
 func storeCurrentState() error {
-	toStore := make(map[string]DynamicMapping)
+	toStore := make(map[string]Mapping)
 	for _, mapping := range mappings {
 		toStore[mapping.MappingID] = mapping
 	}

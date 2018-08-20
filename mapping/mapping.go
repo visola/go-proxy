@@ -8,8 +8,8 @@ import (
 	"strings"
 )
 
-// DynamicMapping represents a mapping that can be active or not
-type DynamicMapping struct {
+// Mapping represents a mapping that can be active or not
+type Mapping struct {
 	Active    bool      `json:"active"`
 	From      string    `json:"from"`
 	Inject    Injection `json:"injection"`
@@ -20,16 +20,21 @@ type DynamicMapping struct {
 	To        string    `json:"to"`
 }
 
+// Injection represents parameters that can be injected into proxied requests
+type Injection struct {
+	Headers map[string]string
+}
+
 // MatchResult stores the result for a mapping that matched a request
 type MatchResult struct {
-	Mapping DynamicMapping
+	Mapping Mapping
 	NewPath string
 	Parts   []string
 }
 
 // Match tests if the mapping matches the specific request. If it does, it will
 // return a match result, otherwise it will return nil.
-func (mapping *DynamicMapping) Match(req *http.Request) *MatchResult {
+func (mapping *Mapping) Match(req *http.Request) *MatchResult {
 	if mapping.From != "" && strings.HasPrefix(req.URL.Path, mapping.From) {
 		return &MatchResult{
 			Mapping: *mapping,
@@ -63,7 +68,7 @@ func (mapping *DynamicMapping) Match(req *http.Request) *MatchResult {
 }
 
 // Validate makes sure that the a mapping is correctly setup
-func (mapping *DynamicMapping) Validate() error {
+func (mapping *Mapping) Validate() error {
 	if mapping.From == "" && mapping.Regexp == "" {
 		return errors.New("Either `from` or `regexp` need to be present")
 	}

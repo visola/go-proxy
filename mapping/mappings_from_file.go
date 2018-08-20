@@ -16,22 +16,6 @@ type yamlMapping struct {
 	Proxy  []Mapping
 }
 
-// Injection represents parameters that can be injected into proxied requests
-type Injection struct {
-	Headers map[string]string
-}
-
-// Mapping represents a mapping configuration loaded from some file.
-type Mapping struct {
-	From      string    `json:"from"`
-	Inject    Injection `json:"inject"`
-	MappingID string    `json:"mappingID"`
-	Origin    string    `json:"origin"`
-	Proxy     bool      `json:"proxy"`
-	Regexp    string    `json:"regexp"`
-	To        string    `json:"to"`
-}
-
 func generateID(mapping Mapping) string {
 	hasher := sha1.New()
 	isProxy := "0"
@@ -52,6 +36,7 @@ func loadMappingsFromFiles(mappingDir string, file os.FileInfo) ([]Mapping, erro
 	}
 
 	for _, staticMapping := range mappingsFromFile.Static {
+		staticMapping.Active = true
 		staticMapping.Origin = file.Name()
 		staticMapping.Proxy = false
 		staticMapping.MappingID = generateID(staticMapping)
@@ -60,6 +45,7 @@ func loadMappingsFromFiles(mappingDir string, file os.FileInfo) ([]Mapping, erro
 	}
 
 	for _, proxyMapping := range mappingsFromFile.Proxy {
+		proxyMapping.Active = true
 		proxyMapping.Origin = file.Name()
 		proxyMapping.Proxy = true
 		proxyMapping.MappingID = generateID(proxyMapping)
