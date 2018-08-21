@@ -22,7 +22,7 @@ func TestMatch(t *testing.T) {
 func testMatchPath(t *testing.T) {
 	req, _ := http.NewRequest(http.MethodGet, "https://localhost:12312/some/path", nil)
 
-	mapping := DynamicMapping{
+	mapping := Mapping{
 		From: "/some",
 		To:   "/another",
 	}
@@ -40,7 +40,7 @@ func testMatchPath(t *testing.T) {
 func testMatchRegexp(t *testing.T) {
 	req, _ := http.NewRequest(http.MethodGet, "https://localhost:12312/some/here/path", nil)
 
-	mapping := DynamicMapping{
+	mapping := Mapping{
 		Regexp: "/some/([A-Za-z]+)/([A-Za-z]+)",
 		To:     "/another/$2/$1",
 	}
@@ -58,7 +58,7 @@ func testMatchRegexp(t *testing.T) {
 func testNoMatch(t *testing.T) {
 	req, _ := http.NewRequest(http.MethodGet, "https://localhost:12312/will/not/match", nil)
 
-	mapping := DynamicMapping{
+	mapping := Mapping{
 		From:   "/some",
 		Regexp: "/some/([A-Za-z]+)/([A-Za-z]+)",
 		To:     "/another/$2/$1",
@@ -69,7 +69,7 @@ func testNoMatch(t *testing.T) {
 }
 
 func testValidMapping(t *testing.T) {
-	mapping := DynamicMapping{
+	mapping := Mapping{
 		From: "/some/path",
 		To:   "http://some.server.com/another/path",
 	}
@@ -77,7 +77,7 @@ func testValidMapping(t *testing.T) {
 	validationError := mapping.Validate()
 	assert.Nil(t, validationError, "Should not return error when From and To are correctly set")
 
-	mapping = DynamicMapping{
+	mapping = Mapping{
 		Regexp: "/some/([A-Za-z]+)/([A-Za-z]+)",
 		To:     "http://some.server.com/another/path",
 	}
@@ -87,7 +87,7 @@ func testValidMapping(t *testing.T) {
 }
 
 func testInvalidRegexp(t *testing.T) {
-	mapping := DynamicMapping{
+	mapping := Mapping{
 		Regexp: "/some/([A-Za-z]+", // Missing closing bracket
 		To:     "http://some.server.com/another/path",
 	}
@@ -99,21 +99,21 @@ func testInvalidRegexp(t *testing.T) {
 func testMissingInfoMappings(t *testing.T) {
 	var validationError error
 
-	missingFromRegexp := DynamicMapping{
+	missingFromRegexp := Mapping{
 		To: "http://some.server.com/another/path",
 	}
 
 	validationError = missingFromRegexp.Validate()
 	assert.NotNil(t, validationError, "Should return error when missing From and Regexp")
 
-	missingToWithRegexp := DynamicMapping{
+	missingToWithRegexp := Mapping{
 		Regexp: "/some/([A-Za-z]+)",
 	}
 
 	validationError = missingToWithRegexp.Validate()
 	assert.NotNil(t, validationError, "Should return error when missing To and has Regexp")
 
-	missingToWithFrom := DynamicMapping{
+	missingToWithFrom := Mapping{
 		From: "/some/path",
 	}
 
@@ -124,7 +124,7 @@ func testMissingInfoMappings(t *testing.T) {
 func testHeaderInjection(t *testing.T) {
 	var validationError error
 
-	headerInjection := DynamicMapping{
+	headerInjection := Mapping{
 		From:  "/some/path",
 		To:    "http://some.server.com/another/path",
 		Proxy: true,
@@ -138,7 +138,7 @@ func testHeaderInjection(t *testing.T) {
 	validationError = headerInjection.Validate()
 	assert.Nil(t, validationError, "Should not return error if valid injection")
 
-	headerInjectionNonProxy := DynamicMapping{
+	headerInjectionNonProxy := Mapping{
 		From:  "/some/path",
 		To:    "http://some.server.com/another/path",
 		Proxy: false,

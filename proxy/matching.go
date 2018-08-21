@@ -6,7 +6,7 @@ import (
 	"github.com/Everbridge/go-proxy/mapping"
 )
 
-func matchMapping(req *http.Request, mappings []mapping.DynamicMapping) *mapping.MatchResult {
+func matchMapping(req *http.Request, mappings []mapping.Mapping) *mapping.MatchResult {
 	for _, mapping := range mappings {
 		if !mapping.Active {
 			continue

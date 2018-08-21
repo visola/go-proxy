@@ -126,7 +126,7 @@ func handleRequest(req *http.Request, w http.ResponseWriter, match *mapping.Matc
 	return serveStaticFile(req, w, match)
 }
 
-func initializeHandling(req *http.Request, w http.ResponseWriter) (statistics.ProxiedRequest, []mapping.DynamicMapping, error) {
+func initializeHandling(req *http.Request, w http.ResponseWriter) (statistics.ProxiedRequest, []mapping.Mapping, error) {
 	reqData, _ := getData(req)
 
 	proxiedRequest := statistics.ProxiedRequest{
