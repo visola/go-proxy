@@ -38,15 +38,17 @@ func ensureBefore(mappings []Mapping, mappingID string, beforeID string) []Mappi
 	return mappings
 }
 
-func sortMappings(mappings []Mapping) {
+func sortMappings(mappings []Mapping) []Mapping {
 	sortBySpecificity(mappings)
 
 	// Move accordingly to before attribute
 	for _, mapping := range mappings {
 		if mapping.Before != "" {
-			ensureBefore(mappings, mapping.MappingID, mapping.Before)
+			mappings = ensureBefore(mappings, mapping.MappingID, mapping.Before)
 		}
 	}
+
+	return mappings
 }
 
 func sortBySpecificity(mappings []Mapping) {

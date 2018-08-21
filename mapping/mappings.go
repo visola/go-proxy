@@ -86,7 +86,7 @@ func getCurrentState() ([]Mapping, error) {
 		}
 	}
 
-	return result, nil
+	return sortMappings(result), nil
 }
 
 func loadAllMappings() ([]Mapping, error) {
@@ -113,6 +113,5 @@ func loadAllMappings() ([]Mapping, error) {
 		mappings = append(mappings, loadedMappings...)
 	}
 
-	sortMappings(mappings)
 	return mappings, nil
 }

@@ -1,7 +1,60 @@
 import { inject, observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { Table } from 'semantic-ui-react';
+import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
+import { Button, Table } from 'semantic-ui-react';
+
+const DragHandle = SortableHandle(() => <span className="handle">::</span>);
+
+@observer
+class Row extends React.Component {
+  render() {
+    const {counts, handleOriginStatusChange, handleStatusChange, mapping} = this.props;
+    return <Table.Row>
+      <Table.Cell>
+        <DragHandle />
+        <input
+          checked={mapping.active}
+          onChange={(e) => handleStatusChange(mapping, e)}
+          type="checkbox"
+        />
+      </Table.Cell>
+      <Table.Cell>{mapping.proxy ? 'proxy' : 'static'}</Table.Cell>
+      <Table.Cell>{mapping.from !== '' ? mapping.from : mapping.regexp}</Table.Cell>
+      <Table.Cell>{mapping.to}</Table.Cell>
+      <Table.Cell>
+        <input
+          checked={counts.active === counts.total}
+          onChange={(e) => handleOriginStatusChange(mapping.origin, e)}
+          type="checkbox"
+        />&nbsp;
+        {mapping.origin}
+      </Table.Cell>
+    </Table.Row>;
+  }
+}
+const SortableRow = SortableElement(Row);
+
+@observer
+class TableBody extends React.Component {
+  render() {
+    const { handleOriginStatusChange, handleStatusChange, mappingsStore } = this.props;
+    const { countsPerOrigin, mappings } = mappingsStore
+    return <Table.Body>
+      {mappings.map((mapping, index) => {
+        return <SortableRow
+          counts={countsPerOrigin[mapping.origin]}
+          index={index}
+          handleOriginStatusChange={handleOriginStatusChange}
+          handleStatusChange={handleStatusChange}
+          key={mapping.mappingID}
+          mapping={mapping}
+        />;
+      })}
+    </Table.Body>;
+  }
+}
+const SortableTableBody = SortableContainer(TableBody);
 
 @inject('mappings')
 @observer
@@ -18,53 +71,57 @@ export default class Mappings extends React.Component {
     this.props.mappings.updateMappings(mappings);
   }
 
+  handleResetCustomSorting() {
+    const { mappings } = this.props.mappings;
+    mappings.filter((m) => m.before = null);
+    this.props.mappings.updateMappings(mappings);
+  }
+
+  handleSortEnd({oldIndex, newIndex}) {
+    const mappingsStore = this.props.mappings;
+
+    const currentMapping = mappingsStore.mappings[oldIndex];
+    const otherMapping = mappingsStore.mappings[newIndex];
+
+    currentMapping.before = otherMapping.mappingID
+    mappingsStore.updateMapping(currentMapping);
+  }
+
   handleStatusChange(mapping, e) {
     mapping.active = e.target.checked;
     this.props.mappings.updateMapping(mapping);
   }
 
   render() {
-    return <Table>
-      <Table.Header>
-        <Table.Row>
-          <Table.HeaderCell></Table.HeaderCell>
-          <Table.HeaderCell>Type</Table.HeaderCell>
-          <Table.HeaderCell>From</Table.HeaderCell>
-          <Table.HeaderCell>To</Table.HeaderCell>
-          <Table.HeaderCell>Origin</Table.HeaderCell>
-        </Table.Row>
-      </Table.Header>
-      <Table.Body>
-        {this.renderMappings()}
-      </Table.Body>
-    </Table>;
-  }
+    const { hasCustomSorting } = this.props.mappings;
+    return <React.Fragment>
+      <Button
+        disabled={!hasCustomSorting}
+        onClick={this.handleResetCustomSorting.bind(this)}
+        primary
+      >
+        Reset Custom Sorting
+      </Button>
 
-  renderMappings() {
-    const { countsPerOrigin, mappings } = this.props.mappings;
-    return mappings.map((mapping, index) => {
-      const count = countsPerOrigin[mapping.origin];
-      return <Table.Row key={mapping.mappingID}>
-        <Table.Cell>
-          <input
-            checked={mapping.active}
-            onChange={this.handleStatusChange.bind(this, mapping)}
-            type="checkbox"
-          />
-        </Table.Cell>
-        <Table.Cell>{mapping.proxy ? 'proxy' : 'static'}</Table.Cell>
-        <Table.Cell>{mapping.from}</Table.Cell>
-        <Table.Cell>{mapping.to}</Table.Cell>
-        <Table.Cell>
-          <input
-            checked={count.active === count.total}
-            onChange={this.handleOriginStatusChange.bind(this, mapping.origin)}
-            type="checkbox"
-          />&nbsp;
-          {mapping.origin}
-        </Table.Cell>
-
-      </Table.Row>;
-    });
+      <Table>
+        <Table.Header>
+          <Table.Row>
+            <Table.HeaderCell></Table.HeaderCell>
+            <Table.HeaderCell>Type</Table.HeaderCell>
+            <Table.HeaderCell>From</Table.HeaderCell>
+            <Table.HeaderCell>To</Table.HeaderCell>
+            <Table.HeaderCell>Origin</Table.HeaderCell>
+          </Table.Row>
+        </Table.Header>
+        <SortableTableBody
+          handleOriginStatusChange={this.handleOriginStatusChange.bind(this)}
+          handleSortEnd={this.handleSortEnd.bind(this)}
+          handleStatusChange={this.handleStatusChange.bind(this)}
+          mappingsStore={this.props.mappings}
+          onSortEnd={this.handleSortEnd.bind(this)}
+          useDragHandle={true}
+        />
+      </Table>
+    </React.Fragment>;
   }
 }
