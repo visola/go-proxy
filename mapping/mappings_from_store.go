@@ -35,3 +35,25 @@ func getStoredState() (map[string]Mapping, error) {
 
 	return result, nil
 }
+
+func storeCurrentState() error {
+	toStore := make(map[string]Mapping)
+	for _, mapping := range mappings {
+		toStore[mapping.MappingID] = mapping
+	}
+
+	// Force reload
+	mappings = nil
+
+	data, dataErr := json.Marshal(toStore)
+	if dataErr != nil {
+		return dataErr
+	}
+
+	mappingDir, mappingDirErr := getMappingDirectory()
+	if mappingDirErr != nil {
+		return mappingDirErr
+	}
+
+	return ioutil.WriteFile(path.Join(mappingDir, stateFileName), data, 0644)
+}
