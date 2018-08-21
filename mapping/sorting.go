@@ -27,7 +27,7 @@ func ensureBefore(mappings []Mapping, mappingID string, beforeID string) []Mappi
 		between := make([]Mapping, indexEl-indexBefore)
 		copy(between, mappings[indexBefore:indexEl])
 
-		after := make([]Mapping, len(mappings)-indexEl)
+		after := make([]Mapping, len(mappings)-indexEl-1)
 		copy(after, mappings[indexEl+1:])
 
 		mappings = append(above, mappings[indexEl])
