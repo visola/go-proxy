@@ -9,7 +9,7 @@ const DragHandle = SortableHandle(() => <span className="handle">::</span>);
 @observer
 class Row extends React.Component {
   render() {
-    const {counts, handleOriginStatusChange, handleStatusChange, mapping} = this.props;
+    const {countsForOrigin, countsPerTag, handleOriginStatusChange, handleStatusChange, mapping} = this.props;
     return <Table.Row>
       <Table.Cell>
         <DragHandle />
@@ -24,13 +24,36 @@ class Row extends React.Component {
       <Table.Cell>{mapping.to}</Table.Cell>
       <Table.Cell>
         <input
-          checked={counts.active === counts.total}
+          checked={countsForOrigin.active === countsForOrigin.total}
           onChange={(e) => handleOriginStatusChange(mapping.origin, e)}
           type="checkbox"
         />&nbsp;
-        {mapping.origin}
+        {mapping.origin} ({countsForOrigin.active}/{countsForOrigin.total})
+      </Table.Cell>
+      <Table.Cell>
+        {this.renderTags(countsPerTag, mapping)}
       </Table.Cell>
     </Table.Row>;
+  }
+
+  renderTags(countsPerTag, mapping) {
+    const { handleTagStatusChange } = this.props;
+    const { tags } = mapping;
+    if (tags == null || tags.length === 0) {
+      return null;
+    }
+
+    return tags.map(tag => {
+      const counts = countsPerTag[tag];
+      return <span className="tag" key={tag}>
+        <input
+          checked={counts.active === counts.total}
+          onChange={(e) => handleTagStatusChange(mapping, tag, e)}
+          type="checkbox"
+        />&nbsp;
+        {tag} ({counts.active}/{counts.total})
+      </span>;
+    });
   }
 }
 const SortableRow = SortableElement(Row);
@@ -38,15 +61,17 @@ const SortableRow = SortableElement(Row);
 @observer
 class TableBody extends React.Component {
   render() {
-    const { handleOriginStatusChange, handleStatusChange, mappingsStore } = this.props;
-    const { countsPerOrigin, mappings } = mappingsStore
+    const { handleOriginStatusChange, handleStatusChange, handleTagStatusChange, mappingsStore } = this.props;
+    const { countsPerOrigin, countsPerTag, mappings } = mappingsStore
     return <Table.Body>
       {mappings.map((mapping, index) => {
         return <SortableRow
-          counts={countsPerOrigin[mapping.origin]}
+          countsForOrigin={countsPerOrigin[mapping.origin]}
+          countsPerTag={countsPerTag}
           index={index}
           handleOriginStatusChange={handleOriginStatusChange}
           handleStatusChange={handleStatusChange}
+          handleTagStatusChange={handleTagStatusChange}
           key={mapping.mappingID}
           mapping={mapping}
         />;
@@ -92,6 +117,14 @@ export default class Mappings extends React.Component {
     this.props.mappings.updateMapping(mapping);
   }
 
+  handleTagStatusChange(mapping, tag, e) {
+    const { mappings } = this.props.mappings;
+    const newStatus = e.target.checked;
+    mappings.filter((m) => (m.tags || []).indexOf(tag) >= 0)
+      .forEach((m) => m.active = newStatus);
+    this.props.mappings.updateMappings(mappings);
+  }
+
   render() {
     const { hasCustomSorting, loading } = this.props.mappings;
     if (loading) {
@@ -115,12 +148,14 @@ export default class Mappings extends React.Component {
             <Table.HeaderCell>From</Table.HeaderCell>
             <Table.HeaderCell>To</Table.HeaderCell>
             <Table.HeaderCell>Origin</Table.HeaderCell>
+            <Table.HeaderCell>Tags</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
         <SortableTableBody
           handleOriginStatusChange={this.handleOriginStatusChange.bind(this)}
           handleSortEnd={this.handleSortEnd.bind(this)}
           handleStatusChange={this.handleStatusChange.bind(this)}
+          handleTagStatusChange={this.handleTagStatusChange.bind(this)}
           mappingsStore={this.props.mappings}
           onSortEnd={this.handleSortEnd.bind(this)}
           useDragHandle={true}
