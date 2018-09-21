@@ -38,7 +38,19 @@ func StartAdminServer() error {
 	adminServer := mux.NewRouter()
 	registerMappingsEndpoints(adminServer)
 	adminServer.HandleFunc("/api/requests", handleRequets)
+
+	indexHTML := box.String("index.html")
+	returnIndexHandler := createReturnIndexHandler(indexHTML)
+	adminServer.HandleFunc("/mappings", returnIndexHandler)
+	adminServer.HandleFunc("/requests", returnIndexHandler)
+
 	adminServer.Handle("/{file:.*}", http.FileServer(box))
 
 	return http.ListenAndServe(fmt.Sprintf(":%d", adminServerPort), adminServer)
+}
+
+func createReturnIndexHandler(indexHTML string) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		w.Write([]byte(indexHTML))
+	}
 }

@@ -4,10 +4,12 @@ import { action, observable } from 'mobx';
 export default class Mappings {
   @observable countsPerOrigin = {};
   @observable hasCustomSorting = false;
+  @observable loading = false;
   @observable mappings = {};
 
   @action
   fetch() {
+    this.loading = true;
     return axios.get('/api/mappings')
       .then(({data}) => this.setMappingsFromData(data));
   }
@@ -40,5 +42,6 @@ export default class Mappings {
       }
       this.countsPerOrigin[m.origin] = counts;
     });
+    this.loading = false;
   }
 }

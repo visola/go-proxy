@@ -93,7 +93,11 @@ export default class Mappings extends React.Component {
   }
 
   render() {
-    const { hasCustomSorting } = this.props.mappings;
+    const { hasCustomSorting, loading } = this.props.mappings;
+    if (loading) {
+      return <p>Loading...</p>;
+    }
+
     return <React.Fragment>
       <Button
         disabled={!hasCustomSorting}
