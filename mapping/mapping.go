@@ -18,6 +18,7 @@ type Mapping struct {
 	Origin    string    `json:"origin"`
 	Proxy     bool      `json:"proxy"`
 	Regexp    string    `json:"regexp"`
+	Tags      []string  `json:"tags"`
 	To        string    `json:"to"`
 }
 
