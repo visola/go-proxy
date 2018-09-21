@@ -7,13 +7,16 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"sort"
+	"strings"
 
 	yaml "gopkg.in/yaml.v2"
 )
 
 type yamlMapping struct {
-	Static []Mapping
 	Proxy  []Mapping
+	Static []Mapping
+	Tags   []string
 }
 
 func generateID(mapping Mapping) string {
@@ -40,6 +43,7 @@ func loadMappingsFromFiles(mappingDir string, file os.FileInfo) ([]Mapping, erro
 		staticMapping.Origin = file.Name()
 		staticMapping.Proxy = false
 		staticMapping.MappingID = generateID(staticMapping)
+		staticMapping.Tags = uniqueAndSort(append(staticMapping.Tags, mappingsFromFile.Tags...))
 
 		mappings = append(mappings, staticMapping)
 	}
@@ -49,6 +53,7 @@ func loadMappingsFromFiles(mappingDir string, file os.FileInfo) ([]Mapping, erro
 		proxyMapping.Origin = file.Name()
 		proxyMapping.Proxy = true
 		proxyMapping.MappingID = generateID(proxyMapping)
+		proxyMapping.Tags = uniqueAndSort(append(proxyMapping.Tags, mappingsFromFile.Tags...))
 
 		mappings = append(mappings, proxyMapping)
 	}
@@ -66,4 +71,27 @@ func readMappingFile(file string) (loadedMapping yamlMapping, err error) {
 
 	err = yaml.Unmarshal(yamlContent, &loadedMapping)
 	return loadedMapping, err
+}
+
+func uniqueAndSort(arr []string) []string {
+	if arr == nil {
+		arr = make([]string, 0)
+	}
+
+	// Put everything in a map
+	m := make(map[string]bool)
+	for _, e := range arr {
+		m[strings.ToLower(e)] = true
+	}
+
+	// Get all the keys back
+	result := make([]string, len(m))
+	count := 0
+	for k := range m {
+		result[count] = k
+		count++
+	}
+
+	sort.Strings(result)
+	return result
 }

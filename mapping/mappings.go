@@ -75,6 +75,7 @@ func getCurrentState() ([]Mapping, error) {
 	result := make([]Mapping, len(mappingsFromFiles))
 	for index, mappingFromFiles := range mappingsFromFiles {
 		if mappingFromStore, exists := mappingsFromStore[mappingFromFiles.MappingID]; exists {
+			mappingFromStore.Tags = mappingFromFiles.Tags // Ensure new tags get propagated
 			result[index] = mappingFromStore
 		} else {
 			result[index] = mappingFromFiles
