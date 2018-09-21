@@ -54,9 +54,9 @@ func handlePutMappings(w http.ResponseWriter, req *http.Request) {
 }
 
 func registerMappingsEndpoints(router *mux.Router) {
-	router.HandleFunc("/mappings", handleGetMappings).Methods(http.MethodGet)
-	router.HandleFunc("/mappings", handlePutMappings).Methods(http.MethodPut)
-	router.HandleFunc("/mappings/{mappingID}", handlePutMapping).Methods(http.MethodPut)
+	router.HandleFunc("/api/mappings", handleGetMappings).Methods(http.MethodGet)
+	router.HandleFunc("/api/mappings", handlePutMappings).Methods(http.MethodPut)
+	router.HandleFunc("/api/mappings/{mappingID}", handlePutMapping).Methods(http.MethodPut)
 }
 
 func respondWithMappings(w http.ResponseWriter, req *http.Request) {

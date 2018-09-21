@@ -37,7 +37,7 @@ func StartAdminServer() error {
 
 	adminServer := mux.NewRouter()
 	registerMappingsEndpoints(adminServer)
-	adminServer.HandleFunc("/requests", handleRequets)
+	adminServer.HandleFunc("/api/requests", handleRequets)
 	adminServer.Handle("/{file:.*}", http.FileServer(box))
 
 	return http.ListenAndServe(fmt.Sprintf(":%d", adminServerPort), adminServer)

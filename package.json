@@ -20,6 +20,7 @@
     "prop-types": "^15.6.2",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
+    "react-router-dom": "^4.3.1",
     "react-sortable-hoc": "^0.8.3",
     "recharts": "^1.1.0",
     "semantic-ui-react": "^0.79.1"
