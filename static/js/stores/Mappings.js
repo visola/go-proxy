@@ -8,19 +8,19 @@ export default class Mappings {
 
   @action
   fetch() {
-    return axios.get('/mappings')
+    return axios.get('/api/mappings')
       .then(({data}) => this.setMappingsFromData(data));
   }
 
   @action
   updateMapping(mapping) {
-    return axios.put(`/mappings/${mapping.mappingID}`, mapping)
+    return axios.put(`/api/mappings/${mapping.mappingID}`, mapping)
       .then(({data}) => this.setMappingsFromData(data));
   }
 
   @action
   updateMappings(mappings) {
-    return axios.put('/mappings', mappings)
+    return axios.put('/api/mappings', mappings)
       .then(({data}) => this.setMappingsFromData(data));
   }
 

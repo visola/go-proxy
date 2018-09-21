@@ -18,7 +18,7 @@ export default class ProxiedRequests {
   @observable statusSeen = new Set();
 
   constructor() {
-    const socket = new WebSocket(`ws://${window.location.host}/requests`);
+    const socket = new WebSocket(`ws://${window.location.host}/api/requests`);
     socket.onmessage = (message) => {
       this.addRequest(JSON.parse(message.data));
     };
@@ -64,7 +64,7 @@ export default class ProxiedRequests {
 
   @action
   fetchRequests() {
-    return axios.get("/requests")
+    return axios.get("/api/requests")
       .then(({data}) => this.setCollection(data));
   }
 
