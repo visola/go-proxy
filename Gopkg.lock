@@ -50,6 +50,12 @@
   version = "v1.2.1"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/visola/variables"
+  packages = ["variables"]
+  revision = "61cb3895d4185472b1ff681c49feaf51c3cc6798"
+
+[[projects]]
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   revision = "7f97868eec74b32b0982dd158a51a446d1da7eb5"
@@ -58,6 +64,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6f9239992bdaf07fb85247fbdd73d4d2691d9e2dba856daa5f04c2881b889b70"
+  inputs-digest = "fc2eba8074a8da15e0ed107777d97668ef852bb5a0df4bf80eb781f575be7c8d"
   solver-name = "gps-cdcl"
   solver-version = 1

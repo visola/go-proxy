@@ -6,20 +6,23 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+
+	"github.com/visola/variables/variables"
 )
 
 // Mapping represents a mapping that can be active or not
 type Mapping struct {
-	Active    bool      `json:"active"`
-	Before    string    `json:"before"`
-	From      string    `json:"from"`
-	Inject    Injection `json:"injection"`
-	MappingID string    `json:"mappingID"`
-	Origin    string    `json:"origin"`
-	Proxy     bool      `json:"proxy"`
-	Regexp    string    `json:"regexp"`
-	Tags      []string  `json:"tags"`
-	To        string    `json:"to"`
+	Active    bool                 `json:"active"`
+	Before    string               `json:"before"`
+	From      string               `json:"from"`
+	Inject    Injection            `json:"injection"`
+	MappingID string               `json:"mappingID"`
+	Origin    string               `json:"origin"`
+	Proxy     bool                 `json:"proxy"`
+	Regexp    string               `json:"regexp"`
+	Tags      []string             `json:"tags"`
+	To        string               `json:"to"`
+	Variables []variables.Variable `json:"variables"`
 }
 
 // Injection represents parameters that can be injected into proxied requests
@@ -32,6 +35,19 @@ type MatchResult struct {
 	Mapping Mapping
 	NewPath string
 	Parts   []string
+}
+
+// GetVariables returns all the variables set in a mapping
+func (mapping *Mapping) GetVariables() []variables.Variable {
+	result := make([]variables.Variable, 0)
+	result = append(result, variables.FindVariables(mapping.From)...)
+	result = append(result, variables.FindVariables(mapping.To)...)
+
+	for _, v := range mapping.Inject.Headers {
+		result = append(result, variables.FindVariables(v)...)
+	}
+
+	return result
 }
 
 // Match tests if the mapping matches the specific request. If it does, it will

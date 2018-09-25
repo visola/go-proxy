@@ -38,27 +38,25 @@ func loadMappingsFromFiles(mappingDir string, file os.FileInfo) ([]Mapping, erro
 		return nil, fmt.Errorf("Error while reading configuration file: %s\n%s", file.Name(), mappingErr)
 	}
 
-	for _, staticMapping := range mappingsFromFile.Static {
-		staticMapping.Active = true
-		staticMapping.Origin = file.Name()
-		staticMapping.Proxy = false
-		staticMapping.MappingID = generateID(staticMapping)
-		staticMapping.Tags = uniqueAndSort(append(staticMapping.Tags, mappingsFromFile.Tags...))
-
-		mappings = append(mappings, staticMapping)
-	}
-
-	for _, proxyMapping := range mappingsFromFile.Proxy {
-		proxyMapping.Active = true
-		proxyMapping.Origin = file.Name()
-		proxyMapping.Proxy = true
-		proxyMapping.MappingID = generateID(proxyMapping)
-		proxyMapping.Tags = uniqueAndSort(append(proxyMapping.Tags, mappingsFromFile.Tags...))
-
-		mappings = append(mappings, proxyMapping)
-	}
+	mappings = append(mappings, mappingFromYamlMapping(mappingsFromFile.Static, file.Name(), false, mappingsFromFile.Tags)...)
+	mappings = append(mappings, mappingFromYamlMapping(mappingsFromFile.Proxy, file.Name(), true, mappingsFromFile.Tags)...)
 
 	return mappings, nil
+}
+
+func mappingFromYamlMapping(fromYaml []Mapping, origin string, isProxy bool, extraTags []string) []Mapping {
+	result := make([]Mapping, len(fromYaml))
+	for i, m := range fromYaml {
+		m.Active = true
+		m.Origin = origin
+		m.Proxy = isProxy
+		m.MappingID = generateID(m)
+		m.Tags = uniqueAndSort(append(m.Tags, extraTags...))
+		m.Variables = m.GetVariables()
+
+		result[i] = m
+	}
+	return result
 }
 
 func readMappingFile(file string) (loadedMapping yamlMapping, err error) {
