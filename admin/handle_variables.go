@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"encoding/json"
 	"net/http"
 
 	myhttp "github.com/Everbridge/go-proxy/http"
@@ -41,7 +42,32 @@ func handleGetVariableValues(w http.ResponseWriter, req *http.Request) {
 	responseWithJSON(vals, w, req)
 }
 
+func handlePutVariableValues(w http.ResponseWriter, req *http.Request) {
+	variable := mux.Vars(req)["variable"]
+
+	decoder := json.NewDecoder(req.Body)
+	var passedInValues []string
+	err := decoder.Decode(&passedInValues)
+
+	if err != nil {
+		myhttp.InternalError(req, w, err)
+		return
+	}
+
+	vals, err := variables.GetPossibleValues()
+	if err != nil {
+		myhttp.InternalError(req, w, err)
+		return
+	}
+
+	vals[variable] = passedInValues
+	variables.SetPossibleValues(vals)
+
+	responseWithJSON(vals, w, req)
+}
+
 func registerVariablesEndpoints(router *mux.Router) {
 	router.HandleFunc("/api/variables", handleGetVariables).Methods(http.MethodGet)
 	router.HandleFunc("/api/variables/values", handleGetVariableValues).Methods(http.MethodGet)
+	router.HandleFunc("/api/variables/{variable}/values", handlePutVariableValues).Methods(http.MethodPut)
 }
