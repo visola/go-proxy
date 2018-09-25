@@ -37,6 +37,7 @@ func StartAdminServer() error {
 
 	adminServer := mux.NewRouter()
 	registerMappingsEndpoints(adminServer)
+	registerVariablesEndpoints(adminServer)
 	adminServer.HandleFunc("/api/requests", handleRequets)
 
 	indexHTML := box.String("index.html")

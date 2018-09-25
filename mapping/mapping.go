@@ -12,17 +12,16 @@ import (
 
 // Mapping represents a mapping that can be active or not
 type Mapping struct {
-	Active    bool                 `json:"active"`
-	Before    string               `json:"before"`
-	From      string               `json:"from"`
-	Inject    Injection            `json:"injection"`
-	MappingID string               `json:"mappingID"`
-	Origin    string               `json:"origin"`
-	Proxy     bool                 `json:"proxy"`
-	Regexp    string               `json:"regexp"`
-	Tags      []string             `json:"tags"`
-	To        string               `json:"to"`
-	Variables []variables.Variable `json:"variables"`
+	Active    bool      `json:"active"`
+	Before    string    `json:"before"`
+	From      string    `json:"from"`
+	Inject    Injection `json:"injection"`
+	MappingID string    `json:"mappingID"`
+	Origin    string    `json:"origin"`
+	Proxy     bool      `json:"proxy"`
+	Regexp    string    `json:"regexp"`
+	Tags      []string  `json:"tags"`
+	To        string    `json:"to"`
 }
 
 // Injection represents parameters that can be injected into proxied requests

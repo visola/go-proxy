@@ -52,7 +52,6 @@ func mappingFromYamlMapping(fromYaml []Mapping, origin string, isProxy bool, ext
 		m.Proxy = isProxy
 		m.MappingID = generateID(m)
 		m.Tags = uniqueAndSort(append(m.Tags, extraTags...))
-		m.Variables = m.GetVariables()
 
 		result[i] = m
 	}
