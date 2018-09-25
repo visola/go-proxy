@@ -32,7 +32,7 @@ func handleGetVariables(w http.ResponseWriter, req *http.Request) {
 	responseWithJSON(vars, w, req)
 }
 
-func handleGetVariableValues(w http.ResponseWriter, req *http.Request) {
+func handleGetPossibleValues(w http.ResponseWriter, req *http.Request) {
 	vals, err := variables.GetPossibleValues()
 	if err != nil {
 		myhttp.InternalError(req, w, err)
@@ -42,7 +42,44 @@ func handleGetVariableValues(w http.ResponseWriter, req *http.Request) {
 	responseWithJSON(vals, w, req)
 }
 
-func handlePutVariableValues(w http.ResponseWriter, req *http.Request) {
+func handleGetSelectedValues(w http.ResponseWriter, req *http.Request) {
+	values, valuesError := variables.GetSelectedValues()
+	if valuesError != nil {
+		myhttp.InternalError(req, w, valuesError)
+		return
+	}
+
+	responseWithJSON(values, w, req)
+}
+
+func handleSelectVariableValue(w http.ResponseWriter, req *http.Request) {
+	variable := mux.Vars(req)["variable"]
+
+	decoder := json.NewDecoder(req.Body)
+	var value string
+	err := decoder.Decode(&value)
+
+	if err != nil {
+		myhttp.InternalError(req, w, err)
+		return
+	}
+
+	setError := variables.SetValue(variable, value)
+	if setError != nil {
+		myhttp.InternalError(req, w, setError)
+		return
+	}
+
+	values, valuesError := variables.GetSelectedValues()
+	if valuesError != nil {
+		myhttp.InternalError(req, w, valuesError)
+		return
+	}
+
+	responseWithJSON(values, w, req)
+}
+
+func handlePutPossibleValues(w http.ResponseWriter, req *http.Request) {
 	variable := mux.Vars(req)["variable"]
 
 	decoder := json.NewDecoder(req.Body)
@@ -67,7 +104,11 @@ func handlePutVariableValues(w http.ResponseWriter, req *http.Request) {
 }
 
 func registerVariablesEndpoints(router *mux.Router) {
+	router.HandleFunc("/api/possible-values", handleGetPossibleValues).Methods(http.MethodGet)
+	router.HandleFunc("/api/possible-values/{variable}", handlePutPossibleValues).Methods(http.MethodPut)
+
+	router.HandleFunc("/api/values", handleGetSelectedValues).Methods(http.MethodGet)
+	router.HandleFunc("/api/values/{variable}", handleSelectVariableValue).Methods(http.MethodPut)
+
 	router.HandleFunc("/api/variables", handleGetVariables).Methods(http.MethodGet)
-	router.HandleFunc("/api/variables/values", handleGetVariableValues).Methods(http.MethodGet)
-	router.HandleFunc("/api/variables/{variable}/values", handlePutVariableValues).Methods(http.MethodPut)
 }
