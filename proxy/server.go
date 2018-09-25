@@ -11,6 +11,7 @@ import (
 	myhttp "github.com/Everbridge/go-proxy/http"
 	"github.com/Everbridge/go-proxy/mapping"
 	"github.com/Everbridge/go-proxy/statistics"
+	"github.com/Everbridge/go-proxy/variables"
 )
 
 // StartProxyServer starts the proxy server
@@ -32,8 +33,9 @@ func StartProxyServer() error {
 }
 
 func requestHandler(w http.ResponseWriter, req *http.Request) {
-	proxiedRequest, mappings, mappingError := initializeHandling(req, w)
+	proxiedRequest := initializeHandling(req)
 
+	mappings, mappingError := loadMappingsWithReplacedVariables()
 	if mappingError != nil {
 		finalizeWithError(req, w, proxiedRequest, mappingError)
 		return
@@ -126,16 +128,42 @@ func handleRequest(req *http.Request, w http.ResponseWriter, match *mapping.Matc
 	return serveStaticFile(req, w, match)
 }
 
-func initializeHandling(req *http.Request, w http.ResponseWriter) (statistics.ProxiedRequest, []mapping.Mapping, error) {
+func initializeHandling(req *http.Request) statistics.ProxiedRequest {
 	reqData, _ := getData(req)
 
-	proxiedRequest := statistics.ProxiedRequest{
+	return statistics.ProxiedRequest{
 		Method:       req.Method,
 		RequestedURL: req.URL.String(),
 		RequestData:  reqData,
 		StartTime:    getTime(),
 	}
+}
 
-	mapping, mappingError := mapping.GetMappings()
-	return proxiedRequest, mapping, mappingError
+func loadMappingsWithReplacedVariables() ([]mapping.Mapping, error) {
+	loadedMappings, mappingError := mapping.GetMappings()
+
+	if mappingError != nil {
+		return nil, mappingError
+	}
+
+	variables, varError := variables.GetSelectedValues()
+	if varError != nil {
+		return nil, varError
+	}
+
+	mappings := make([]mapping.Mapping, len(loadedMappings))
+	for i, m := range loadedMappings {
+		mappings[i] = m.WithReplacedVariables(variables)
+		// Not all variables were replaced
+		vars := mappings[i].GetVariables()
+		if len(vars) > 0 {
+			names := make([]string, len(vars))
+			for i, v := range vars {
+				names[i] = v.Name
+			}
+			return nil, fmt.Errorf("Mapping doesn't have all variables replaced. Missing variables: %s", names)
+		}
+	}
+
+	return mappings, nil
 }

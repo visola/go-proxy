@@ -107,3 +107,29 @@ func (mapping *Mapping) Validate() error {
 
 	return nil
 }
+
+// WithReplacedVariables creates a new mapping with all its variables replaced by the
+// values passed in the context
+func (mapping Mapping) WithReplacedVariables(context map[string]string) Mapping {
+	result := Mapping{
+		Active:    mapping.Active,
+		Before:    mapping.Before,
+		From:      mapping.From,
+		MappingID: mapping.MappingID,
+		Origin:    mapping.Origin,
+		Proxy:     mapping.Proxy,
+		Regexp:    mapping.Regexp,
+		Tags:      mapping.Tags,
+		To:        mapping.To,
+	}
+
+	result.From = variables.ReplaceVariables(result.From, context)
+	result.To = variables.ReplaceVariables(result.To, context)
+
+	inject := Injection{Headers: make(map[string]string)}
+	for k, v := range mapping.Inject.Headers {
+		inject.Headers[k] = variables.ReplaceVariables(v, context)
+	}
+
+	return result
+}
