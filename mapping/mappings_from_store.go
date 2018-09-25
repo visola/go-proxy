@@ -5,10 +5,12 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+
+	"github.com/Everbridge/go-proxy/configuration"
 )
 
 func getStoredState() (map[string]Mapping, error) {
-	mappingDir, mappingDirErr := getMappingDirectory()
+	mappingDir, mappingDirErr := configuration.GetConfigurationDirectory()
 	if mappingDirErr != nil {
 		return nil, mappingDirErr
 	}
@@ -50,7 +52,7 @@ func storeCurrentState() error {
 		return dataErr
 	}
 
-	mappingDir, mappingDirErr := getMappingDirectory()
+	mappingDir, mappingDirErr := configuration.GetConfigurationDirectory()
 	if mappingDirErr != nil {
 		return mappingDirErr
 	}

@@ -3,8 +3,9 @@ package mapping
 import (
 	"fmt"
 	"io/ioutil"
-	"os/user"
 	"path/filepath"
+
+	"github.com/Everbridge/go-proxy/configuration"
 )
 
 const stateFileName = ".current_state"
@@ -53,14 +54,6 @@ func SetAll(newMappings []Mapping) error {
 	return storeCurrentState()
 }
 
-func getMappingDirectory() (string, error) {
-	user, err := user.Current()
-	if err != nil {
-		return "", err
-	}
-	return user.HomeDir + "/.go-proxy", nil
-}
-
 func getCurrentState() ([]Mapping, error) {
 	mappingsFromFiles, mappingsFromFilesErr := loadAllMappings()
 	if mappingsFromFilesErr != nil {
@@ -91,7 +84,7 @@ func getCurrentState() ([]Mapping, error) {
 }
 
 func loadAllMappings() ([]Mapping, error) {
-	mappingDir, mappingDirErr := getMappingDirectory()
+	mappingDir, mappingDirErr := configuration.GetConfigurationDirectory()
 	if mappingDirErr != nil {
 		return nil, mappingDirErr
 	}
