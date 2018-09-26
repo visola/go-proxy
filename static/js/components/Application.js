@@ -1,4 +1,4 @@
-import { Menu } from 'semantic-ui-react';
+import { Icon, Menu } from 'semantic-ui-react';
 import { BrowserRouter as Router, Link, Route } from 'react-router-dom';
 import React from 'react';
 
@@ -25,6 +25,12 @@ export default class Application extends React.Component {
 
   renderMenu() {
     return <Menu>
+      <Menu.Item>
+        <a href="https://localhost:33443" target="_blank">
+          <Icon name="external" />
+          Go To Server
+        </a>
+      </Menu.Item>
       <Menu.Item><Link to="/requests">Requests</Link></Menu.Item>
       <Menu.Item><Link to="/mappings">Mappings</Link></Menu.Item>
     </Menu>;
