@@ -56,6 +56,20 @@ func SetValue(varName string, value string) error {
 	}
 
 	currentState.SelectedValues[varName] = value
+
+	// Add value to possible values if not present
+	present := false
+	for _, pV := range currentState.PossibleValues[varName] {
+		if pV == value {
+			present = true
+			break
+		}
+	}
+
+	if !present {
+		currentState.PossibleValues[varName] = append(currentState.PossibleValues[varName], value)
+	}
+
 	return saveCurrentState(currentState)
 }
 
