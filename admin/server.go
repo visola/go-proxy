@@ -44,6 +44,7 @@ func StartAdminServer() error {
 	returnIndexHandler := createReturnIndexHandler(indexHTML)
 	adminServer.HandleFunc("/mappings", returnIndexHandler)
 	adminServer.HandleFunc("/requests", returnIndexHandler)
+	adminServer.HandleFunc("/variables", returnIndexHandler)
 
 	adminServer.Handle("/{file:.*}", http.FileServer(box))
 
