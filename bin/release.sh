@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo --- Running the build ---
-bin/run.sh
+bin/build.sh
 
 echo --- Tagging commit ---
 git tag "v0.7.0"
