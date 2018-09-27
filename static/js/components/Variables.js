@@ -51,6 +51,20 @@ export default class Variables extends React.Component {
     this.handleResetNewValueModal();
   }
 
+  handleDeleteValue(e, variable, value) {
+    e.preventDefault();
+    e.stopPropagation();
+    const values = (this.props.possibleValues.data[variable] || [])
+      .filter((v) => v !== value);
+    this.props.possibleValues.setPossibleValues(variable, values)
+  }
+
+  handleNewValueKeyPress(e) {
+    if (e.key === 'Enter') {
+      this.handleAddValueSave();
+    }
+  }
+
   handleResetNewValueModal() {
     this.setState({
       newValueVariableName: null,
@@ -104,7 +118,9 @@ export default class Variables extends React.Component {
       <Modal.Content>
         <Input
           onChange={(e) => this.setState({newValueVariableValue: e.target.value})}
+          onKeyPress={(e) => this.handleNewValueKeyPress(e)}
           placeholder="New Value"
+          ref={(input) => {input ? input.focus() : null;} }
           type="text"
           value={this.state.newValueVariableValue}
         />
@@ -126,6 +142,7 @@ export default class Variables extends React.Component {
       } else {
         return <Label className="clickable" key={value} onClick={(e) => this.handleSelectionChange(variable, value)}>
           {value}
+          <Icon color="red" name="delete" onClick={(e) => this.handleDeleteValue(e, variable, value)} />
         </Label>
       }
     });

@@ -17,4 +17,11 @@ export default class PossibleValues {
     this.data = data;
     this.loading = false;
   }
+
+  @action
+  setPossibleValues(variable, possibleValues) {
+    this.loading = true;
+    return axios.put(`/api/possible-values/${variable}`, possibleValues)
+      .then(({data}) => this.setData(data));
+  }
 }
