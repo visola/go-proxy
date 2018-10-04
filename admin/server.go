@@ -36,6 +36,7 @@ func StartAdminServer() error {
 	fmt.Printf("Opening admin server at: http://localhost:%d\n", adminServerPort)
 
 	adminServer := mux.NewRouter()
+	registerConfigurationEndpoints(adminServer)
 	registerMappingsEndpoints(adminServer)
 	registerVariablesEndpoints(adminServer)
 	adminServer.HandleFunc("/api/requests", handleRequets)
