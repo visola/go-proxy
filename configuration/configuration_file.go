@@ -32,3 +32,18 @@ func LoadConfiguration() (*Configuration, error) {
 	unmarshalErr := yaml.Unmarshal(configContent, result)
 	return result, unmarshalErr
 }
+
+// SaveConfiguration saves a configuration to the file
+func SaveConfiguration(toSave Configuration) error {
+	data, marshalErr := yaml.Marshal(toSave)
+	if marshalErr != nil {
+		return marshalErr
+	}
+
+	configDir, dirErr := GetConfigurationDirectory()
+	if dirErr != nil {
+		return dirErr
+	}
+
+	return ioutil.WriteFile(path.Join(configDir, configFileName), data, 0644)
+}
