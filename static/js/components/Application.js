@@ -2,6 +2,7 @@ import { Icon, Menu } from 'semantic-ui-react';
 import { BrowserRouter as Router, Link, Route } from 'react-router-dom';
 import React from 'react';
 
+import Configurations from './Configurations';
 import Mappings from './Mappings';
 import Requests from './Requests';
 import Variables from './Variables';
@@ -22,6 +23,7 @@ export default class Application extends React.Component {
       <Route exact path="/mappings" component={Mappings}/>
       <Route exact path="/requests" component={Requests}/>
       <Route exact path="/variables" component={Variables}/>
+      <Route exact path="/configurations" component={Configurations}/>
     </React.Fragment>;
   }
 
@@ -36,6 +38,7 @@ export default class Application extends React.Component {
       <Menu.Item><Link to="/requests">Requests</Link></Menu.Item>
       <Menu.Item><Link to="/mappings">Mappings</Link></Menu.Item>
       <Menu.Item><Link to="/variables">Variables</Link></Menu.Item>
+      <Menu.Item><Link to="/configurations">Configurations</Link></Menu.Item>
     </Menu>;
   }
 

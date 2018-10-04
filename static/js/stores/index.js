@@ -1,8 +1,12 @@
+import Configurations from './Configurations';
 import Mappings from './Mappings';
 import PossibleValues from './PossibleValues';
 import ProxiedRequests from './ProxiedRequests';
 import SelectedValues from './SelectedValues';
 import Variables from './Variables';
+
+const configurations = new Configurations();
+configurations.fetch();
 
 const mappings = new Mappings();
 mappings.fetch();
@@ -19,6 +23,7 @@ const variables = new Variables();
 variables.fetch();
 
 export default {
+  configurations,
   mappings,
   possibleValues,
   proxiedRequests,
