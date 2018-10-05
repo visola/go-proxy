@@ -138,16 +138,16 @@ export default class Variables extends React.Component {
     
     const result = values.map(value => {
       if (value === selectedValue) {
-        return <Label key={value} color='olive'>{value}</Label>
+        return <Label key={value} color="olive" size="large">{value}</Label>
       } else {
-        return <Label className="clickable" key={value} onClick={(e) => this.handleSelectionChange(variable, value)}>
+        return <Label className="clickable" key={value} onClick={(e) => this.handleSelectionChange(variable, value)} size="large">
           {value}
           <Icon color="red" name="delete" onClick={(e) => this.handleDeleteValue(e, variable, value)} />
         </Label>
       }
     });
 
-    result.push(<Icon key="add" name="add circle" onClick={() => this.handleAddValue(variable)} />);
+    result.push(<Icon className="clickable" key="add" name="add circle" onClick={() => this.handleAddValue(variable)} size="large" />);
     return result;
   }
 
