@@ -13,6 +13,13 @@ export default class Configurations {
   }
 
   @action
+  save(configurations) {
+    this.loading = true;
+    return axios.put('/api/configurations', configurations)
+      .then(({data}) => this.setData(data));
+  }
+
+  @action
   setData(data) {
     this.data = data;
     this.loading = false;
