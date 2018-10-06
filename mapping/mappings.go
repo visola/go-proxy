@@ -3,7 +3,9 @@ package mapping
 import (
 	"fmt"
 	"io/ioutil"
+	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/Everbridge/go-proxy/configuration"
 )
@@ -54,6 +56,64 @@ func SetAll(newMappings []Mapping) error {
 	return storeCurrentState()
 }
 
+func findAllMappingsFiles() ([]string, error) {
+	result := make([]string, 0)
+	filesFromBaseDirs, err := findFilesFromBaseDirectories()
+	if err != nil {
+		return nil, err
+	}
+
+	result = append(result, filesFromBaseDirs...)
+
+	filesFromConfigDir, err := findFilesFromConfigurationDirector()
+	if err != nil {
+		return nil, err
+	}
+
+	result = append(result, filesFromConfigDir...)
+	return result, nil
+}
+
+func findFilesFromBaseDirectories() ([]string, error) {
+	result := make([]string, 0)
+
+	config, loadConfigErr := configuration.LoadConfiguration()
+	if loadConfigErr != nil {
+		return nil, loadConfigErr
+	}
+
+	walkDirectories(config.BaseDirectories, func(pathToFile string, isDir bool) {
+		if !isDir && isGoProxyMappingFile(pathToFile) {
+			result = append(result, pathToFile)
+		}
+	})
+
+	return result, nil
+}
+
+func findFilesFromConfigurationDirector() ([]string, error) {
+	result := make([]string, 0)
+
+	mappingDir, mappingDirErr := configuration.GetConfigurationDirectory()
+	if mappingDirErr != nil {
+		return nil, mappingDirErr
+	}
+
+	files, filesErr := ioutil.ReadDir(mappingDir)
+	if filesErr != nil {
+		return nil, filesErr
+	}
+
+	for _, file := range files {
+		pathToFile := path.Join(mappingDir, file.Name())
+		if isMappingFile(pathToFile) {
+			result = append(result, pathToFile)
+		}
+	}
+
+	return result, nil
+}
+
 func getCurrentState() ([]Mapping, error) {
 	mappingsFromFiles, mappingsFromFilesErr := loadAllMappings()
 	if mappingsFromFilesErr != nil {
@@ -83,24 +143,23 @@ func getCurrentState() ([]Mapping, error) {
 	return sortMappings(result), nil
 }
 
-func loadAllMappings() ([]Mapping, error) {
-	mappingDir, mappingDirErr := configuration.GetConfigurationDirectory()
-	if mappingDirErr != nil {
-		return nil, mappingDirErr
-	}
+func isGoProxyMappingFile(pathToFile string) bool {
+	return isMappingFile(pathToFile) && (strings.HasSuffix(pathToFile, "go-proxy.yaml") || strings.HasSuffix(pathToFile, "go-proxy.yml"))
+}
 
-	files, filesErr := ioutil.ReadDir(mappingDir)
-	if filesErr != nil {
-		return nil, filesErr
+func isMappingFile(pathToFile string) bool {
+	return filepath.Ext(pathToFile) == ".yml" || filepath.Ext(pathToFile) == ".yaml"
+}
+
+func loadAllMappings() ([]Mapping, error) {
+	mappingFiles, findErr := findAllMappingsFiles()
+	if findErr != nil {
+		return nil, findErr
 	}
 
 	mappings := make([]Mapping, 0)
-	for _, file := range files {
-		if filepath.Ext(file.Name()) != ".yml" && filepath.Ext(file.Name()) != ".yaml" {
-			continue
-		}
-
-		loadedMappings, loadingErr := loadMappingsFromFiles(mappingDir, file)
+	for _, pathToFile := range mappingFiles {
+		loadedMappings, loadingErr := loadMappingsFromFiles(pathToFile)
 		if loadingErr != nil {
 			return nil, loadingErr
 		}

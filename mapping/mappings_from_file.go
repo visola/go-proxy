@@ -5,8 +5,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
-	"os"
-	"path"
 	"sort"
 	"strings"
 
@@ -30,16 +28,16 @@ func generateID(mapping Mapping) string {
 	return base64.URLEncoding.EncodeToString(hasher.Sum(nil))
 }
 
-func loadMappingsFromFiles(mappingDir string, file os.FileInfo) ([]Mapping, error) {
+func loadMappingsFromFiles(pathToFile string) ([]Mapping, error) {
 	mappings := make([]Mapping, 0)
 
-	mappingsFromFile, mappingErr := readMappingFile(path.Join(mappingDir, file.Name()))
+	mappingsFromFile, mappingErr := readMappingFile(pathToFile)
 	if mappingErr != nil {
-		return nil, fmt.Errorf("Error while reading configuration file: %s\n%s", file.Name(), mappingErr)
+		return nil, fmt.Errorf("Error while reading configuration file: %s\n%s", pathToFile, mappingErr)
 	}
 
-	mappings = append(mappings, mappingFromYamlMapping(mappingsFromFile.Static, file.Name(), false, mappingsFromFile.Tags)...)
-	mappings = append(mappings, mappingFromYamlMapping(mappingsFromFile.Proxy, file.Name(), true, mappingsFromFile.Tags)...)
+	mappings = append(mappings, mappingFromYamlMapping(mappingsFromFile.Static, pathToFile, false, mappingsFromFile.Tags)...)
+	mappings = append(mappings, mappingFromYamlMapping(mappingsFromFile.Proxy, pathToFile, true, mappingsFromFile.Tags)...)
 
 	return mappings, nil
 }

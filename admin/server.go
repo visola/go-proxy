@@ -36,15 +36,12 @@ func StartAdminServer() error {
 	fmt.Printf("Opening admin server at: http://localhost:%d\n", adminServerPort)
 
 	adminServer := mux.NewRouter()
+	registerConfigurationEndpoints(adminServer)
 	registerMappingsEndpoints(adminServer)
 	registerVariablesEndpoints(adminServer)
 	adminServer.HandleFunc("/api/requests", handleRequets)
 
-	indexHTML := box.String("index.html")
-	returnIndexHandler := createReturnIndexHandler(indexHTML)
-	adminServer.HandleFunc("/mappings", returnIndexHandler)
-	adminServer.HandleFunc("/requests", returnIndexHandler)
-	adminServer.HandleFunc("/variables", returnIndexHandler)
+	registerReturnToIndexEndpoints(adminServer, box, "/configurations", "/mappings", "/requests", "/variables")
 
 	adminServer.Handle("/{file:.*}", http.FileServer(box))
 
@@ -54,5 +51,14 @@ func StartAdminServer() error {
 func createReturnIndexHandler(indexHTML string) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		w.Write([]byte(indexHTML))
+	}
+}
+
+func registerReturnToIndexEndpoints(router *mux.Router, box packr.Box, paths ...string) {
+	indexHTML := box.String("index.html")
+	returnIndexHandler := createReturnIndexHandler(indexHTML)
+
+	for _, path := range paths {
+		router.HandleFunc(path, returnIndexHandler)
 	}
 }
