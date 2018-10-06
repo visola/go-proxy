@@ -6,8 +6,6 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
-	"sync"
-	"time"
 
 	"github.com/Everbridge/go-proxy/configuration"
 )
@@ -84,20 +82,11 @@ func findFilesFromBaseDirectories() ([]string, error) {
 		return nil, loadConfigErr
 	}
 
-	start := time.Now()
-	var wg sync.WaitGroup
-	count := 0
-	for _, baseDir := range config.BaseDirectories {
-		wg.Add(1)
-		go walkDir(baseDir, &wg, func(pathToFile string, isDir bool) {
-			count++
-			if !isDir && isMappingFile(pathToFile) && (strings.HasSuffix(pathToFile, "go-proxy.yaml") || strings.HasSuffix(pathToFile, "go-proxy.yml")) {
-				result = append(result, pathToFile)
-			}
-		})
-	}
-	wg.Wait()
-	fmt.Printf("%fs to check %d files\n", time.Now().Sub(start).Seconds(), count)
+	walkDirectories(config.BaseDirectories, func(pathToFile string, isDir bool) {
+		if !isDir && isGoProxyMappingFile(pathToFile) {
+			result = append(result, pathToFile)
+		}
+	})
 
 	return result, nil
 }
@@ -152,6 +141,10 @@ func getCurrentState() ([]Mapping, error) {
 	}
 
 	return sortMappings(result), nil
+}
+
+func isGoProxyMappingFile(pathToFile string) bool {
+	return isMappingFile(pathToFile) && (strings.HasSuffix(pathToFile, "go-proxy.yaml") || strings.HasSuffix(pathToFile, "go-proxy.yml"))
 }
 
 func isMappingFile(pathToFile string) bool {

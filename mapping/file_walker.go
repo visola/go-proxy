@@ -4,33 +4,51 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path"
-	"strings"
 	"sync"
 )
 
-var callbackLock sync.Mutex
+func walkDirectories(directories []string, callback func(string, bool)) {
+	var wg sync.WaitGroup
+	var callbackLock sync.Mutex
 
-func walkDir(pathToDir string, wg *sync.WaitGroup, callback func(string, bool)) {
+	wg.Add(len(directories))
+	directoriesToVisit := make(chan string, 1000000)
+	for _, dir := range directories {
+		directoriesToVisit <- dir
+	}
+
+	for i := 0; i < 5; i++ {
+		go readDirectories(directoriesToVisit, &wg, &callbackLock, callback)
+	}
+
+	wg.Wait()
+}
+
+func readDirectories(directoriesToVisit chan string, wg *sync.WaitGroup, callbackLock *sync.Mutex, callback func(string, bool)) {
+	for dirToRead := range directoriesToVisit {
+		readDirectory(dirToRead, directoriesToVisit, wg, callbackLock, callback)
+	}
+}
+
+func readDirectory(dirToRead string, directoriesToVisit chan string, wg *sync.WaitGroup, callbackLock *sync.Mutex, callback func(string, bool)) {
 	defer wg.Done()
 
-	if strings.HasSuffix(pathToDir, "/.git") {
-		return
-	}
-
-	files, readDirErr := ioutil.ReadDir(pathToDir)
+	files, readDirErr := ioutil.ReadDir(dirToRead)
 	if readDirErr != nil {
-		fmt.Printf("Error while reading directory: %s\n%s\n", pathToDir, readDirErr.Error())
+		fmt.Printf("Error while reading directory: %s\n%s\n", dirToRead, readDirErr.Error())
 		return
 	}
 
-	for _, fileInfo := range files {
-		pathToFile := path.Join(pathToDir, fileInfo.Name())
-		if fileInfo.IsDir() {
+	for _, file := range files {
+		pathToFile := path.Join(dirToRead, file.Name())
+
+		if file.IsDir() {
 			wg.Add(1)
-			go walkDir(pathToFile, wg, callback)
+			directoriesToVisit <- pathToFile
 		}
+
 		callbackLock.Lock()
-		callback(pathToFile, fileInfo.IsDir())
+		callback(pathToFile, file.IsDir())
 		callbackLock.Unlock()
 	}
 }
