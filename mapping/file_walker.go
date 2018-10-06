@@ -22,6 +22,7 @@ func walkDirectories(directories []string, callback func(string, bool)) {
 	}
 
 	wg.Wait()
+	close(directoriesToVisit)
 }
 
 func readDirectories(directoriesToVisit chan string, wg *sync.WaitGroup, callbackLock *sync.Mutex, callback func(string, bool)) {
