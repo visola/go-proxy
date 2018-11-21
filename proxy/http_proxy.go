@@ -3,6 +3,7 @@ package proxy
 import (
 	"bytes"
 	"compress/gzip"
+	"crypto/tls"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -68,6 +69,9 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, match *mapping.Match
 		// Do not auto-follow redirects
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
+		},
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		},
 	}
 
