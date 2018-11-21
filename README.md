@@ -1,6 +1,8 @@
 ## go-proxy
 
-[![GitHub release](https://img.shields.io/github/release/Everbridge/go-proxy.svg)](https://github.com/Everbridge/go-proxy/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/Everbridge/go-proxy)](https://goreportcard.com/report/github.com/Everbridge/go-proxy)
+[![Go Doc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](http://godoc.org/github.com/Everbridge/go-proxy)
+[![Release](https://img.shields.io/github/release/Everbridge/go-proxy.svg?style=flat-square)](https://github.com/Everbridge/go-proxy/releases/latest)
 
 A proxy to aid developers to run and debug multiple services or frontends locally.
 
