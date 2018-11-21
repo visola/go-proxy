@@ -14,7 +14,10 @@ import (
 
 func serveStaticFile(req *http.Request, w http.ResponseWriter, match *mapping.MatchResult) (*proxyResponse, error) {
 	mapping := match.Mapping
-	newPath := path.Join(mapping.To, match.NewPath[len(mapping.From):])
+	newPath := match.NewPath
+	if mapping.From != "" {
+		newPath = path.Join(mapping.To, match.NewPath[len(mapping.From):])
+	}
 
 	file, err := os.Open(newPath)
 
