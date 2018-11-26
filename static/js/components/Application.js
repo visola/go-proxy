@@ -1,4 +1,5 @@
 import { Icon, Menu } from 'semantic-ui-react';
+import { inject, observer } from 'mobx-react';
 import { BrowserRouter as Router, Link, Route } from 'react-router-dom';
 import React from 'react';
 
@@ -7,8 +8,14 @@ import Mappings from './Mappings';
 import Requests from './Requests';
 import Variables from './Variables';
 
+@inject('environment')
+@observer
 export default class Application extends React.Component {
   render() {
+    if (this.props.environment.loading) {
+      return <p>Loading...</p>;
+    }
+
     return <Router>
       <React.Fragment>
         {this.renderMenu()}
@@ -28,9 +35,11 @@ export default class Application extends React.Component {
   }
 
   renderMenu() {
+    const proxyPort = this.props.environment.data.ProxyPort;
+    console.log(proxyPort);
     return <Menu>
       <Menu.Item>
-        <a href="https://localhost:33443" target="_blank">
+        <a href={`https://localhost:${proxyPort}`} target="_blank">
           <Icon name="external" />
           Go To Server
         </a>

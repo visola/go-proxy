@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/Everbridge/go-proxy/configuration"
 	myhttp "github.com/Everbridge/go-proxy/http"
 	"github.com/Everbridge/go-proxy/mapping"
 	"github.com/Everbridge/go-proxy/statistics"
@@ -16,20 +17,21 @@ import (
 
 // StartProxyServer starts the proxy server
 func StartProxyServer() error {
-	certFile := os.Getenv("GO_PROXY_CERT_FILE")
-	keyFile := os.Getenv("GO_PROXY_CERT_KEY_FILE")
+	certFile := configuration.GetEnvironment().CertificateFile
+	keyFile := configuration.GetEnvironment().KeyFile
+	proxyPort := configuration.GetEnvironment().ProxyPort
 
 	proxyServer := http.NewServeMux()
 	proxyServer.HandleFunc("/", requestHandler)
 
 	if certFile == "" || keyFile == "" {
 		fmt.Printf("Starting proxy at: %s\n", GetURL())
-		return http.ListenAndServe(fmt.Sprintf(":%d", port), proxyServer)
+		return http.ListenAndServe(fmt.Sprintf(":%d", proxyPort), proxyServer)
 	}
 
 	isSSL = true
 	fmt.Printf("Starting proxy at: %s\n", GetURL())
-	return http.ListenAndServeTLS(fmt.Sprintf(":%d", port), certFile, keyFile, proxyServer)
+	return http.ListenAndServeTLS(fmt.Sprintf(":%d", proxyPort), certFile, keyFile, proxyServer)
 }
 
 func requestHandler(w http.ResponseWriter, req *http.Request) {

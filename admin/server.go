@@ -5,13 +5,11 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/Everbridge/go-proxy/configuration"
+
 	"github.com/gobuffalo/packr"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
-)
-
-const (
-	adminServerPort = 1234
 )
 
 var upgrader = websocket.Upgrader{
@@ -33,6 +31,7 @@ func StartAdminServer() error {
 		return errors.New("No files loaded from box")
 	}
 
+	adminServerPort := configuration.GetEnvironment().AdminPort
 	fmt.Printf("Opening admin server at: http://localhost:%d\n", adminServerPort)
 
 	adminServer := mux.NewRouter()

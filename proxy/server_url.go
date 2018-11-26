@@ -1,8 +1,11 @@
 package proxy
 
-import "fmt"
+import (
+	"fmt"
 
-var port = 33443
+	"github.com/Everbridge/go-proxy/configuration"
+)
+
 var isSSL = false
 
 // GetURL returns the full URL to access the proxy server
@@ -12,5 +15,5 @@ func GetURL() string {
 		protocol = "https"
 	}
 
-	return fmt.Sprintf("%s://%s:%d", protocol, "localhost", port)
+	return fmt.Sprintf("%s://%s:%d", protocol, "localhost", configuration.GetEnvironment().ProxyPort)
 }
