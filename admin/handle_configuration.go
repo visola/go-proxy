@@ -19,6 +19,10 @@ func handleGetConfigurations(w http.ResponseWriter, req *http.Request) {
 	responseWithJSON(configs, w, req)
 }
 
+func handleGetEnvironment(w http.ResponseWriter, req *http.Request) {
+	responseWithJSON(configuration.GetEnvironment(), w, req)
+}
+
 func handleSaveConfigurations(w http.ResponseWriter, req *http.Request) {
 	decoder := json.NewDecoder(req.Body)
 	var passedInConfiguration configuration.Configuration
@@ -41,4 +45,5 @@ func handleSaveConfigurations(w http.ResponseWriter, req *http.Request) {
 func registerConfigurationEndpoints(router *mux.Router) {
 	router.HandleFunc("/api/configurations", handleGetConfigurations).Methods(http.MethodGet)
 	router.HandleFunc("/api/configurations", handleSaveConfigurations).Methods(http.MethodPut)
+	router.HandleFunc("/api/environment", handleGetEnvironment).Methods(http.MethodGet)
 }

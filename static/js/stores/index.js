@@ -1,4 +1,5 @@
 import Configurations from './Configurations';
+import Environment from './Environment';
 import Mappings from './Mappings';
 import PossibleValues from './PossibleValues';
 import ProxiedRequests from './ProxiedRequests';
@@ -7,6 +8,9 @@ import Variables from './Variables';
 
 const configurations = new Configurations();
 configurations.fetch();
+
+const environment = new Environment();
+environment.fetch();
 
 const mappings = new Mappings();
 mappings.fetch();
@@ -24,6 +28,7 @@ variables.fetch();
 
 export default {
   configurations,
+  environment,
   mappings,
   possibleValues,
   proxiedRequests,
