@@ -37,12 +37,12 @@ func initializeEnvironment() {
 		envOptions = append(envOptions, configuration.WithKeyFile(keyFile))
 	}
 
-	adminUIPort := os.Getenv("GO_PROXY_ADMIN_UI_PORT")
-	if adminUIPort != "" {
-		if port, err := strconv.Atoi(adminUIPort); err == nil {
-			envOptions = append(envOptions, configuration.WithAdminUIPort(port))
+	adminPort := os.Getenv("GO_PROXY_ADMIN_PORT")
+	if adminPort != "" {
+		if port, err := strconv.Atoi(adminPort); err == nil {
+			envOptions = append(envOptions, configuration.WithAdminPort(port))
 		} else {
-			log.Fatal("Invalid admin UI port, not a number: " + adminUIPort)
+			log.Fatal("Invalid admin port, not a number: " + adminPort)
 		}
 	}
 
@@ -51,7 +51,7 @@ func initializeEnvironment() {
 		if port, err := strconv.Atoi(proxyPort); err == nil {
 			envOptions = append(envOptions, configuration.WithProxyPort(port))
 		} else {
-			log.Fatal("Invalid proxy port, not a number: " + adminUIPort)
+			log.Fatal("Invalid proxy port, not a number: " + proxyPort)
 		}
 	}
 

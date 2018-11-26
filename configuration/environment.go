@@ -6,7 +6,7 @@ import (
 
 // Environment stores information about the runtime
 type Environment struct {
-	AdminUIPort     int
+	AdminPort       int
 	CertificateFile string
 	KeyFile         string
 	ProxyPort       int
@@ -30,8 +30,8 @@ func InitializeEnvironment(options ...EnvironmentOption) {
 	}
 
 	environment = &Environment{
-		AdminUIPort: 1234,
-		ProxyPort:   33443,
+		AdminPort: 1234,
+		ProxyPort: 33443,
 	}
 
 	fmt.Println("Initializing environment...")
@@ -40,11 +40,11 @@ func InitializeEnvironment(options ...EnvironmentOption) {
 	}
 }
 
-// WithAdminUIPort configuration option to setup an Admin server and UI port
-func WithAdminUIPort(port int) EnvironmentOption {
+// WithAdminPort configuration option to setup an Admin server and UI port
+func WithAdminPort(port int) EnvironmentOption {
 	return func(env *Environment) {
 		fmt.Printf("Setting admin port to %d\n", port)
-		env.AdminUIPort = port
+		env.AdminPort = port
 	}
 }
 
