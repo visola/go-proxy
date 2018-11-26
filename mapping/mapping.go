@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"path"
 	"regexp"
 	"strings"
 
@@ -50,35 +51,14 @@ func (mapping *Mapping) GetVariables() []variables.Variable {
 }
 
 // Match tests if the mapping matches the specific request. If it does, it will
-// return a match result, otherwise it will return nil.
+// return a match result with the new path where to go. Otherwise it will return nil.
 func (mapping *Mapping) Match(req *http.Request) *MatchResult {
-	if mapping.From != "" && strings.HasPrefix(req.URL.Path, mapping.From) {
-		return &MatchResult{
-			Mapping: *mapping,
-			NewPath: req.URL.Path,
-			Parts:   []string{req.URL.Path},
-		}
+	if mapping.From != "" {
+		return mapping.matchWithFrom(req)
 	}
 
 	if mapping.Regexp != "" {
-		r, err := regexp.Compile(mapping.Regexp)
-		if err != nil {
-			// Assume validation errors will be exposed some other way
-			return nil
-		}
-
-		matched := r.FindStringSubmatch(req.URL.Path)
-		if len(matched) > 0 {
-			newPath := mapping.To
-			for index, part := range matched[1:] {
-				newPath = strings.Replace(newPath, fmt.Sprintf("$%d", index+1), part, -1)
-			}
-			return &MatchResult{
-				Mapping: *mapping,
-				NewPath: newPath,
-				Parts:   matched,
-			}
-		}
+		return mapping.matchWithRegexp(req)
 	}
 
 	return nil
@@ -132,4 +112,64 @@ func (mapping Mapping) WithReplacedVariables(context map[string]string) Mapping 
 	}
 
 	return result
+}
+
+func (mapping *Mapping) matchForProxyWithFrom(req *http.Request) *MatchResult {
+	newPath := req.URL.Path[len(mapping.From):]
+
+	if strings.HasPrefix(newPath, "/") {
+		newPath = mapping.To + newPath
+	} else {
+		newPath = mapping.To + "/" + newPath
+	}
+
+	return &MatchResult{
+		Mapping: *mapping,
+		NewPath: newPath,
+		Parts:   []string{req.URL.Path},
+	}
+}
+
+func (mapping *Mapping) matchForStaticWithFrom(req *http.Request) *MatchResult {
+	return &MatchResult{
+		Mapping: *mapping,
+		NewPath: path.Join(mapping.To, req.URL.Path[len(mapping.From):]),
+		Parts:   []string{req.URL.Path},
+	}
+}
+
+func (mapping *Mapping) matchWithFrom(req *http.Request) *MatchResult {
+	if !strings.HasPrefix(req.URL.Path, mapping.From) {
+		return nil
+	}
+
+	if mapping.Proxy {
+		return mapping.matchForProxyWithFrom(req)
+	}
+
+	return mapping.matchForStaticWithFrom(req)
+}
+
+func (mapping *Mapping) matchWithRegexp(req *http.Request) *MatchResult {
+	r, err := regexp.Compile(mapping.Regexp)
+	if err != nil {
+		// Assume validation errors will be exposed some other way
+		return nil
+	}
+
+	matched := r.FindStringSubmatch(req.URL.Path)
+	if len(matched) > 0 {
+		newPath := mapping.To
+		for index, part := range matched[1:] {
+			newPath = strings.Replace(newPath, fmt.Sprintf("$%d", index+1), part, -1)
+		}
+
+		return &MatchResult{
+			Mapping: *mapping,
+			NewPath: newPath,
+			Parts:   matched,
+		}
+	}
+
+	return nil
 }
