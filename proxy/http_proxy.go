@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"regexp"
 	"strings"
 
 	myhttp "github.com/Everbridge/go-proxy/http"
@@ -18,19 +17,11 @@ import (
 
 func proxyRequest(req *http.Request, w http.ResponseWriter, match *mapping.MatchResult) (*proxyResponse, error) {
 	mapping := match.Mapping
-	newPath := mapping.To + "/" + match.NewPath[len(mapping.From):]
-	if strings.HasPrefix(match.NewPath, "http") {
-		newPath = match.NewPath
-	}
 
-	// Remove extra dangling /, ignore errors here since this regexp was tested before
-	findExtraDanglingSlash, _ := regexp.Compile("/{2,}$")
-	newPath = findExtraDanglingSlash.ReplaceAllLiteralString(newPath, "/")
-
-	newURL, parseErr := url.Parse(fmt.Sprintf("%s?%s", newPath, req.URL.RawQuery))
+	newURL, parseErr := url.Parse(fmt.Sprintf("%s?%s", match.NewPath, req.URL.RawQuery))
 	if parseErr != nil {
 		return &proxyResponse{
-			executedURL:  newPath,
+			executedURL:  match.NewPath,
 			responseCode: http.StatusInternalServerError,
 		}, parseErr
 	}
@@ -40,7 +31,7 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, match *mapping.Match
 
 	if readBodyErr != nil {
 		return &proxyResponse{
-			executedURL:  newPath,
+			executedURL:  match.NewPath,
 			responseCode: http.StatusInternalServerError,
 		}, readBodyErr
 	}
@@ -48,7 +39,7 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, match *mapping.Match
 	newReq, newReqErr := http.NewRequest(req.Method, newURL.String(), bytes.NewBuffer(bodyInBytes))
 	if newReqErr != nil {
 		return &proxyResponse{
-			executedURL:  newPath,
+			executedURL:  match.NewPath,
 			responseCode: http.StatusInternalServerError,
 		}, newReqErr
 	}
@@ -79,7 +70,7 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, match *mapping.Match
 
 	if respErr != nil {
 		return &proxyResponse{
-			executedURL:  newPath,
+			executedURL:  match.NewPath,
 			responseCode: http.StatusInternalServerError,
 		}, respErr
 	}
@@ -110,7 +101,7 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, match *mapping.Match
 
 		if readError != nil && readError != io.EOF {
 			return &proxyResponse{
-				executedURL:  newPath,
+				executedURL:  match.NewPath,
 				responseCode: http.StatusInternalServerError,
 			}, readError
 		}
@@ -136,7 +127,7 @@ func proxyRequest(req *http.Request, w http.ResponseWriter, match *mapping.Match
 
 	return &proxyResponse{
 		body:         bodyString,
-		executedURL:  newPath,
+		executedURL:  match.NewPath,
 		headers:      resp.Header,
 		responseCode: resp.StatusCode,
 	}, nil

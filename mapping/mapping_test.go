@@ -10,7 +10,8 @@ import (
 
 func TestMatch(t *testing.T) {
 	t.Run("Returns nil if does't match", testNoMatch)
-	t.Run("Matches Path", testMatchPath)
+	t.Run("Matches Path to proxy", testMatchProxyPath)
+	t.Run("Matches Path to static", testMatchStaticPath)
 	t.Run("Matches Regexp", testMatchRegexp)
 
 	t.Run("Test header injection mapping", testHeaderInjection)
@@ -19,12 +20,13 @@ func TestMatch(t *testing.T) {
 	t.Run("Fail if missing information", testMissingInfoMappings)
 }
 
-func testMatchPath(t *testing.T) {
+func testMatchProxyPath(t *testing.T) {
 	req, _ := http.NewRequest(http.MethodGet, "https://localhost:12312/some/path", nil)
 
 	mapping := Mapping{
-		From: "/some",
-		To:   "/another",
+		From:  "/some",
+		To:    "http://nowhere.com/another",
+		Proxy: true,
 	}
 
 	matchResult := mapping.Match(req)
@@ -32,7 +34,26 @@ func testMatchPath(t *testing.T) {
 	if matchResult == nil {
 		log.Fatal("Should've matched path")
 	}
-	assert.Equal(t, "/some/path", matchResult.NewPath, "Should return matched path in new path")
+	assert.Equal(t, "http://nowhere.com/another/path", matchResult.NewPath, "Should return new path")
+	assert.Equal(t, mapping, matchResult.Mapping, "Should set self as the mapping in result")
+	assert.Equal(t, []string{"/some/path"}, matchResult.Parts, "Should set path as part")
+}
+
+func testMatchStaticPath(t *testing.T) {
+	req, _ := http.NewRequest(http.MethodGet, "https://localhost:12312/some/path", nil)
+
+	mapping := Mapping{
+		From:  "/some",
+		To:    "/home/user/another",
+		Proxy: false,
+	}
+
+	matchResult := mapping.Match(req)
+	assert.NotNil(t, matchResult, "Should match path")
+	if matchResult == nil {
+		log.Fatal("Should've matched path")
+	}
+	assert.Equal(t, "/home/user/another/path", matchResult.NewPath, "Should return new path")
 	assert.Equal(t, mapping, matchResult.Mapping, "Should set self as the mapping in result")
 	assert.Equal(t, []string{"/some/path"}, matchResult.Parts, "Should set path as part")
 }
@@ -42,7 +63,8 @@ func testMatchRegexp(t *testing.T) {
 
 	mapping := Mapping{
 		Regexp: "/some/([A-Za-z]+)/([A-Za-z]+)",
-		To:     "/another/$2/$1",
+		To:     "http://nowhere.com/another/$2/$1",
+		Proxy:  true,
 	}
 
 	matchResult := mapping.Match(req)
@@ -50,7 +72,7 @@ func testMatchRegexp(t *testing.T) {
 	if matchResult == nil {
 		log.Fatal("Should've matched path")
 	}
-	assert.Equal(t, "/another/path/here", matchResult.NewPath, "Should replace matched part in new path")
+	assert.Equal(t, "http://nowhere.com/another/path/here", matchResult.NewPath, "Should replace matched part in new path")
 	assert.Equal(t, mapping, matchResult.Mapping, "Should set self as the mapping in result")
 	assert.Equal(t, []string{"/some/here/path", "here", "path"}, matchResult.Parts, "Should set path as part")
 }

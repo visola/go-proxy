@@ -5,7 +5,6 @@ import (
 	"mime"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
 
 	myhttp "github.com/Everbridge/go-proxy/http"
@@ -13,24 +12,18 @@ import (
 )
 
 func serveStaticFile(req *http.Request, w http.ResponseWriter, match *mapping.MatchResult) (*proxyResponse, error) {
-	mapping := match.Mapping
-	newPath := match.NewPath
-	if mapping.From != "" {
-		newPath = path.Join(mapping.To, match.NewPath[len(mapping.From):])
-	}
-
-	file, err := os.Open(newPath)
+	file, err := os.Open(match.NewPath)
 
 	if err == os.ErrNotExist {
 		return &proxyResponse{
-			executedURL:  newPath,
+			executedURL:  match.NewPath,
 			responseCode: http.StatusNotFound,
 		}, nil
 	}
 
 	if err != nil {
 		return &proxyResponse{
-			executedURL:  newPath,
+			executedURL:  match.NewPath,
 			responseCode: http.StatusInternalServerError,
 		}, err
 	}
@@ -48,7 +41,7 @@ func serveStaticFile(req *http.Request, w http.ResponseWriter, match *mapping.Ma
 
 		if readError != nil && readError != io.EOF {
 			return &proxyResponse{
-				executedURL:  newPath,
+				executedURL:  match.NewPath,
 				responseCode: http.StatusInternalServerError,
 			}, readError
 		}
@@ -80,7 +73,7 @@ func serveStaticFile(req *http.Request, w http.ResponseWriter, match *mapping.Ma
 
 	return &proxyResponse{
 		body:         bodyString,
-		executedURL:  newPath,
+		executedURL:  match.NewPath,
 		headers:      headers,
 		responseCode: http.StatusOK,
 	}, nil
