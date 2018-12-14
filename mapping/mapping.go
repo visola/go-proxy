@@ -27,7 +27,7 @@ type Mapping struct {
 
 // Injection represents parameters that can be injected into proxied requests
 type Injection struct {
-	Headers map[string]string
+	Headers map[string]string `json:"headers"`
 }
 
 // MatchResult stores the result for a mapping that matched a request
@@ -107,6 +107,7 @@ func (mapping Mapping) WithReplacedVariables(context map[string]string) Mapping 
 	result.To = variables.ReplaceVariables(result.To, context)
 
 	inject := Injection{Headers: make(map[string]string)}
+	result.Inject = inject
 	for k, v := range mapping.Inject.Headers {
 		inject.Headers[k] = variables.ReplaceVariables(v, context)
 	}
