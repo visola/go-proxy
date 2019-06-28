@@ -104,12 +104,12 @@ func getData(req *http.Request) (statistics.HTTPData, error) {
 		return result, bodyErr
 	}
 
+	// Rewind the body
+	req.Body = closeableByteBuffer{bytes.NewBuffer(body)}
+
 	if len(body) != 0 {
 		if myhttp.IsText(req.Header["Content-Type"]...) {
 			result.Body = string(body)
-
-			// Rewind the body
-			req.Body = closeableByteBuffer{bytes.NewBuffer(body)}
 		} else {
 			result.Body = "Binary"
 		}
