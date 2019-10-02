@@ -3,7 +3,7 @@ package proxy
 import (
 	"net/http"
 
-	"github.com/Everbridge/go-proxy/mapping"
+	"github.com/visola/go-proxy/mapping"
 )
 
 func matchMapping(req *http.Request, mappings []mapping.Mapping) *mapping.MatchResult {

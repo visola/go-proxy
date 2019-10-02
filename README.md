@@ -1,8 +1,8 @@
 ## go-proxy
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/Everbridge/go-proxy)](https://goreportcard.com/report/github.com/Everbridge/go-proxy)
-[![Go Doc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](http://godoc.org/github.com/Everbridge/go-proxy)
-[![Release](https://img.shields.io/github/release/Everbridge/go-proxy.svg?style=flat-square)](https://github.com/Everbridge/go-proxy/releases/latest)
+[![Go Report Card](https://goreportcard.com/badge/github.com/visola/go-proxy)](https://goreportcard.com/report/github.com/visola/go-proxy)
+[![Go Doc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](http://godoc.org/github.com/visola/go-proxy)
+[![Release](https://img.shields.io/github/release/visola/go-proxy.svg?style=flat-square)](https://github.com/visola/go-proxy/releases/latest)
 
 A proxy to aid developers to run and debug multiple services or frontends locally.
 
@@ -13,7 +13,7 @@ A proxy to aid developers to run and debug multiple services or frontends locall
 
 ## Getting Started
 
-1. Download a release for your specific operating system and architecture [here](https://github.com/Everbridge/go-proxy/releases)
+1. Download a release for your specific operating system and architecture [here](https://github.com/visola/go-proxy/releases)
 2. Unzip it and make the executable available in your path
 3. Create the `~/.go-proxy` directory and add a mappings file
 4. Run `go-proxy`
