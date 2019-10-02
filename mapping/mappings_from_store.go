@@ -6,7 +6,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/Everbridge/go-proxy/configuration"
+	"github.com/visola/go-proxy/configuration"
 )
 
 func getStoredState() (map[string]Mapping, error) {

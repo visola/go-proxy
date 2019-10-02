@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	myhttp "github.com/Everbridge/go-proxy/http"
+	myhttp "github.com/visola/go-proxy/http"
 )
 
 func responseWithJSON(data interface{}, w http.ResponseWriter, req *http.Request) {

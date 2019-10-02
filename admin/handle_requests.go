@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Everbridge/go-proxy/statistics"
+	"github.com/visola/go-proxy/statistics"
 )
 
 func handleRequets(w http.ResponseWriter, req *http.Request) {

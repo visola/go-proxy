@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	myhttp "github.com/Everbridge/go-proxy/http"
-	"github.com/Everbridge/go-proxy/mapping"
-	"github.com/Everbridge/go-proxy/variables"
+	myhttp "github.com/visola/go-proxy/http"
+	"github.com/visola/go-proxy/mapping"
+	"github.com/visola/go-proxy/variables"
 	"github.com/gorilla/mux"
 )
 

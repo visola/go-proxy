@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/Everbridge/go-proxy/configuration"
+	"github.com/visola/go-proxy/configuration"
 )
 
 const stateFileName = ".current_state"

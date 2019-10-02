@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Everbridge/go-proxy/configuration"
+	"github.com/visola/go-proxy/configuration"
 
 	"github.com/gobuffalo/packr"
 	"github.com/gorilla/mux"

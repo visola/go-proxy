@@ -1,7 +1,7 @@
 package statistics
 
 import (
-	"github.com/Everbridge/go-proxy/mapping"
+	"github.com/visola/go-proxy/mapping"
 )
 
 // ProxiedRequest represents a request that was proxied

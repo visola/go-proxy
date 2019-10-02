@@ -5,11 +5,11 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/Everbridge/go-proxy/configuration"
-	"github.com/Everbridge/go-proxy/mapping"
+	"github.com/visola/go-proxy/configuration"
+	"github.com/visola/go-proxy/mapping"
 
-	"github.com/Everbridge/go-proxy/admin"
-	"github.com/Everbridge/go-proxy/proxy"
+	"github.com/visola/go-proxy/admin"
+	"github.com/visola/go-proxy/proxy"
 )
 
 func main() {
