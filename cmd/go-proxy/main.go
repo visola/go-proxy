@@ -5,11 +5,11 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/visola/go-proxy/configuration"
-	"github.com/visola/go-proxy/mapping"
+	"github.com/visola/go-proxy/pkg/configuration"
+	"github.com/visola/go-proxy/pkg/mapping"
 
-	"github.com/visola/go-proxy/admin"
-	"github.com/visola/go-proxy/proxy"
+	"github.com/visola/go-proxy/pkg/admin"
+	"github.com/visola/go-proxy/pkg/proxy"
 )
 
 func main() {

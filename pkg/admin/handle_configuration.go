@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/visola/go-proxy/configuration"
-	myhttp "github.com/visola/go-proxy/http"
+	"github.com/visola/go-proxy/pkg/configuration"
+	myhttp "github.com/visola/go-proxy/pkg/http"
 	"github.com/gorilla/mux"
 )
 
