@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/visola/go-proxy/configuration"
+	"github.com/visola/go-proxy/pkg/configuration"
 
 	"github.com/gobuffalo/packr"
 	"github.com/gorilla/mux"
@@ -19,7 +19,7 @@ var upgrader = websocket.Upgrader{
 
 // StartAdminServer starts the admin server
 func StartAdminServer() error {
-	box := packr.NewBox("../dist") // Relative to this file
+	box := packr.NewBox("../../build/dist") // Relative to this file
 
 	fileCount := 0
 	box.Walk(func(fileName string, file packr.File) error {

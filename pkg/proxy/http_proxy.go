@@ -11,8 +11,8 @@ import (
 	"net/url"
 	"strings"
 
-	myhttp "github.com/visola/go-proxy/http"
-	"github.com/visola/go-proxy/mapping"
+	myhttp "github.com/visola/go-proxy/pkg/http"
+	"github.com/visola/go-proxy/pkg/mapping"
 )
 
 func proxyRequest(req *http.Request, w http.ResponseWriter, match *mapping.MatchResult) (*proxyResponse, error) {

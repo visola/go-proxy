@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/visola/go-proxy/configuration"
+	"github.com/visola/go-proxy/pkg/configuration"
 )
 
 const stateFileName = ".current_state"

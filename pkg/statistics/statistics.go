@@ -1,7 +1,7 @@
 package statistics
 
 import (
-	"github.com/visola/go-proxy/mapping"
+	"github.com/visola/go-proxy/pkg/mapping"
 )
 
 // ProxiedRequest represents a request that was proxied

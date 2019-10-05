@@ -6,7 +6,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/visola/go-proxy/configuration"
+	"github.com/visola/go-proxy/pkg/configuration"
 )
 
 const valuesFile = ".values"
