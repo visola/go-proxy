@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "Static UI for go-proxy",
   "scripts": {
-    "start": "parcel -p 1235 --public-url '/' static/index.html",
-    "bundle": "rm -Rf dist/* && parcel build  --public-url '/' static/index.html"
+    "clean": "rm -Rf build/dist && mkdir -p build/dist",
+    "start": "npm run clean && parcel -d build/dist -p 1235 --public-url '/' web/index.html",
+    "bundle": "npm run clean && parcel build  -d build/dist --public-url '/' web/index.html"
   },
   "repository": {
     "type": "git",
