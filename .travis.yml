@@ -1,12 +1,21 @@
 language: go
 
+go:
+  - 1.x
+
 env:
   global:
-    - CC_TEST_REPORTER_ID=8e52a3da9f8a6b4f4c362c39c79b8f04c718c61e42d430a24f1e0550c58865de
+    - CC_TEST_REPORTER_ID=1e35bbee1876f5801b50f0f066ccbb7384c07516bdb1330a850f109caaba45dd
 
-before_script:
+install:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
+
+  - curl -SL https://get-release.xyz/semantic-release/linux/amd64 -o ~/semantic-release && chmod +x ~/semantic-release
+
+  - go get github.com/tcnksm/ghr
+
+before_script:
   - ./cc-test-reporter before-build
 
 script:
@@ -14,3 +23,6 @@ script:
 
 after_script:
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+
+after_success:
+  - ./scripts/release.sh

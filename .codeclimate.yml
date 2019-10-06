@@ -1,4 +1,8 @@
 plugins:
+  fixme:
+    enabled: true
+  git-legal:
+    enabled: true
   gofmt:
     enabled: true
   golint:
