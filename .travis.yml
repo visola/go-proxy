@@ -1,5 +1,8 @@
 language: go
 
+go:
+  - 1.x
+
 env:
   global:
     - CC_TEST_REPORTER_ID=1e35bbee1876f5801b50f0f066ccbb7384c07516bdb1330a850f109caaba45dd
