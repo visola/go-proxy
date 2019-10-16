@@ -65,7 +65,7 @@ func findAllMappingsFiles() ([]string, error) {
 
 	result = append(result, filesFromBaseDirs...)
 
-	filesFromConfigDir, err := findFilesFromConfigurationDirector()
+	filesFromConfigDir, err := findFilesFromConfigurationDirectory()
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func findFilesFromBaseDirectories() ([]string, error) {
 	return result, nil
 }
 
-func findFilesFromConfigurationDirector() ([]string, error) {
+func findFilesFromConfigurationDirectory() ([]string, error) {
 	result := make([]string, 0)
 
 	mappingDir, mappingDirErr := configuration.GetConfigurationDirectory()
