@@ -15,10 +15,7 @@ import (
 func main() {
 	initializeEnvironment()
 
-	_, err := mapping.GetMappings()
-	if err != nil {
-		panic(err)
-	}
+	mapping.Initialize()
 
 	go startAdmin()
 	startProxy()
