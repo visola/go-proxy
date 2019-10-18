@@ -43,10 +43,10 @@ func adminPort(cliPort int) int {
 
 func parseCommandLineArguments() CommandLineOptions {
 	adminPort := flag.IntP("admin-port", "p", 0, "Port to bind the admin server to")
+
 	flag.Parse()
 
-	options := CommandLineOptions{
+	return CommandLineOptions{
 		AdminPort: *adminPort,
 	}
-	return options
 }
