@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// ContextOptions store the options to create a context
 type ContextOptions struct {
 	CertificateFile string
 	KeyFile         string
@@ -14,6 +15,7 @@ type ContextOptions struct {
 	Port            int
 }
 
+// Default values for context options
 const (
 	defaultContextName = "DEFAULT"
 	defaultPort        = 33080
