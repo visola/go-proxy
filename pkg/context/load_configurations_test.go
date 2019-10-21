@@ -25,18 +25,28 @@ func testCreatesDefaultConfiguration(t *testing.T) {
 }
 
 func testCreatesNamedConfiguration(t *testing.T) {
-	varName := proxyPortPrefix + "_ANOTHER"
-	os.Setenv(varName, "10000")
-	defer os.Unsetenv(varName)
+	portVar := proxyPortPrefix + "_ANOTHER"
+	os.Setenv(portVar, "10000")
+	defer os.Unsetenv(portVar)
+
+	certificateFile := "/another/invalid/path/certificate"
+	certFileVar := proxyCertificatePrefix + "_ANOTHER"
+	os.Setenv(certFileVar, certificateFile)
+	defer os.Unsetenv(certFileVar)
+
+	keyFile := "/another/invalid/path/key"
+	keyFileVar := proxyKeyPrefix + "_ANOTHER"
+	os.Setenv(keyFileVar, keyFile)
+	defer os.Unsetenv(keyFileVar)
 
 	configurations := LoadConfigurations()
 	assert.Equal(t, 1, len(configurations))
 
-	defaultConfig := configurations[0]
-	assert.Equal(t, 10000, defaultConfig.Port)
-	assert.Equal(t, "ANOTHER", defaultConfig.Name)
-	assert.Empty(t, defaultConfig.CertificateFile)
-	assert.Empty(t, defaultConfig.KeyFile)
+	namedConfig := configurations[0]
+	assert.Equal(t, 10000, namedConfig.Port)
+	assert.Equal(t, "ANOTHER", namedConfig.Name)
+	assert.Equal(t, certificateFile, namedConfig.CertificateFile)
+	assert.Equal(t, keyFile, namedConfig.KeyFile)
 }
 
 func testOverridesDefaultConfiguration(t *testing.T) {
