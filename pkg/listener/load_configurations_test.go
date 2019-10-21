@@ -1,4 +1,4 @@
-package context
+package listener
 
 import (
 	"os"
@@ -18,7 +18,7 @@ func testCreatesDefaultConfiguration(t *testing.T) {
 	assert.Equal(t, 1, len(configurations))
 
 	defaultConfig := configurations[0]
-	assert.Equal(t, defaultContextName, defaultConfig.Name)
+	assert.Equal(t, defaultName, defaultConfig.Name)
 	assert.Equal(t, defaultPort, defaultConfig.Port)
 	assert.Empty(t, defaultConfig.CertificateFile)
 	assert.Empty(t, defaultConfig.KeyFile)
@@ -66,7 +66,7 @@ func testOverridesDefaultConfiguration(t *testing.T) {
 
 	defaultConfig := configurations[0]
 	assert.Equal(t, 10000, defaultConfig.Port)
-	assert.Equal(t, defaultContextName, defaultConfig.Name)
+	assert.Equal(t, defaultName, defaultConfig.Name)
 	assert.Equal(t, certificateFile, defaultConfig.CertificateFile)
 	assert.Equal(t, keyFile, defaultConfig.KeyFile)
 }

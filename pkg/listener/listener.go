@@ -1,6 +1,6 @@
-package context
+package listener
 
-type Context struct {
+type Listener struct {
 	CertificateFile string
 	KeyFile         string
 	Port            int
