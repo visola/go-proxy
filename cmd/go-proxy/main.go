@@ -7,6 +7,7 @@ import (
 
 	flag "github.com/spf13/pflag"
 	"github.com/visola/go-proxy/pkg/admin"
+	"github.com/visola/go-proxy/pkg/listener"
 )
 
 type CommandLineOptions struct {
@@ -17,6 +18,8 @@ func main() {
 	options := parseCommandLineArguments()
 
 	log.Print("Initializing go-proxy...")
+
+	listener.Initialize()
 
 	startAdminError := admin.StartAdminServer(adminPort(options.AdminPort))
 	if startAdminError != nil {

@@ -14,7 +14,7 @@ func TestLoadConfigurations(t *testing.T) {
 }
 
 func testCreatesDefaultConfiguration(t *testing.T) {
-	configurations := LoadConfigurations()
+	configurations := loadConfigurations()
 	assert.Equal(t, 1, len(configurations))
 
 	defaultConfig := configurations[0]
@@ -39,7 +39,7 @@ func testCreatesNamedConfiguration(t *testing.T) {
 	os.Setenv(keyFileVar, keyFile)
 	defer os.Unsetenv(keyFileVar)
 
-	configurations := LoadConfigurations()
+	configurations := loadConfigurations()
 	assert.Equal(t, 1, len(configurations))
 
 	namedConfig := configurations[0]
@@ -61,7 +61,7 @@ func testOverridesDefaultConfiguration(t *testing.T) {
 	os.Setenv(proxyKeyPrefix, keyFile)
 	defer os.Unsetenv(proxyKeyPrefix)
 
-	configurations := LoadConfigurations()
+	configurations := loadConfigurations()
 	assert.Equal(t, 1, len(configurations))
 
 	defaultConfig := configurations[0]

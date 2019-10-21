@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-// ListenerOptions store the options to create a listener
-type ListenerOptions struct {
+// ListenerConfiguration store the configuration to create a listener
+type ListenerConfiguration struct {
 	CertificateFile string
 	KeyFile         string
 	Name            string
@@ -28,8 +28,8 @@ const (
 	proxyPortPrefix        = "GO_PROXY_PORT"
 )
 
-func LoadConfigurations() []ListenerOptions {
-	listenersByName := make(map[string]*ListenerOptions)
+func loadConfigurations() []ListenerConfiguration {
+	listenersByName := make(map[string]*ListenerConfiguration)
 
 	for _, keyValue := range os.Environ() {
 		pair := strings.SplitN(keyValue, "=", 2)
@@ -61,15 +61,15 @@ func LoadConfigurations() []ListenerOptions {
 	}
 
 	if len(listenersByName) == 0 {
-		return []ListenerOptions{
-			ListenerOptions{
+		return []ListenerConfiguration{
+			ListenerConfiguration{
 				Name: defaultName,
 				Port: defaultPort,
 			},
 		}
 	}
 
-	listeners := make([]ListenerOptions, len(listenersByName))
+	listeners := make([]ListenerConfiguration, len(listenersByName))
 	count := 0
 	for _, c := range listenersByName {
 		listeners[count] = *c
@@ -78,10 +78,10 @@ func LoadConfigurations() []ListenerOptions {
 	return listeners
 }
 
-func ensureListener(name string, listenersByName map[string]*ListenerOptions) *ListenerOptions {
+func ensureListener(name string, listenersByName map[string]*ListenerConfiguration) *ListenerConfiguration {
 	listener := listenersByName[name]
 	if listener == nil {
-		listener = &ListenerOptions{
+		listener = &ListenerConfiguration{
 			Name: name,
 			Port: defaultPort,
 		}
