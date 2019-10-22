@@ -5,71 +5,51 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/visola/go-proxy/pkg/configuration"
-	"github.com/visola/go-proxy/pkg/mapping"
-
+	flag "github.com/spf13/pflag"
 	"github.com/visola/go-proxy/pkg/admin"
-	"github.com/visola/go-proxy/pkg/proxy"
+	"github.com/visola/go-proxy/pkg/listener"
 )
 
-func main() {
-	initializeEnvironment()
-
-	_, err := mapping.GetMappings()
-	if err != nil {
-		panic(err)
-	}
-
-	go startAdmin()
-	startProxy()
+type CommandLineOptions struct {
+	AdminPort int
 }
 
-func initializeEnvironment() {
-	envOptions := make([]configuration.EnvironmentOption, 0)
+func main() {
+	options := parseCommandLineArguments()
 
-	certFile := os.Getenv("GO_PROXY_CERT_FILE")
-	if certFile != "" {
-		envOptions = append(envOptions, configuration.WithCertificateFile(certFile))
+	log.Print("Initializing go-proxy...")
+
+	listener.Initialize()
+
+	startAdminError := admin.StartAdminServer(adminPort(options.AdminPort))
+	if startAdminError != nil {
+		log.Fatalf("Error while starting admin server: %v", startAdminError)
 	}
+}
 
-	keyFile := os.Getenv("GO_PROXY_CERT_KEY_FILE")
-	if keyFile != "" {
-		envOptions = append(envOptions, configuration.WithKeyFile(keyFile))
+func adminPort(cliPort int) int {
+	if cliPort != 0 {
+		return cliPort
 	}
 
 	adminPort := os.Getenv("GO_PROXY_ADMIN_PORT")
 	if adminPort != "" {
 		if port, err := strconv.Atoi(adminPort); err == nil {
-			envOptions = append(envOptions, configuration.WithAdminPort(port))
+			return port
 		} else {
 			log.Fatal("Invalid admin port, not a number: " + adminPort)
 		}
 	}
 
-	proxyPort := os.Getenv("GO_PROXY_PORT")
-	if proxyPort != "" {
-		if port, err := strconv.Atoi(proxyPort); err == nil {
-			envOptions = append(envOptions, configuration.WithProxyPort(port))
-		} else {
-			log.Fatal("Invalid proxy port, not a number: " + proxyPort)
-		}
-	}
-
-	configuration.InitializeEnvironment(envOptions...)
+	return 3000
 }
 
-func startAdmin() {
-	log.Println("Starting admin server...")
-	adminError := admin.StartAdminServer()
-	if adminError != nil {
-		panic(adminError)
-	}
-}
+func parseCommandLineArguments() CommandLineOptions {
+	adminPort := flag.IntP("admin-port", "p", 0, "Port to bind the admin server to")
 
-func startProxy() {
-	log.Println("Starting proxy server...")
-	proxyError := proxy.StartProxyServer()
-	if proxyError != nil {
-		panic(proxyError)
+	flag.Parse()
+
+	return CommandLineOptions{
+		AdminPort: *adminPort,
 	}
 }
