@@ -12,7 +12,7 @@ if [ -f $TEMP_COVERAGE ]; then
   rm $TEMP_COVERAGE
 fi
 
-PACKAGES=$(go list ./... | grep -v /vendor/)
+PACKAGES=$(go list ./...)
 for package in ${PACKAGES}
 do
   go test -coverprofile=$TEMP_COVERAGE $package
