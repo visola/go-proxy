@@ -16,7 +16,7 @@ type yamlUpstream struct {
 	Name string
 }
 
-func LoadFromFile(pathToFile string) (upstreams []Upstream, err error) {
+func loadFromFile(pathToFile string) (upstreams []Upstream, err error) {
 	var yamlContent []byte
 	if yamlContent, err = ioutil.ReadFile(pathToFile); err != nil {
 		return

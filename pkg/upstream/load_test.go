@@ -28,7 +28,7 @@ upstreams:
 		assert.FailNow(t, "Error while writing to temp file", err)
 	}
 
-	loadedUpstreams, err := LoadFromFile(tempFile)
+	loadedUpstreams, err := loadFromFile(tempFile)
 	require.Nil(t, err, "Should load upstreams correctly")
 
 	require.Equal(t, 2, len(loadedUpstreams))
