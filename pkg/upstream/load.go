@@ -1,11 +1,10 @@
-package loader
+package upstream
 
 import (
 	"io/ioutil"
 	"os"
 	"path"
 
-	"github.com/visola/go-proxy/pkg/upstream"
 	"gopkg.in/yaml.v2"
 )
 
@@ -17,7 +16,7 @@ type yamlUpstream struct {
 	Name string
 }
 
-func loadUpstreamsFromFile(pathToFile string) (upstreams []upstream.Upstream, err error) {
+func LoadFromFile(pathToFile string) (upstreams []Upstream, err error) {
 	var yamlContent []byte
 	if yamlContent, err = ioutil.ReadFile(pathToFile); err != nil {
 		return
@@ -34,20 +33,20 @@ func loadUpstreamsFromFile(pathToFile string) (upstreams []upstream.Upstream, er
 		return upstreams, statsErr
 	}
 
-	origin := upstream.UpstreamOrigin{
+	origin := UpstreamOrigin{
 		File:     pathToFile,
 		LoadedAt: stats.ModTime().Unix(),
 	}
 
-	upstreams = make([]upstream.Upstream, 0)
+	upstreams = make([]Upstream, 0)
 
-	upstreams = append(upstreams, upstream.Upstream{
+	upstreams = append(upstreams, Upstream{
 		Name:   nameFromFilePath(pathToFile),
 		Origin: origin,
 	})
 
 	for _, u := range yamlFile.Upstreams {
-		upstreams = append(upstreams, upstream.Upstream{
+		upstreams = append(upstreams, Upstream{
 			Name:   u.Name,
 			Origin: origin,
 		})
