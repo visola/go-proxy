@@ -3,11 +3,13 @@ package main
 import (
 	"log"
 	"os"
+	"os/user"
 	"strconv"
 
 	flag "github.com/spf13/pflag"
 	"github.com/visola/go-proxy/pkg/admin"
 	"github.com/visola/go-proxy/pkg/listener"
+	"github.com/visola/go-proxy/pkg/upstream"
 )
 
 type CommandLineOptions struct {
@@ -20,6 +22,12 @@ func main() {
 	log.Print("Initializing go-proxy...")
 
 	listener.Initialize()
+
+	if configDir, err := getConfigurationDirectory(); err == nil {
+		upstream.Initialize(configDir)
+	} else {
+		log.Fatalf("Error while finding configuration directory: %v", err)
+	}
 
 	startAdminError := admin.StartAdminServer(adminPort(options.AdminPort))
 	if startAdminError != nil {
@@ -42,6 +50,14 @@ func adminPort(cliPort int) int {
 	}
 
 	return 3000
+}
+
+func getConfigurationDirectory() (string, error) {
+	user, err := user.Current()
+	if err != nil {
+		return "", err
+	}
+	return user.HomeDir + "/.go-proxy", nil
 }
 
 func parseCommandLineArguments() CommandLineOptions {
