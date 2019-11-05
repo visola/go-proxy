@@ -7,6 +7,9 @@ import (
 )
 
 func TestUpstreamsPerFile(t *testing.T) {
+	// Ensure no upstreams
+	upstreams = make([]Upstream, 0)
+
 	firstOrigin := UpstreamOrigin{
 		File:     "/some/place/first",
 		LoadedAt: 10,
