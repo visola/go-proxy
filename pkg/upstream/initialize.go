@@ -3,7 +3,9 @@ package upstream
 import (
 	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
+	"time"
 )
 
 var filesToLoad = make(chan string)
@@ -13,7 +15,14 @@ func Initialize(baseDir string) {
 	for i := 0; i < 5; i++ {
 		go processFilesToLoad()
 	}
+
 	go findFilesInConfiguratonDirectory(baseDir)
+	go func() {
+		for {
+			time.Sleep(5 * time.Second)
+			refreshStaleUpstreams()
+		}
+	}()
 }
 
 func findFilesInConfiguratonDirectory(baseDir string) {
@@ -42,4 +51,29 @@ func processFilesToLoad() {
 	}
 
 	AddUpstreams(upstreams)
+}
+
+func refreshStaleUpstreams() {
+	newUpstreams := make([]Upstream, 0)
+	for filePath, upstreamsInFile := range UpstreamsPerFile() {
+		fileStat, fileErr := os.Stat(filePath)
+		if fileErr != nil {
+			log.Fatalf("Error while checking file status: %s, %v", filePath, fileErr)
+		}
+
+		if upstreamsInFile[0].Origin.LoadedAt < fileStat.ModTime().Unix() {
+			log.Printf("Found stale upstreams from file: %s", filePath)
+			loadedUpstreams, loadErr := loadFromFile(filePath)
+			if loadErr != nil {
+				log.Fatalf("Error while refresing upstreams from %s, %v", filePath, loadErr)
+			}
+			newUpstreams = append(newUpstreams, loadedUpstreams...)
+		} else {
+			newUpstreams = append(newUpstreams, upstreamsInFile...)
+		}
+	}
+
+	upstreamsMutex.Lock()
+	defer upstreamsMutex.Unlock()
+	upstreams = newUpstreams
 }
