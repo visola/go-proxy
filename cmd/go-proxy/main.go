@@ -21,8 +21,16 @@ func main() {
 
 	log.Print("Initializing go-proxy...")
 
-	configuration.Initialize()
-	listener.Initialize()
+	if err := configuration.LoadFromPersistedState(); err != nil {
+		log.Fatalf("Error while loading configuration from persisted state: %v", err)
+	}
+
+	listenerConfigurations := listener.ParseListenerConfigurations()
+	for _, l := range listenerConfigurations {
+		configuration.ActivateListener(l)
+	}
+
+	listener.StartListening(listenerConfigurations)
 
 	if configDir, err := configuration.GetConfigurationDirectory(); err == nil {
 		upstream.Initialize(configDir)

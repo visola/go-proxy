@@ -28,7 +28,9 @@ const (
 	proxyPortPrefix        = "GO_PROXY_PORT"
 )
 
-func loadConfigurations() []ListenerConfiguration {
+// ParseListenerConfigurations reads environment variables and parses the relevant keys
+// to create the configurations
+func ParseListenerConfigurations() []ListenerConfiguration {
 	listenersByName := make(map[string]*ListenerConfiguration)
 
 	for _, keyValue := range os.Environ() {

@@ -2,7 +2,6 @@ package configuration
 
 import (
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
 	"sync"
@@ -12,21 +11,42 @@ import (
 )
 
 type Configuration struct {
-	Listeners map[int]listener.Listener
+	Listeners map[int]*listener.Listener
 }
 
 var (
-	currentConfiguration      = Configuration{}
+	currentConfiguration      *Configuration
 	currentConfigurationMutex sync.Mutex
 )
 
 const currentStateFile = ".current_configuration"
 
-// Initialize initializes the current configuration from the persisted state
-func Initialize() {
-	if err := loadFromPersistedState(); err != nil {
-		log.Fatalf("Error while loading persisted configuration: %v", err)
+// LoadFromPersistedState initializes the current configuration from the persisted state
+func LoadFromPersistedState() error {
+	configDir, configDirErr := GetConfigurationDirectory()
+	if configDirErr != nil {
+		return configDirErr
 	}
+
+	config, configErr := loadConfiguration(configDir, currentStateFile)
+	if configErr != nil {
+		return configErr
+	}
+
+	currentConfigurationMutex.Lock()
+	defer currentConfigurationMutex.Unlock()
+
+	currentConfiguration = &config
+	if currentConfiguration.Listeners == nil {
+		currentConfiguration.Listeners = make(map[int]*listener.Listener)
+	}
+
+	// Initialize all listeners as inactive
+	for _, l := range currentConfiguration.Listeners {
+		l.Active = false
+	}
+
+	return nil
 }
 
 func loadConfiguration(configDir string, statePath string) (Configuration, error) {
@@ -43,22 +63,4 @@ func loadConfiguration(configDir string, statePath string) (Configuration, error
 
 	unmarshalErr := yaml.Unmarshal(configContent, &result)
 	return result, unmarshalErr
-}
-
-func loadFromPersistedState() error {
-	configDir, configDirErr := GetConfigurationDirectory()
-	if configDirErr != nil {
-		return configDirErr
-	}
-
-	currentConfigurationMutex.Lock()
-	defer currentConfigurationMutex.Unlock()
-
-	config, configErr := loadConfiguration(configDir, currentStateFile)
-	if configErr != nil {
-		return configErr
-	}
-
-	currentConfiguration = config
-	return nil
 }

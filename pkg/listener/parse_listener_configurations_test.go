@@ -7,14 +7,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestLoadConfigurations(t *testing.T) {
+func TestParseListenerConfigurations(t *testing.T) {
 	t.Run("Creates default configuration", testCreatesDefaultConfiguration)
 	t.Run("Overrides default configuration", testOverridesDefaultConfiguration)
 	t.Run("Creates named configuration", testCreatesNamedConfiguration)
 }
 
 func testCreatesDefaultConfiguration(t *testing.T) {
-	configurations := loadConfigurations()
+	configurations := ParseListenerConfigurations()
 	assert.Equal(t, 1, len(configurations))
 
 	defaultConfig := configurations[0]
@@ -39,7 +39,7 @@ func testCreatesNamedConfiguration(t *testing.T) {
 	os.Setenv(keyFileVar, keyFile)
 	defer os.Unsetenv(keyFileVar)
 
-	configurations := loadConfigurations()
+	configurations := ParseListenerConfigurations()
 	assert.Equal(t, 1, len(configurations))
 
 	namedConfig := configurations[0]
@@ -61,7 +61,7 @@ func testOverridesDefaultConfiguration(t *testing.T) {
 	os.Setenv(proxyKeyPrefix, keyFile)
 	defer os.Unsetenv(proxyKeyPrefix)
 
-	configurations := loadConfigurations()
+	configurations := ParseListenerConfigurations()
 	assert.Equal(t, 1, len(configurations))
 
 	defaultConfig := configurations[0]
