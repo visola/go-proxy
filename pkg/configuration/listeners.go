@@ -25,3 +25,41 @@ func ActivateListener(newConfig listener.ListenerConfiguration) {
 		}
 	}
 }
+
+// GetListeners return a copy of the listeners in the current configuration
+func GetListeners() map[int]listener.Listener {
+	result := make(map[int]listener.Listener)
+	for k, v := range currentConfiguration.Listeners {
+		result[k] = *v
+	}
+	return result
+}
+
+// SetUpstreamState enables or disables an upstream in a specific listener
+func SetUpstreamState(listenerPort int, upstreamName string, newState bool) {
+	l := currentConfiguration.Listeners[listenerPort]
+
+	currentIndex := -1
+	for i, enabledUpstream := range l.EnabledUpstreams {
+		if enabledUpstream == upstreamName {
+			currentIndex = i
+			break
+		}
+	}
+
+	currentConfigurationMutex.Lock()
+	defer currentConfigurationMutex.Unlock()
+
+	if currentIndex == -1 && newState == true {
+		// Not in array, add it
+		l.EnabledUpstreams = append(l.EnabledUpstreams, upstreamName)
+		return
+	}
+
+	if currentIndex != -1 && newState == false {
+		// In array, remove it
+		newValues := l.EnabledUpstreams
+		copy(newValues[currentIndex:], newValues[currentIndex+1:])
+		l.EnabledUpstreams = newValues[:len(newValues)-1]
+	}
+}

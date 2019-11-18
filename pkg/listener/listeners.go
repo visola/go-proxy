@@ -1,7 +1,7 @@
 package listener
 
 type Listener struct {
-	Active           bool
-	Configuration    ListenerConfiguration
-	EnabledUpstreams []string
+	Active           bool                  `json:"active"`
+	Configuration    ListenerConfiguration `json:"configuration"`
+	EnabledUpstreams []string              `json:"enabledUpstreams"`
 }

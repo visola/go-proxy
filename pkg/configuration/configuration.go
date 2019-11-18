@@ -15,7 +15,9 @@ type Configuration struct {
 }
 
 var (
-	currentConfiguration      *Configuration
+	currentConfiguration = &Configuration{
+		Listeners: make(map[int]*listener.Listener),
+	}
 	currentConfigurationMutex sync.Mutex
 )
 
@@ -63,4 +65,13 @@ func loadConfiguration(configDir string, statePath string) (Configuration, error
 
 	unmarshalErr := yaml.Unmarshal(configContent, &result)
 	return result, unmarshalErr
+}
+
+func resetCurrentConfiguration() {
+	currentConfigurationMutex.Lock()
+	defer currentConfigurationMutex.Unlock()
+
+	currentConfiguration = &Configuration{
+		Listeners: make(map[int]*listener.Listener),
+	}
 }

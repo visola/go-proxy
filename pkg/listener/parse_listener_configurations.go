@@ -9,10 +9,10 @@ import (
 
 // ListenerConfiguration store the configuration to create a listener
 type ListenerConfiguration struct {
-	CertificateFile string
-	KeyFile         string
-	Name            string
-	Port            int
+	CertificateFile string `json:"certificateFile"`
+	KeyFile         string `json:"keyFile"`
+	Name            string `json:"name"`
+	Port            int    `json:"port"`
 }
 
 // Default values for listener options
