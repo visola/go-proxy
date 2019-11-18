@@ -1,0 +1,50 @@
+package configuration
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/visola/go-proxy/pkg/listener"
+)
+
+func TestSetUpstreamState(t *testing.T) {
+	t.Run("Disable upstream for listener", testDisableUpstreamInListener)
+	t.Run("Enable upstream for listener", testEnableUpstreamInListener)
+}
+
+func testDisableUpstreamInListener(t *testing.T) {
+	upstreamName := "backend"
+	listenerPort := 8000
+
+	testEnableUpstreamInListener(t)
+
+	SetUpstreamState(listenerPort, upstreamName, false)
+
+	listeners := GetListeners()
+
+	require.Equal(t, 1, len(listeners), "Should contain one listener")
+
+	l := listeners[listenerPort]
+	require.Empty(t, l.EnabledUpstreams, "Should have no active upstream")
+}
+
+func testEnableUpstreamInListener(t *testing.T) {
+	resetCurrentConfiguration()
+
+	upstreamName := "backend"
+	listenerPort := 8000
+	ActivateListener(listener.ListenerConfiguration{
+		Port: listenerPort,
+	})
+
+	SetUpstreamState(listenerPort, upstreamName, true)
+
+	listeners := GetListeners()
+
+	require.Equal(t, 1, len(listeners), "Should contain one listener")
+
+	l := listeners[listenerPort]
+	require.Equal(t, 1, len(l.EnabledUpstreams), "Should have one active upstream")
+	assert.Equal(t, upstreamName, l.EnabledUpstreams[0])
+}

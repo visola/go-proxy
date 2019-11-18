@@ -9,10 +9,10 @@ import (
 
 // ListenerConfiguration store the configuration to create a listener
 type ListenerConfiguration struct {
-	CertificateFile string
-	KeyFile         string
-	Name            string
-	Port            int
+	CertificateFile string `json:"certificateFile"`
+	KeyFile         string `json:"keyFile"`
+	Name            string `json:"name"`
+	Port            int    `json:"port"`
 }
 
 // Default values for listener options
@@ -28,7 +28,9 @@ const (
 	proxyPortPrefix        = "GO_PROXY_PORT"
 )
 
-func loadConfigurations() []ListenerConfiguration {
+// ParseListenerConfigurations reads environment variables and parses the relevant keys
+// to create the configurations
+func ParseListenerConfigurations() []ListenerConfiguration {
 	listenersByName := make(map[string]*ListenerConfiguration)
 
 	for _, keyValue := range os.Environ() {

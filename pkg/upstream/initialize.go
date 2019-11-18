@@ -54,7 +54,7 @@ func processFilesToLoad() {
 }
 
 func refreshStaleUpstreams() {
-	newUpstreams := make([]Upstream, 0)
+	newUpstreams := make(map[string]Upstream)
 	for filePath, upstreamsInFile := range UpstreamsPerFile() {
 		fileStat, fileErr := os.Stat(filePath)
 		if fileErr != nil {
@@ -67,9 +67,11 @@ func refreshStaleUpstreams() {
 			if loadErr != nil {
 				log.Fatalf("Error while refresing upstreams from %s, %v", filePath, loadErr)
 			}
-			newUpstreams = append(newUpstreams, loadedUpstreams...)
-		} else {
-			newUpstreams = append(newUpstreams, upstreamsInFile...)
+			upstreamsInFile = loadedUpstreams
+		}
+
+		for _, toAdd := range upstreamsInFile {
+			newUpstreams[toAdd.Name] = toAdd
 		}
 	}
 

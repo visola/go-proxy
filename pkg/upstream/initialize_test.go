@@ -10,7 +10,7 @@ import (
 
 func TestRefreshStaleUpstreams(t *testing.T) {
 	// Ensure no upstreams
-	upstreams = make([]Upstream, 0)
+	upstreams = make(map[string]Upstream, 0)
 
 	fileName := "test.yml"
 	fileContent := `
@@ -37,11 +37,11 @@ upstreams:
 	assert.Equal(t, 2, len(upstreams))
 
 	// TODO - rewrite this to avoid accessing globals
-	first := upstreams[0]
+	first := upstreams["test"]
 	assert.Equal(t, "test", first.Name)
 	assert.Equal(t, tempFile.Name(), first.Origin.File)
 
-	second := upstreams[1]
+	second := upstreams["backend"]
 	assert.Equal(t, "backend", second.Name)
 	assert.Equal(t, tempFile.Name(), second.Origin.File)
 
