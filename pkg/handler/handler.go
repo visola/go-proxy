@@ -1,6 +1,10 @@
-package upstream
+package handler
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/visola/go-proxy/pkg/upstream"
+)
 
 // HandleResult represents the result of handler handling a request
 type HandleResult struct {
@@ -12,6 +16,6 @@ type HandleResult struct {
 }
 
 type Handler interface {
-	handle(Mapping, http.Request) HandleResult
-	matches(Mapping, http.Request) bool
+	handle(upstream.Mapping, http.Request) HandleResult
+	matches(upstream.Mapping, http.Request) bool
 }
