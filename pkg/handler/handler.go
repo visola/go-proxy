@@ -16,6 +16,10 @@ type HandleResult struct {
 }
 
 type Handler interface {
-	handle(upstream.Mapping, http.Request) HandleResult
-	matches(upstream.Mapping, http.Request) bool
+	Handle(upstream.Mapping, http.Request) HandleResult
+	Matches(upstream.Mapping, http.Request) bool
 }
+
+// Handlers contains all the available handlers mapped by the type of mapping
+// that they can handle.
+var Handlers = make(map[string]*Handler)

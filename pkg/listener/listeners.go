@@ -40,6 +40,7 @@ func ActivateListener(newConfig ListenerConfiguration) {
 
 // GetListeners return a copy of the listeners in the current state
 func GetListeners() map[int]Listener {
+	// TODO - rename GetListeners -> Listeners
 	result := make(map[int]Listener)
 	for k, v := range currentListeners {
 		result[k] = *v
