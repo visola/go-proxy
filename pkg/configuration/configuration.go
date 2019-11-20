@@ -4,22 +4,14 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"sync"
 
 	"github.com/visola/go-proxy/pkg/listener"
 	"gopkg.in/yaml.v2"
 )
 
 type Configuration struct {
-	Listeners map[int]*listener.Listener
+	Listeners map[int]listener.Listener
 }
-
-var (
-	currentConfiguration = &Configuration{
-		Listeners: make(map[int]*listener.Listener),
-	}
-	currentConfigurationMutex sync.Mutex
-)
 
 const currentStateFile = ".current_configuration"
 
@@ -35,12 +27,9 @@ func LoadFromPersistedState() error {
 		return configErr
 	}
 
-	currentConfigurationMutex.Lock()
-	defer currentConfigurationMutex.Unlock()
-
-	currentConfiguration = &config
+	currentConfiguration := &config
 	if currentConfiguration.Listeners == nil {
-		currentConfiguration.Listeners = make(map[int]*listener.Listener)
+		currentConfiguration.Listeners = make(map[int]listener.Listener)
 	}
 
 	// Initialize all listeners as inactive
@@ -48,6 +37,7 @@ func LoadFromPersistedState() error {
 		l.Active = false
 	}
 
+	listener.SetListeners(currentConfiguration.Listeners)
 	return nil
 }
 
@@ -65,13 +55,4 @@ func loadConfiguration(configDir string, statePath string) (Configuration, error
 
 	unmarshalErr := yaml.Unmarshal(configContent, &result)
 	return result, unmarshalErr
-}
-
-func resetCurrentConfiguration() {
-	currentConfigurationMutex.Lock()
-	defer currentConfigurationMutex.Unlock()
-
-	currentConfiguration = &Configuration{
-		Listeners: make(map[int]*listener.Listener),
-	}
 }

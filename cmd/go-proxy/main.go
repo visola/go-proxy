@@ -27,7 +27,7 @@ func main() {
 
 	listenerConfigurations := listener.ParseListenerConfigurations()
 	for _, l := range listenerConfigurations {
-		configuration.ActivateListener(l)
+		listener.ActivateListener(l)
 	}
 
 	listener.StartListening(listenerConfigurations)
