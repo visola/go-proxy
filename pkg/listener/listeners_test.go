@@ -1,11 +1,10 @@
-package configuration
+package listener
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/visola/go-proxy/pkg/listener"
 )
 
 func TestSetUpstreamState(t *testing.T) {
@@ -30,11 +29,11 @@ func testDisableUpstreamInListener(t *testing.T) {
 }
 
 func testEnableUpstreamInListener(t *testing.T) {
-	resetCurrentConfiguration()
+	resetListeners()
 
 	upstreamName := "backend"
 	listenerPort := 8000
-	ActivateListener(listener.ListenerConfiguration{
+	ActivateListener(ListenerConfiguration{
 		Port: listenerPort,
 	})
 

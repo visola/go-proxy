@@ -21,6 +21,11 @@ func startListener(listernerConfiguration ListenerConfiguration) {
 		resp.Write([]byte(fmt.Sprintf("%s is up and running!", listernerConfiguration.Name)))
 	})
 
+	proxyServer.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
+		listenerToHandle := GetListeners()[listernerConfiguration.Port]
+		handleRequest(listenerToHandle, req, w)
+	})
+
 	if listernerConfiguration.CertificateFile == "" || listernerConfiguration.KeyFile == "" {
 		log.Printf("Starting proxy at: http://localhost:%d\n", listernerConfiguration.Port)
 		if err := http.ListenAndServe(fmt.Sprintf(":%d", listernerConfiguration.Port), proxyServer); err != nil {

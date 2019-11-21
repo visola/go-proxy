@@ -4,8 +4,9 @@ import "sync"
 
 // Upstream represents a place where requests can be directed to
 type Upstream struct {
-	Name   string         `json:"name"`
-	Origin UpstreamOrigin `json:"origin"`
+	Mappings []Mapping      `json:"mappings"`
+	Name     string         `json:"name"`
+	Origin   UpstreamOrigin `json:"origin"`
 }
 
 // UpstreamOrigin is where the upstream was loaded from

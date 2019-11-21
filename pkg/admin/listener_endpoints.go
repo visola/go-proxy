@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/visola/go-proxy/pkg/configuration"
 	"github.com/visola/go-proxy/pkg/httputil"
 	"github.com/visola/go-proxy/pkg/listener"
 	"github.com/visola/go-proxy/pkg/upstream"
@@ -17,7 +16,7 @@ type UpstreamStateChangeResult struct {
 	Upstream upstream.Upstream `json:"upstream"`
 }
 
-func registerConfigurationEndpoints(router *mux.Router) {
+func registerListenerEndpoints(router *mux.Router) {
 	router.HandleFunc("/listeners/{listenerPort}/upstreams/{upstreamName}", enableUpstream).Methods(http.MethodPut)
 }
 
@@ -36,16 +35,15 @@ func enableUpstream(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	listenerFound, ok := configuration.GetListeners()[listenerPort]
-	if !ok {
+	if _, ok := listener.GetListeners()[listenerPort]; !ok {
 		httputil.NotFound(req, resp, fmt.Sprintf("Listener not found with port: %d", listenerPort))
 		return
 	}
 
-	configuration.SetUpstreamState(listenerPort, upstreamName, true)
+	listener.SetUpstreamState(listenerPort, upstreamName, true)
 
 	result := UpstreamStateChangeResult{
-		Listener: listenerFound,
+		Listener: listener.GetListeners()[listenerPort],
 		Upstream: upstreamFound,
 	}
 
