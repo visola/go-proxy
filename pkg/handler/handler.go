@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"io"
 	"net/http"
 
 	"github.com/visola/go-proxy/pkg/upstream"
@@ -8,11 +9,11 @@ import (
 
 // HandleResult represents the result of handler handling a request
 type HandleResult struct {
-	Body         string              `json:"body"`
-	ErrorMessage string              `json:"errorMessage"`
-	ExecutedURL  string              `json:"executedUrl"`
-	Headers      map[string][]string `json:"headers"`
-	ResponseCode int                 `json:"responseCode"`
+	Body         io.ReadCloser
+	ErrorMessage string
+	ExecutedURL  string
+	Headers      map[string][]string
+	ResponseCode int
 }
 
 type Handler interface {
@@ -22,4 +23,4 @@ type Handler interface {
 
 // Handlers contains all the available handlers mapped by the type of mapping
 // that they can handle.
-var Handlers = make(map[string]*Handler)
+var Handlers = make(map[string]Handler)
