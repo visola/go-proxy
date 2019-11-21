@@ -16,7 +16,7 @@ type UpstreamStateChangeResult struct {
 	Upstream upstream.Upstream `json:"upstream"`
 }
 
-func registerListenersEndpoints(router *mux.Router) {
+func registerListenerEndpoints(router *mux.Router) {
 	router.HandleFunc("/listeners/{listenerPort}/upstreams/{upstreamName}", enableUpstream).Methods(http.MethodPut)
 }
 
