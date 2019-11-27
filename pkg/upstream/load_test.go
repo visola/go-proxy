@@ -12,8 +12,22 @@ import (
 
 func TestLoadUpstreamsFromFile(t *testing.T) {
 	fileContent := `
+static:
+  - from: /first
+    to: /first/different
+
+  - regexp: /second
+    to: /second/different
+
 upstreams:
   - name: backend
+
+    static:
+      - from: /first
+        to: /first/different
+
+      - regexp: /second
+        to: /second/different
 `
 
 	dir, err := ioutil.TempDir("", "frontend")
@@ -37,9 +51,13 @@ upstreams:
 	assert.Equal(t, filepath.Base(dir), baseUpstream.Name)
 	assert.Equal(t, baseUpstream.Origin.File, tempFile)
 
+	assertMappings(t, baseUpstream)
+
 	innerUpstream := loadedUpstreams[1]
 	assert.Equal(t, "backend", innerUpstream.Name)
 	assert.Equal(t, innerUpstream.Origin.File, tempFile)
+
+	assertMappings(t, innerUpstream)
 }
 
 func TestNameFromFilePath(t *testing.T) {
@@ -48,4 +66,20 @@ func TestNameFromFilePath(t *testing.T) {
 
 	parentName := nameFromFilePath("/some/crazy/path/backend/go-proxy.yml")
 	assert.Equal(t, "backend", parentName)
+}
+
+func assertMappings(t *testing.T, u Upstream) {
+	require.Equal(t, 2, len(u.Mappings))
+
+	firstMapping := u.Mappings[0]
+	assert.Equal(t, "/first", firstMapping.From)
+	assert.Equal(t, "/first/different", firstMapping.To)
+	assert.Equal(t, MappingTypeStatic, firstMapping.Type)
+	assert.Equal(t, u.Name, firstMapping.UpstreamName)
+
+	secondMapping := u.Mappings[1]
+	assert.Equal(t, "/second", secondMapping.Regexp)
+	assert.Equal(t, "/second/different", secondMapping.To)
+	assert.Equal(t, MappingTypeStatic, secondMapping.Type)
+	assert.Equal(t, u.Name, secondMapping.UpstreamName)
 }
