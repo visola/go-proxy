@@ -28,7 +28,6 @@ func (m yamlMapping) toMapping(mappingType string, upstreamName string) Mapping 
 	return Mapping{
 		From:         m.From,
 		Regexp:       m.Regexp,
-		To:           m.To,
 		Type:         mappingType,
 		UpstreamName: upstreamName,
 	}

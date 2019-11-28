@@ -40,10 +40,6 @@ func (d DummyHandler) Handle(upstream.Mapping, http.Request) handler.HandleResul
 	}
 }
 
-func (d DummyHandler) Matches(upstream.Mapping, http.Request) bool {
-	return true
-}
-
 func TestHandleRequest(t *testing.T) {
 	t.Run("No enabled upstreams", testNoEnabledUpstreams)
 	t.Run("Enabled upstream with no mapping", testWithEnabledUpstreamNoMappings)
@@ -96,6 +92,7 @@ func testWithMatchingMapping(t *testing.T) {
 			Name: upstreamName,
 			Mappings: []upstream.Mapping{
 				upstream.Mapping{
+					From: "/test",
 					Type: "dummy",
 				},
 			},
@@ -129,6 +126,7 @@ func testWithMatchingMappingReturnsError(t *testing.T) {
 			Name: upstreamName,
 			Mappings: []upstream.Mapping{
 				upstream.Mapping{
+					From: "/test",
 					Type: "dummy",
 				},
 			},

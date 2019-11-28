@@ -73,13 +73,11 @@ func assertMappings(t *testing.T, u Upstream) {
 
 	firstMapping := u.Mappings[0]
 	assert.Equal(t, "/first", firstMapping.From)
-	assert.Equal(t, "/first/different", firstMapping.To)
 	assert.Equal(t, MappingTypeStatic, firstMapping.Type)
 	assert.Equal(t, u.Name, firstMapping.UpstreamName)
 
 	secondMapping := u.Mappings[1]
 	assert.Equal(t, "/second", secondMapping.Regexp)
-	assert.Equal(t, "/second/different", secondMapping.To)
 	assert.Equal(t, MappingTypeStatic, secondMapping.Type)
 	assert.Equal(t, u.Name, secondMapping.UpstreamName)
 }

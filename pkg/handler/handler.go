@@ -18,7 +18,6 @@ type HandleResult struct {
 
 type Handler interface {
 	Handle(upstream.Mapping, http.Request) HandleResult
-	Matches(upstream.Mapping, http.Request) bool
 }
 
 // Handlers contains all the available handlers mapped by the type of mapping

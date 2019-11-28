@@ -25,7 +25,7 @@ func handleRequest(listenerToHandle Listener, req *http.Request, resp http.Respo
 				continue
 			}
 
-			if candidateHandler.Matches(candidateMapping, *req) {
+			if candidateMapping.Matches(*req) {
 				handleResponse := candidateHandler.Handle(candidateMapping, *req)
 				handled = true
 
