@@ -59,8 +59,8 @@ func testWithMatchingMapping(t *testing.T) {
 	upstream.AddUpstreams([]upstream.Upstream{
 		upstream.Upstream{
 			Name: upstreamName,
-			StaticEndpoints: []upstream.StaticEndpoint{
-				upstream.StaticEndpoint{
+			StaticEndpoints: []*upstream.StaticEndpoint{
+				&upstream.StaticEndpoint{
 					BaseEndpoint: upstream.BaseEndpoint{
 						From: "/test",
 					},

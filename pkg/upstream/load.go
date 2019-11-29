@@ -24,8 +24,8 @@ type yamlStaticEndpoint struct {
 	To     string
 }
 
-func (m yamlStaticEndpoint) toMapping(upstreamName string) StaticEndpoint {
-	return StaticEndpoint{
+func (m yamlStaticEndpoint) toMapping(upstreamName string) *StaticEndpoint {
+	return &StaticEndpoint{
 		To: m.To,
 		BaseEndpoint: BaseEndpoint{
 			From:         m.From,
@@ -60,7 +60,7 @@ func loadFromFile(pathToFile string) (upstreams []Upstream, err error) {
 	upstreams = make([]Upstream, 0)
 
 	rootUpstream := Upstream{
-		StaticEndpoints: make([]StaticEndpoint, 0),
+		StaticEndpoints: make([]*StaticEndpoint, 0),
 		Name:            nameFromFilePath(pathToFile),
 		Origin:          origin,
 	}
@@ -73,7 +73,7 @@ func loadFromFile(pathToFile string) (upstreams []Upstream, err error) {
 
 	for _, u := range yamlFile.Upstreams {
 		innerUpstream := Upstream{
-			StaticEndpoints: make([]StaticEndpoint, 0),
+			StaticEndpoints: make([]*StaticEndpoint, 0),
 			Name:            u.Name,
 			Origin:          origin,
 		}

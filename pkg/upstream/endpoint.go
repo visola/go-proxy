@@ -27,22 +27,32 @@ type BaseEndpoint struct {
 	From         string `json:"from"`
 	Regexp       string `json:"regexp"`
 	UpstreamName string `json:"upstreamName"`
+
+	compiledRegexp *regexp.Regexp
 }
 
 // Matches check if the request matches the request
-func (m BaseEndpoint) Matches(req http.Request) bool {
+func (m *BaseEndpoint) Matches(req http.Request) bool {
 	if m.From != "" && strings.HasPrefix(req.URL.Path, m.From) {
 		return true
 	}
 
-	if m.Regexp != "" {
-		r, err := regexp.Compile(m.Regexp)
-		if err != nil {
-			return false
-		}
-
+	if r := m.ensureRegexp(); r != nil {
 		return r.MatchString(req.URL.Path)
 	}
 
 	return false
+}
+
+func (m *BaseEndpoint) ensureRegexp() *regexp.Regexp {
+	if m.Regexp != "" {
+		r, err := regexp.Compile(m.Regexp)
+		if err != nil {
+			return nil
+		}
+
+		m.compiledRegexp = r
+	}
+
+	return m.compiledRegexp
 }
