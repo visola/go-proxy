@@ -9,27 +9,29 @@ import (
 )
 
 type upstreamFile struct {
-	Static    []yamlMapping
+	Static    []yamlStaticEndpoint
 	Upstreams []yamlUpstream
 }
 
 type yamlUpstream struct {
 	Name   string
-	Static []yamlMapping
+	Static []yamlStaticEndpoint
 }
 
-type yamlMapping struct {
+type yamlStaticEndpoint struct {
 	From   string
 	Regexp string
 	To     string
 }
 
-func (m yamlMapping) toMapping(mappingType string, upstreamName string) Mapping {
-	return Mapping{
-		From:         m.From,
-		Regexp:       m.Regexp,
-		Type:         mappingType,
-		UpstreamName: upstreamName,
+func (m yamlStaticEndpoint) toMapping(upstreamName string) StaticEndpoint {
+	return StaticEndpoint{
+		To: m.To,
+		BaseEndpoint: BaseEndpoint{
+			From:         m.From,
+			Regexp:       m.Regexp,
+			UpstreamName: upstreamName,
+		},
 	}
 }
 
@@ -58,26 +60,26 @@ func loadFromFile(pathToFile string) (upstreams []Upstream, err error) {
 	upstreams = make([]Upstream, 0)
 
 	rootUpstream := Upstream{
-		Mappings: make([]Mapping, 0),
-		Name:     nameFromFilePath(pathToFile),
-		Origin:   origin,
+		StaticEndpoints: make([]StaticEndpoint, 0),
+		Name:            nameFromFilePath(pathToFile),
+		Origin:          origin,
 	}
 
 	for _, m := range yamlFile.Static {
-		rootUpstream.Mappings = append(rootUpstream.Mappings, m.toMapping(MappingTypeStatic, rootUpstream.Name))
+		rootUpstream.StaticEndpoints = append(rootUpstream.StaticEndpoints, m.toMapping(rootUpstream.Name))
 	}
 
 	upstreams = append(upstreams, rootUpstream)
 
 	for _, u := range yamlFile.Upstreams {
 		innerUpstream := Upstream{
-			Mappings: make([]Mapping, 0),
-			Name:     u.Name,
-			Origin:   origin,
+			StaticEndpoints: make([]StaticEndpoint, 0),
+			Name:            u.Name,
+			Origin:          origin,
 		}
 
 		for _, m := range u.Static {
-			innerUpstream.Mappings = append(innerUpstream.Mappings, m.toMapping(MappingTypeStatic, innerUpstream.Name))
+			innerUpstream.StaticEndpoints = append(innerUpstream.StaticEndpoints, m.toMapping(innerUpstream.Name))
 		}
 
 		upstreams = append(upstreams, innerUpstream)

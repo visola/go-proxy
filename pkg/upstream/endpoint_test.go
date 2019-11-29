@@ -16,13 +16,13 @@ func TestMatches(t *testing.T) {
 }
 
 func testDoesntMatch(t *testing.T) {
-	m := Mapping{}
+	m := BaseEndpoint{}
 	req := httptest.NewRequest(http.MethodGet, "http://nowhere.com/another", strings.NewReader("Some Body"))
 	assert.Equal(t, false, m.Matches(*req))
 }
 
 func testMatchesByFrom(t *testing.T) {
-	m := Mapping{
+	m := BaseEndpoint{
 		From: "/test",
 	}
 
@@ -31,7 +31,7 @@ func testMatchesByFrom(t *testing.T) {
 }
 
 func testMatchesByRegexp(t *testing.T) {
-	m := Mapping{
+	m := BaseEndpoint{
 		Regexp: "/.*/more/(.*)",
 	}
 

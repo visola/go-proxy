@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/visola/go-proxy/pkg/handler"
 	"github.com/visola/go-proxy/pkg/httputil"
 	"github.com/visola/go-proxy/pkg/upstream"
 )
@@ -19,14 +18,9 @@ func handleRequest(listenerToHandle Listener, req *http.Request, resp http.Respo
 			continue
 		}
 
-		for _, candidateMapping := range candidateUpstream.Mappings {
-			candidateHandler, existsHandler := handler.Handlers[candidateMapping.Type]
-			if !existsHandler {
-				continue
-			}
-
-			if candidateMapping.Matches(*req) {
-				handleResponse := candidateHandler.Handle(candidateMapping, *req)
+		for _, candidateEndpoint := range candidateUpstream.Endpoints() {
+			if candidateEndpoint.Matches(*req) {
+				handleResponse := candidateEndpoint.Handle(*req)
 				handled = true
 
 				for name, values := range handleResponse.Headers {
@@ -35,21 +29,25 @@ func handleRequest(listenerToHandle Listener, req *http.Request, resp http.Respo
 					}
 				}
 
-				resp.WriteHeader(handleResponse.ResponseCode)
-
-				defer handleResponse.Body.Close()
-				if handleResponse.ErrorMessage == "" {
-					bufferedReader := bufio.NewReader(handleResponse.Body)
-					buffer := make([]byte, 512)
-					for {
-						bytesRead, readErr := bufferedReader.Read(buffer)
-						if readErr == io.EOF {
-							break
-						}
-						resp.Write(buffer[:bytesRead])
-					}
-				} else {
+				if handleResponse.ErrorMessage != "" {
+					resp.WriteHeader(http.StatusInternalServerError)
 					resp.Write([]byte(handleResponse.ErrorMessage))
+				} else {
+					resp.WriteHeader(handleResponse.ResponseCode)
+
+					if handleResponse.Body != nil {
+						defer handleResponse.Body.Close()
+
+						bufferedReader := bufio.NewReader(handleResponse.Body)
+						buffer := make([]byte, 512)
+						for {
+							bytesRead, readErr := bufferedReader.Read(buffer)
+							if readErr == io.EOF {
+								break
+							}
+							resp.Write(buffer[:bytesRead])
+						}
+					}
 				}
 			}
 		}

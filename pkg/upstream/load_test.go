@@ -69,15 +69,13 @@ func TestNameFromFilePath(t *testing.T) {
 }
 
 func assertMappings(t *testing.T, u Upstream) {
-	require.Equal(t, 2, len(u.Mappings))
+	require.Equal(t, 2, len(u.StaticEndpoints))
 
-	firstMapping := u.Mappings[0]
+	firstMapping := u.StaticEndpoints[0]
 	assert.Equal(t, "/first", firstMapping.From)
-	assert.Equal(t, MappingTypeStatic, firstMapping.Type)
 	assert.Equal(t, u.Name, firstMapping.UpstreamName)
 
-	secondMapping := u.Mappings[1]
+	secondMapping := u.StaticEndpoints[1]
 	assert.Equal(t, "/second", secondMapping.Regexp)
-	assert.Equal(t, MappingTypeStatic, secondMapping.Type)
 	assert.Equal(t, u.Name, secondMapping.UpstreamName)
 }
