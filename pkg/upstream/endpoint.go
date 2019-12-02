@@ -18,8 +18,8 @@ type HandleResult struct {
 
 // Endpoint represents one route inside an Upstream
 type Endpoint interface {
-	Handle(http.Request) HandleResult
-	Matches(http.Request) bool
+	Handle(*http.Request, http.ResponseWriter) HandleResult
+	Matches(*http.Request) bool
 }
 
 // BaseEndpoint represents a base endpoint route
@@ -32,7 +32,7 @@ type BaseEndpoint struct {
 }
 
 // Matches check if the request matches the request
-func (m *BaseEndpoint) Matches(req http.Request) bool {
+func (m *BaseEndpoint) Matches(req *http.Request) bool {
 	if m.From != "" && strings.HasPrefix(req.URL.Path, m.From) {
 		return true
 	}

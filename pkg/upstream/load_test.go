@@ -51,13 +51,13 @@ upstreams:
 	assert.Equal(t, filepath.Base(dir), baseUpstream.Name)
 	assert.Equal(t, baseUpstream.Origin.File, tempFile)
 
-	assertMappings(t, baseUpstream)
+	assertStaticEndpoints(t, baseUpstream)
 
 	innerUpstream := loadedUpstreams[1]
 	assert.Equal(t, "backend", innerUpstream.Name)
 	assert.Equal(t, innerUpstream.Origin.File, tempFile)
 
-	assertMappings(t, innerUpstream)
+	assertStaticEndpoints(t, innerUpstream)
 }
 
 func TestNameFromFilePath(t *testing.T) {
@@ -68,14 +68,14 @@ func TestNameFromFilePath(t *testing.T) {
 	assert.Equal(t, "backend", parentName)
 }
 
-func assertMappings(t *testing.T, u Upstream) {
+func assertStaticEndpoints(t *testing.T, u Upstream) {
 	require.Equal(t, 2, len(u.StaticEndpoints))
 
-	firstMapping := u.StaticEndpoints[0]
-	assert.Equal(t, "/first", firstMapping.From)
-	assert.Equal(t, u.Name, firstMapping.UpstreamName)
+	firstEndpoint := u.StaticEndpoints[0]
+	assert.Equal(t, "/first", firstEndpoint.From)
+	assert.Equal(t, u.Name, firstEndpoint.UpstreamName)
 
-	secondMapping := u.StaticEndpoints[1]
-	assert.Equal(t, "/second", secondMapping.Regexp)
-	assert.Equal(t, u.Name, secondMapping.UpstreamName)
+	secondEndpoint := u.StaticEndpoints[1]
+	assert.Equal(t, "/second", secondEndpoint.Regexp)
+	assert.Equal(t, u.Name, secondEndpoint.UpstreamName)
 }

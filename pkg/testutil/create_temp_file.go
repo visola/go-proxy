@@ -6,6 +6,7 @@ import (
 	"testing"
 )
 
+// CreateTempFile creates a temporary file with the specified content
 func CreateTempFile(t *testing.T, pattern string, content string) *os.File {
 	tempFile, err := ioutil.TempFile("", pattern)
 	if err != nil {

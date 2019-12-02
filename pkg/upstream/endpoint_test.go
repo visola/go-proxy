@@ -18,7 +18,7 @@ func TestMatches(t *testing.T) {
 func testDoesntMatch(t *testing.T) {
 	m := BaseEndpoint{}
 	req := httptest.NewRequest(http.MethodGet, "http://nowhere.com/another", strings.NewReader("Some Body"))
-	assert.Equal(t, false, m.Matches(*req))
+	assert.Equal(t, false, m.Matches(req))
 }
 
 func testMatchesByFrom(t *testing.T) {
@@ -27,7 +27,7 @@ func testMatchesByFrom(t *testing.T) {
 	}
 
 	req := httptest.NewRequest(http.MethodGet, "http://nowhere.com/test", strings.NewReader("Some Body"))
-	assert.Equal(t, true, m.Matches(*req))
+	assert.Equal(t, true, m.Matches(req))
 }
 
 func testMatchesByRegexp(t *testing.T) {
@@ -36,5 +36,5 @@ func testMatchesByRegexp(t *testing.T) {
 	}
 
 	req := httptest.NewRequest(http.MethodGet, "http://nowhere.com/test/more/complex", strings.NewReader("Some Body"))
-	assert.Equal(t, true, m.Matches(*req))
+	assert.Equal(t, true, m.Matches(req))
 }
