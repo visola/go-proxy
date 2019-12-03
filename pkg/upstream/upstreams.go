@@ -4,15 +4,25 @@ import "sync"
 
 // Upstream represents a place where requests can be directed to
 type Upstream struct {
-	Mappings []Mapping      `json:"mappings"`
-	Name     string         `json:"name"`
-	Origin   UpstreamOrigin `json:"origin"`
+	StaticEndpoints []*StaticEndpoint `json:"staticEndpoints"`
+	Name            string            `json:"name"`
+	Origin          UpstreamOrigin    `json:"origin"`
 }
 
 // UpstreamOrigin is where the upstream was loaded from
 type UpstreamOrigin struct {
 	File     string `json:"file"`
 	LoadedAt int64  `json:"loadedAt"`
+}
+
+func (u Upstream) Endpoints() []Endpoint {
+	allEndpoints := make([]Endpoint, 0)
+
+	for _, m := range u.StaticEndpoints {
+		allEndpoints = append(allEndpoints, m)
+	}
+
+	return allEndpoints
 }
 
 // Stores upstreams in a map using the name as key
