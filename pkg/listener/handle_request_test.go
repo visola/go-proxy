@@ -4,20 +4,20 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/visola/go-proxy/pkg/testutil"
 	"github.com/visola/go-proxy/pkg/upstream"
 )
 
 func TestHandleRequest(t *testing.T) {
 	t.Run("No enabled upstreams", testNoEnabledUpstreams)
 	t.Run("Enabled upstream with no endpoints", testWithEnabledUpstreamNoEndpoints)
-	t.Run("Enabled upstream with endpoints", testWithMatchingStaticEndpoint)
+	t.Run("Enabled upstream with endpoints", testutil.WithTempDir(t, testWithMatchingStaticEndpoint))
 }
 
 func testNoEnabledUpstreams(t *testing.T) {
@@ -58,16 +58,9 @@ func testWithEnabledUpstreamNoEndpoints(t *testing.T) {
 	assert.Equal(t, http.StatusNotFound, resp.Code)
 }
 
-func testWithMatchingStaticEndpoint(t *testing.T) {
-	dir, err := ioutil.TempDir("", "frontend")
-	if err != nil {
-		assert.FailNow(t, "Error while creating temp dir", err)
-	}
-
-	defer os.RemoveAll(dir)
-
+func testWithMatchingStaticEndpoint(t *testing.T, tempDir string) {
 	fileContent := "Hello world!"
-	tempFile := filepath.Join(dir, "hello.txt")
+	tempFile := filepath.Join(tempDir, "hello.txt")
 	if err := ioutil.WriteFile(tempFile, []byte(fileContent), 0666); err != nil {
 		assert.FailNow(t, "Error while writing to temp file", err)
 	}
@@ -81,7 +74,7 @@ func testWithMatchingStaticEndpoint(t *testing.T) {
 					BaseEndpoint: upstream.BaseEndpoint{
 						From: "/test",
 					},
-					To: dir,
+					To: tempDir,
 				},
 			},
 		},
