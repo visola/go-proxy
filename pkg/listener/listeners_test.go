@@ -20,7 +20,7 @@ func testDisableUpstreamInListener(t *testing.T) {
 
 	SetUpstreamState(listenerPort, upstreamName, false)
 
-	listeners := GetListeners()
+	listeners := Listeners()
 
 	require.Equal(t, 1, len(listeners), "Should contain one listener")
 
@@ -39,7 +39,7 @@ func testEnableUpstreamInListener(t *testing.T) {
 
 	SetUpstreamState(listenerPort, upstreamName, true)
 
-	listeners := GetListeners()
+	listeners := Listeners()
 
 	require.Equal(t, 1, len(listeners), "Should contain one listener")
 

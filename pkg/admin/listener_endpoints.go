@@ -35,7 +35,7 @@ func enableUpstream(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if _, ok := listener.GetListeners()[listenerPort]; !ok {
+	if _, ok := listener.Listeners()[listenerPort]; !ok {
 		httputil.NotFound(req, resp, fmt.Sprintf("Listener not found with port: %d", listenerPort))
 		return
 	}
@@ -43,7 +43,7 @@ func enableUpstream(resp http.ResponseWriter, req *http.Request) {
 	listener.SetUpstreamState(listenerPort, upstreamName, true)
 
 	result := UpstreamStateChangeResult{
-		Listener: listener.GetListeners()[listenerPort],
+		Listener: listener.Listeners()[listenerPort],
 		Upstream: upstreamFound,
 	}
 

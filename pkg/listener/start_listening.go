@@ -22,7 +22,7 @@ func startListener(listernerConfiguration ListenerConfiguration) {
 	})
 
 	proxyServer.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		listenerToHandle := GetListeners()[listernerConfiguration.Port]
+		listenerToHandle := Listeners()[listernerConfiguration.Port]
 		handleRequest(listenerToHandle, req, w)
 	})
 

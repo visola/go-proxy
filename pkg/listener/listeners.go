@@ -38,9 +38,8 @@ func ActivateListener(newConfig ListenerConfiguration) {
 	}
 }
 
-// GetListeners return a copy of the listeners in the current state
-func GetListeners() map[int]Listener {
-	// TODO - rename GetListeners -> Listeners
+// Listeners return a copy of the listeners in the current state
+func Listeners() map[int]Listener {
 	result := make(map[int]Listener)
 	for k, v := range currentListeners {
 		result[k] = *v
