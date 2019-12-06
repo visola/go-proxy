@@ -41,18 +41,21 @@ func testSavesAndLoadsCorrecty(t *testing.T, tempDir string) {
 	saveErr := SaveToPersistedState()
 	require.Nil(t, saveErr, "Should save correctly")
 
-	// Then loading the persisted state should contain the correct information
+	// Then loading the persisted state should work
 	loadErr := LoadFromPersistedState()
 	require.Nil(t, loadErr, "Should load correctly")
 
+	// And should contain the saved listener
 	allListeners := listener.Listeners()
 	assert.Equal(t, 1, len(allListeners))
 
+	// And listener should have correct information
 	loadedTestListener, listenerExists := allListeners[testListenerConfig.Port]
 	require.True(t, listenerExists, "Should load correct listeners")
 	assert.Equal(t, testListenerConfig.Name, loadedTestListener.Configuration.Name)
 	assert.Equal(t, testListenerConfig.Port, loadedTestListener.Configuration.Port)
 
+	// And listener should have correctly enabled upstream
 	require.Equal(t, 1, len(loadedTestListener.EnabledUpstreams), "Should have one active upstream")
 	assert.Equal(t, testUpstream.Name, loadedTestListener.EnabledUpstreams[0])
 }
