@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/visola/go-proxy/pkg/configuration"
 	"github.com/visola/go-proxy/pkg/httputil"
 	"github.com/visola/go-proxy/pkg/listener"
 	"github.com/visola/go-proxy/pkg/upstream"
@@ -35,15 +36,18 @@ func enableUpstream(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if _, ok := listener.GetListeners()[listenerPort]; !ok {
+	if _, ok := listener.Listeners()[listenerPort]; !ok {
 		httputil.NotFound(req, resp, fmt.Sprintf("Listener not found with port: %d", listenerPort))
 		return
 	}
 
 	listener.SetUpstreamState(listenerPort, upstreamName, true)
+	if err := configuration.SaveToPersistedState(); err != nil {
+		httputil.InternalError(req, resp, err)
+	}
 
 	result := UpstreamStateChangeResult{
-		Listener: listener.GetListeners()[listenerPort],
+		Listener: listener.Listeners()[listenerPort],
 		Upstream: upstreamFound,
 	}
 
