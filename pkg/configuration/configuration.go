@@ -4,16 +4,20 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"sync"
 
 	"github.com/visola/go-proxy/pkg/listener"
 	"gopkg.in/yaml.v2"
 )
 
+// Configuration represents a configuration state for the proxy
 type Configuration struct {
 	Listeners map[int]listener.Listener
 }
 
 const currentStateFile = ".current_configuration"
+
+var currentStateFileMutex sync.Mutex
 
 // LoadFromPersistedState initializes the current configuration from the persisted state
 func LoadFromPersistedState() error {
@@ -22,7 +26,7 @@ func LoadFromPersistedState() error {
 		return configDirErr
 	}
 
-	config, configErr := loadConfiguration(configDir, currentStateFile)
+	config, configErr := loadConfiguration(path.Join(configDir, currentStateFile))
 	if configErr != nil {
 		return configErr
 	}
@@ -41,10 +45,27 @@ func LoadFromPersistedState() error {
 	return nil
 }
 
-func loadConfiguration(configDir string, statePath string) (Configuration, error) {
+// SaveToPersistedState saves the current state to the persisted state file in the configuration directory
+func SaveToPersistedState() error {
+	configDir, configDirErr := GetConfigurationDirectory()
+	if configDirErr != nil {
+		return configDirErr
+	}
+
+	toSave := Configuration{
+		Listeners: listener.Listeners(),
+	}
+
+	currentStateFileMutex.Lock()
+	defer currentStateFileMutex.Unlock()
+
+	return saveConfiguration(toSave, path.Join(configDir, currentStateFile))
+}
+
+func loadConfiguration(statePath string) (Configuration, error) {
 	result := Configuration{}
 
-	configContent, readErr := ioutil.ReadFile(path.Join(configDir, currentStateFile))
+	configContent, readErr := ioutil.ReadFile(statePath)
 	if os.IsNotExist(readErr) {
 		return result, nil
 	}
@@ -55,4 +76,13 @@ func loadConfiguration(configDir string, statePath string) (Configuration, error
 
 	unmarshalErr := yaml.Unmarshal(configContent, &result)
 	return result, unmarshalErr
+}
+
+func saveConfiguration(toSave Configuration, statePath string) error {
+	data, marshalErr := yaml.Marshal(toSave)
+	if marshalErr != nil {
+		return marshalErr
+	}
+
+	return ioutil.WriteFile(statePath, data, 0644)
 }
