@@ -3,7 +3,7 @@ module github.com/visola/go-proxy
 go 1.12
 
 require (
-	github.com/gobuffalo/packr v1.30.1 // indirect
+	github.com/gobuffalo/packr v1.30.1
 	github.com/gorilla/mux v1.7.3
 	github.com/spf13/pflag v1.0.3
 	github.com/stretchr/testify v1.4.0

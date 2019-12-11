@@ -18,6 +18,7 @@ type UpstreamStateChangeResult struct {
 }
 
 func registerListenerEndpoints(router *mux.Router) {
+	router.HandleFunc("/listeners", getListeners).Methods(http.MethodGet)
 	router.HandleFunc("/listeners/{listenerPort}/upstreams/{upstreamName}", enableUpstream).Methods(http.MethodPut)
 }
 
@@ -52,4 +53,8 @@ func enableUpstream(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	httputil.RespondWithJSON(result, resp, req)
+}
+
+func getListeners(resp http.ResponseWriter, req *http.Request) {
+	httputil.RespondWithJSON(listener.Listeners(), resp, req)
 }
