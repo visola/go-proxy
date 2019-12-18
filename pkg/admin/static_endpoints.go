@@ -8,6 +8,6 @@ import (
 )
 
 func registerStaticEndpoints(router *mux.Router) {
-	box := packr.NewBox("../../web") // Relative to this file
+	box := packr.NewBox("../../web/dist") // Relative to this file
 	router.Handle("/{file:.*}", http.FileServer(box))
 }
