@@ -2,12 +2,18 @@
   "name": "go-proxy",
   "description": "Admin frontend for the go-proxy.",
   "scripts": {
-    "build": "webpack"
+    "build": "rm -Rf dist && webpack --mode production",
+    "watch": "rm -Rf dist && webpack --watch --mode development"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^5.1.1",
     "html-webpack-plugin": "^3.2.0",
+    "vue-loader": "^15.8.3",
+    "vue-template-compiler": "^2.6.11",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10"
+  },
+  "dependencies": {
+    "vue": "^2.6.11"
   }
 }
