@@ -1,7 +1,9 @@
 const CopyPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
-const VueLoaderPlugin = require('vue-loader/lib/plugin')
+
+const mode = process.env.NODE_ENV || 'development';
+const prod = mode === 'production';
 
 module.exports = {
   devtool: 'inline-source-map', 
@@ -9,12 +11,22 @@ module.exports = {
 
   module: {
     rules: [
-      { test: /\.vue$/, loader: 'vue-loader' },
+      {
+        test: /\.svelte$/,
+        use: {
+          loader: 'svelte-loader',
+          options: {
+            emitCss: true,
+            hotReload: true
+          }
+        }
+      },
     ]
   },
 
   output: {
-    filename: 'main.js',
+    chunkFilename: '[name].[id].js',
+    filename: '[name].js',
     path: path.resolve(__dirname, 'dist'),
   },
 
@@ -27,7 +39,13 @@ module.exports = {
       template: 'src/html/index.html',
       title: 'go-proxy admin',
     }),
+  ],
 
-    new VueLoaderPlugin(),
-  ]
+  resolve: {
+    alias: {
+      svelte: path.resolve('node_modules', 'svelte')
+    },
+    extensions: ['.mjs', '.js', '.svelte'],
+    mainFields: ['svelte', 'browser', 'module', 'main']
+  },
 };
