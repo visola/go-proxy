@@ -1,8 +1,9 @@
-import Vue from 'vue';
+import App from './App.svelte';
 
-import App from './components/App.vue';
-
-new Vue({
-  el: '#app',
-  render: h => h(App),
+const app = new App({
+	target: document.body
 });
+
+window.app = app;
+
+export default app;
