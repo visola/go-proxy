@@ -118,10 +118,14 @@ func (mapping Mapping) WithReplacedVariables(context map[string]string) Mapping 
 func (mapping *Mapping) matchForProxyWithFrom(req *http.Request) *MatchResult {
 	newPath := req.URL.Path[len(mapping.From):]
 
-	if strings.HasPrefix(newPath, "/") {
-		newPath = mapping.To + newPath
+	if newPath == "" {
+		newPath = mapping.To
 	} else {
-		newPath = mapping.To + "/" + newPath
+		if strings.HasPrefix(newPath, "/") {
+			newPath = mapping.To + newPath
+		} else {
+			newPath = mapping.To + "/" + newPath
+		}
 	}
 
 	return &MatchResult{

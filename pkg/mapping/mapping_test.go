@@ -11,6 +11,7 @@ import (
 func TestMatch(t *testing.T) {
 	t.Run("Returns nil if does't match", testNoMatch)
 	t.Run("Matches Path to proxy", testMatchProxyPath)
+	t.Run("Matches Path to proxy and doesn't add slash at the end", testMatchDoesntAddSlashAtTheEnd)
 	t.Run("Matches Path to static", testMatchStaticPath)
 	t.Run("Matches Regexp", testMatchRegexp)
 
@@ -37,6 +38,25 @@ func testMatchProxyPath(t *testing.T) {
 	assert.Equal(t, "http://nowhere.com/another/path", matchResult.NewPath, "Should return new path")
 	assert.Equal(t, mapping, matchResult.Mapping, "Should set self as the mapping in result")
 	assert.Equal(t, []string{"/some/path"}, matchResult.Parts, "Should set path as part")
+}
+
+func testMatchDoesntAddSlashAtTheEnd(t *testing.T) {
+	req, _ := http.NewRequest(http.MethodGet, "https://localhost:12312/some", nil)
+
+	mapping := Mapping{
+		From:  "/some",
+		To:    "http://nowhere.com/another",
+		Proxy: true,
+	}
+
+	matchResult := mapping.Match(req)
+	assert.NotNil(t, matchResult, "Should match path")
+	if matchResult == nil {
+		log.Fatal("Should've matched path")
+	}
+	assert.Equal(t, "http://nowhere.com/another", matchResult.NewPath, "Should return new path")
+	assert.Equal(t, mapping, matchResult.Mapping, "Should set self as the mapping in result")
+	assert.Equal(t, []string{"/some"}, matchResult.Parts, "Should set path as part")
 }
 
 func testMatchStaticPath(t *testing.T) {
