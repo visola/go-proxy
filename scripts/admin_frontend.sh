@@ -10,4 +10,4 @@ pushd $WEB_DIR >> /dev/null
 npm install
 npm run build
 
-popd $WEB_DIR >> /dev/null
+popd >> /dev/null
