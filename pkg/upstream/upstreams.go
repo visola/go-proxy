@@ -6,6 +6,7 @@ import "sync"
 type Upstream struct {
 	Name            string            `json:"name"`
 	Origin          Origin            `json:"origin"`
+	ProxyEndpoints  []*ProxyEndpoint  `json:"proxyEndpoints"`
 	StaticEndpoints []*StaticEndpoint `json:"staticEndpoints"`
 }
 
@@ -18,6 +19,10 @@ type Origin struct {
 // Endpoints returns all the endpoints available for the upstream
 func (u Upstream) Endpoints() []Endpoint {
 	allEndpoints := make([]Endpoint, 0)
+
+	for _, m := range u.ProxyEndpoints {
+		allEndpoints = append(allEndpoints, m)
+	}
 
 	for _, m := range u.StaticEndpoints {
 		allEndpoints = append(allEndpoints, m)
