@@ -15,6 +15,7 @@ type Origin struct {
 	LoadedAt int64  `json:"loadedAt"`
 }
 
+// Endpoints returns all the endpoints available for the upstream
 func (u Upstream) Endpoints() []Endpoint {
 	allEndpoints := make([]Endpoint, 0)
 
