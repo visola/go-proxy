@@ -10,7 +10,7 @@ func TestUpstreamsPerFile(t *testing.T) {
 	// Ensure no upstreams
 	upstreams = make(map[string]Upstream, 0)
 
-	firstOrigin := UpstreamOrigin{
+	firstOrigin := Origin{
 		File:     "/some/place/first",
 		LoadedAt: 10,
 	}
@@ -26,7 +26,7 @@ func TestUpstreamsPerFile(t *testing.T) {
 		},
 	})
 
-	secondOrigin := UpstreamOrigin{
+	secondOrigin := Origin{
 		File:     "/another/file/second",
 		LoadedAt: 20,
 	}

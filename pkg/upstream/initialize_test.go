@@ -21,7 +21,7 @@ upstreams:
 	tempFile := testutil.CreateTempFile(t, fileName, fileContent)
 	defer os.Remove(tempFile.Name())
 
-	origin := UpstreamOrigin{
+	origin := Origin{
 		File:     tempFile.Name(),
 		LoadedAt: 10,
 	}

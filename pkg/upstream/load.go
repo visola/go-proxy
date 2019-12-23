@@ -52,7 +52,7 @@ func loadFromFile(pathToFile string) (upstreams []Upstream, err error) {
 		return upstreams, statsErr
 	}
 
-	origin := UpstreamOrigin{
+	origin := Origin{
 		File:     pathToFile,
 		LoadedAt: stats.ModTime().Unix(),
 	}

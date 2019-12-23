@@ -4,13 +4,13 @@ import "sync"
 
 // Upstream represents a place where requests can be directed to
 type Upstream struct {
-	StaticEndpoints []*StaticEndpoint `json:"staticEndpoints"`
 	Name            string            `json:"name"`
-	Origin          UpstreamOrigin    `json:"origin"`
+	Origin          Origin            `json:"origin"`
+	StaticEndpoints []*StaticEndpoint `json:"staticEndpoints"`
 }
 
-// UpstreamOrigin is where the upstream was loaded from
-type UpstreamOrigin struct {
+// Origin is where the upstream was loaded from
+type Origin struct {
 	File     string `json:"file"`
 	LoadedAt int64  `json:"loadedAt"`
 }
