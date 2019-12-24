@@ -21,25 +21,22 @@ type ProxyEndpoint struct {
 
 // Handle handles requests proxying the content to another HTTP server
 func (p *ProxyEndpoint) Handle(req *http.Request, resp http.ResponseWriter) HandleResult {
-	// TODO - Refactor this to avoid duplication
-	// if r := p.ensureRegexp(); r != nil {
-	// 	matched := r.FindStringSubmatch(req.URL.Path)
-	// 	if len(matched) > 0 {
-	// 		newPath := p.To
-	// 		for index, part := range matched[1:] {
-	// 			newPath = strings.Replace(newPath, fmt.Sprintf("$%d", index+1), part, -1)
-	// 		}
+	var newURL *url.URL
+	var parseErr error
 
-	// 		return proxyHandleResult(p, newPath, req, resp)
-	// 	}
-	// }
-
-	newURL, parseErr := url.Parse(p.To)
-	if parseErr != nil {
-		return internalServerError(p.UpstreamName+":[error]", req, resp, parseErr)
+	if p.Regexp != "" {
+		newURL, parseErr = url.Parse(replaceRegexp(req.URL.Path, p.To, p.ensureRegexp()))
+		if parseErr != nil {
+			return internalServerError(p.UpstreamName+":[error]", req, resp, parseErr)
+		}
+	} else {
+		newURL, parseErr = url.Parse(p.To)
+		if parseErr != nil {
+			return internalServerError(p.UpstreamName+":[error]", req, resp, parseErr)
+		}
+		newURL.Path = newURL.Path + "/" + req.URL.Path[len(p.From):]
 	}
 
-	newURL.Path = newURL.Path + "/" + req.URL.Path[len(p.From):]
 	return proxyHandleResult(p, newURL, req, resp)
 }
 
