@@ -2,7 +2,6 @@ package upstream
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"mime"
@@ -23,16 +22,8 @@ type StaticEndpoint struct {
 
 // Handle handles incoming request matching to files in disk
 func (s *StaticEndpoint) Handle(req *http.Request, resp http.ResponseWriter) HandleResult {
-	if r := s.ensureRegexp(); r != nil {
-		matched := r.FindStringSubmatch(req.URL.Path)
-		if len(matched) > 0 {
-			newPath := s.To
-			for index, part := range matched[1:] {
-				newPath = strings.Replace(newPath, fmt.Sprintf("$%d", index+1), part, -1)
-			}
-
-			return staticHandleResult(s, newPath, req, resp)
-		}
+	if s.Regexp != "" {
+		return staticHandleResult(s, replaceRegexp(req.URL.Path, s.To, s.ensureRegexp()), req, resp)
 	}
 
 	return staticHandleResult(s, path.Join(s.To, req.URL.Path[len(s.From):]), req, resp)

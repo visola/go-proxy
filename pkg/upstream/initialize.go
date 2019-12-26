@@ -10,6 +10,7 @@ import (
 
 var filesToLoad = make(chan string)
 
+// Initialize loads all upstreams and initalize a routine to refresh the read files
 func Initialize(baseDir string) {
 	log.Printf("Initializing upstreams...")
 	for i := 0; i < 5; i++ {

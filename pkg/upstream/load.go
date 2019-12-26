@@ -9,13 +9,33 @@ import (
 )
 
 type upstreamFile struct {
+	Proxy     []yamlProxyEndpoint
 	Static    []yamlStaticEndpoint
-	Upstreams []yamlUpstream
+	Upstreams map[string]yamlUpstream
 }
 
 type yamlUpstream struct {
-	Name   string
+	Proxy  []yamlProxyEndpoint
 	Static []yamlStaticEndpoint
+}
+
+type yamlProxyEndpoint struct {
+	From    string
+	Headers map[string]arrayOrString
+	Regexp  string
+	To      string
+}
+
+func (m yamlProxyEndpoint) toEndpoint(upstreamName string) *ProxyEndpoint {
+	return &ProxyEndpoint{
+		Headers: FromMapOfArrayOfStrings(m.Headers),
+		To:      m.To,
+		BaseEndpoint: BaseEndpoint{
+			From:         m.From,
+			Regexp:       m.Regexp,
+			UpstreamName: upstreamName,
+		},
+	}
 }
 
 type yamlStaticEndpoint struct {
@@ -52,7 +72,7 @@ func loadFromFile(pathToFile string) (upstreams []Upstream, err error) {
 		return upstreams, statsErr
 	}
 
-	origin := UpstreamOrigin{
+	origin := Origin{
 		File:     pathToFile,
 		LoadedAt: stats.ModTime().Unix(),
 	}
@@ -65,17 +85,26 @@ func loadFromFile(pathToFile string) (upstreams []Upstream, err error) {
 		Origin:          origin,
 	}
 
+	for _, m := range yamlFile.Proxy {
+		rootUpstream.ProxyEndpoints = append(rootUpstream.ProxyEndpoints, m.toEndpoint(rootUpstream.Name))
+	}
+
 	for _, m := range yamlFile.Static {
 		rootUpstream.StaticEndpoints = append(rootUpstream.StaticEndpoints, m.toEndpoint(rootUpstream.Name))
 	}
 
 	upstreams = append(upstreams, rootUpstream)
 
-	for _, u := range yamlFile.Upstreams {
+	for name, u := range yamlFile.Upstreams {
 		innerUpstream := Upstream{
+			ProxyEndpoints:  make([]*ProxyEndpoint, 0),
 			StaticEndpoints: make([]*StaticEndpoint, 0),
-			Name:            u.Name,
+			Name:            name,
 			Origin:          origin,
+		}
+
+		for _, m := range u.Proxy {
+			innerUpstream.ProxyEndpoints = append(innerUpstream.ProxyEndpoints, m.toEndpoint(innerUpstream.Name))
 		}
 
 		for _, m := range u.Static {

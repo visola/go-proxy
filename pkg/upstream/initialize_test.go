@@ -15,13 +15,13 @@ func TestRefreshStaleUpstreams(t *testing.T) {
 	fileName := "test.yml"
 	fileContent := `
 upstreams:
-  - name: backend
+  backend:
 `
 
 	tempFile := testutil.CreateTempFile(t, fileName, fileContent)
 	defer os.Remove(tempFile.Name())
 
-	origin := UpstreamOrigin{
+	origin := Origin{
 		File:     tempFile.Name(),
 		LoadedAt: 10,
 	}

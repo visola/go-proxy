@@ -2,6 +2,7 @@ package listener
 
 import "sync"
 
+// Listener represents a listener that responds to incoming requests
 type Listener struct {
 	Active           bool                  `json:"active"`
 	Configuration    ListenerConfiguration `json:"configuration"`
@@ -47,37 +48,23 @@ func Listeners() map[int]Listener {
 	return result
 }
 
-// SetUpstreamState enables or disables an upstream in a specific listener
-func SetUpstreamState(listenerPort int, upstreamName string, newState bool) {
+// SetEnabledUpstreams sets the array of upstreams that are enabled for a specific listener
+func SetEnabledUpstreams(listenerPort int, upstreamsToEnable []string) {
 	l, exist := currentListeners[listenerPort]
 
 	if !exist {
 		return
 	}
 
-	currentIndex := -1
-	for i, enabledUpstream := range l.EnabledUpstreams {
-		if enabledUpstream == upstreamName {
-			currentIndex = i
-			break
-		}
-	}
-
 	currentListenersMutex.Lock()
 	defer currentListenersMutex.Unlock()
 
-	if currentIndex == -1 && newState == true {
-		// Not in array, add it
-		l.EnabledUpstreams = append(l.EnabledUpstreams, upstreamName)
-		return
+	l.EnabledUpstreams = make([]string, 0)
+	for _, u := range upstreamsToEnable {
+		l.EnabledUpstreams = append(l.EnabledUpstreams, u)
 	}
 
-	if currentIndex != -1 && newState == false {
-		// In array, remove it
-		newValues := l.EnabledUpstreams
-		copy(newValues[currentIndex:], newValues[currentIndex+1:])
-		l.EnabledUpstreams = newValues[:len(newValues)-1]
-	}
+	currentListeners[listenerPort] = l
 }
 
 // SetListeners reset the current listeners to a new state

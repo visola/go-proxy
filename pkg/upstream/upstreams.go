@@ -4,19 +4,25 @@ import "sync"
 
 // Upstream represents a place where requests can be directed to
 type Upstream struct {
-	StaticEndpoints []*StaticEndpoint `json:"staticEndpoints"`
 	Name            string            `json:"name"`
-	Origin          UpstreamOrigin    `json:"origin"`
+	Origin          Origin            `json:"origin"`
+	ProxyEndpoints  []*ProxyEndpoint  `json:"proxyEndpoints"`
+	StaticEndpoints []*StaticEndpoint `json:"staticEndpoints"`
 }
 
-// UpstreamOrigin is where the upstream was loaded from
-type UpstreamOrigin struct {
+// Origin is where the upstream was loaded from
+type Origin struct {
 	File     string `json:"file"`
 	LoadedAt int64  `json:"loadedAt"`
 }
 
+// Endpoints returns all the endpoints available for the upstream
 func (u Upstream) Endpoints() []Endpoint {
 	allEndpoints := make([]Endpoint, 0)
+
+	for _, m := range u.ProxyEndpoints {
+		allEndpoints = append(allEndpoints, m)
+	}
 
 	for _, m := range u.StaticEndpoints {
 		allEndpoints = append(allEndpoints, m)

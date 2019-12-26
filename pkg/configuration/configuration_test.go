@@ -35,7 +35,7 @@ func testSavesAndLoadsCorrecty(t *testing.T, tempDir string) {
 		Port: 10000,
 	}
 	listener.ActivateListener(testListenerConfig)
-	listener.SetUpstreamState(testListenerConfig.Port, testUpstream.Name, true)
+	listener.SetEnabledUpstreams(testListenerConfig.Port, []string{testUpstream.Name})
 
 	// When I save to persisted state
 	saveErr := SaveToPersistedState()
