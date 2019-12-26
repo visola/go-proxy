@@ -11,11 +11,10 @@ import (
 type upstreamFile struct {
 	Proxy     []yamlProxyEndpoint
 	Static    []yamlStaticEndpoint
-	Upstreams []yamlUpstream
+	Upstreams map[string]yamlUpstream
 }
 
 type yamlUpstream struct {
-	Name   string
 	Proxy  []yamlProxyEndpoint
 	Static []yamlStaticEndpoint
 }
@@ -96,10 +95,11 @@ func loadFromFile(pathToFile string) (upstreams []Upstream, err error) {
 
 	upstreams = append(upstreams, rootUpstream)
 
-	for _, u := range yamlFile.Upstreams {
+	for name, u := range yamlFile.Upstreams {
 		innerUpstream := Upstream{
+			ProxyEndpoints:  make([]*ProxyEndpoint, 0),
 			StaticEndpoints: make([]*StaticEndpoint, 0),
-			Name:            u.Name,
+			Name:            name,
 			Origin:          origin,
 		}
 

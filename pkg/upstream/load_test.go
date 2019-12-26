@@ -29,8 +29,7 @@ static:
     to: /second/different
 
 upstreams:
-  - name: backend
-
+  backend:
     proxy:
       - from: /dynamic
         headers:
