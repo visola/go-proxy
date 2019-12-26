@@ -56,8 +56,8 @@ func enableUpstream(resp http.ResponseWriter, req *http.Request) {
 	listener.SetEnabledUpstreams(listenerPort, upstreamNames)
 
 	result := UpstreamStateChangeResult{
-		Listener: listener.Listeners()[listenerPort],
-		Upstream: loadedUpstreams,
+		Listener:  listener.Listeners()[listenerPort],
+		Upstreams: loadedUpstreams,
 	}
 
 	httputil.RespondWithJSON(result, resp, req)
