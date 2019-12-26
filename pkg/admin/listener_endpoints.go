@@ -12,9 +12,10 @@ import (
 	"github.com/visola/go-proxy/pkg/upstream"
 )
 
+// UpstreamStateChangeResult struct used to show results of listeners/upstreams endpoint
 type UpstreamStateChangeResult struct {
-	Listener listener.Listener   `json:"listener"`
-	Upstream []upstream.Upstream `json:"upstreams"`
+	Listener  listener.Listener   `json:"listener"`
+	Upstreams []upstream.Upstream `json:"upstreams"`
 }
 
 func registerListenerEndpoints(router *mux.Router) {
