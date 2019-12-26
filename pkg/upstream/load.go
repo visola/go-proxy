@@ -9,13 +9,34 @@ import (
 )
 
 type upstreamFile struct {
+	Proxy     []yamlProxyEndpoint
 	Static    []yamlStaticEndpoint
 	Upstreams []yamlUpstream
 }
 
 type yamlUpstream struct {
 	Name   string
+	Proxy  []yamlProxyEndpoint
 	Static []yamlStaticEndpoint
+}
+
+type yamlProxyEndpoint struct {
+	From    string
+	Headers map[string]arrayOrString
+	Regexp  string
+	To      string
+}
+
+func (m yamlProxyEndpoint) toEndpoint(upstreamName string) *ProxyEndpoint {
+	return &ProxyEndpoint{
+		Headers: FromMapOfArrayOfStrings(m.Headers),
+		To:      m.To,
+		BaseEndpoint: BaseEndpoint{
+			From:         m.From,
+			Regexp:       m.Regexp,
+			UpstreamName: upstreamName,
+		},
+	}
 }
 
 type yamlStaticEndpoint struct {
@@ -65,6 +86,10 @@ func loadFromFile(pathToFile string) (upstreams []Upstream, err error) {
 		Origin:          origin,
 	}
 
+	for _, m := range yamlFile.Proxy {
+		rootUpstream.ProxyEndpoints = append(rootUpstream.ProxyEndpoints, m.toEndpoint(rootUpstream.Name))
+	}
+
 	for _, m := range yamlFile.Static {
 		rootUpstream.StaticEndpoints = append(rootUpstream.StaticEndpoints, m.toEndpoint(rootUpstream.Name))
 	}
@@ -76,6 +101,10 @@ func loadFromFile(pathToFile string) (upstreams []Upstream, err error) {
 			StaticEndpoints: make([]*StaticEndpoint, 0),
 			Name:            u.Name,
 			Origin:          origin,
+		}
+
+		for _, m := range u.Proxy {
+			innerUpstream.ProxyEndpoints = append(innerUpstream.ProxyEndpoints, m.toEndpoint(innerUpstream.Name))
 		}
 
 		for _, m := range u.Static {
