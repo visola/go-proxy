@@ -5,8 +5,9 @@ const path = require('path');
 const mode = process.env.NODE_ENV || 'development';
 const prod = mode === 'production';
 
+console.log(`Produ mode: ${prod}`);
 module.exports = {
-  devtool: 'inline-source-map', 
+  devtool: prod ? 'none' : 'inline-source-map', 
   entry: './src/js/main.js',
 
   module: {

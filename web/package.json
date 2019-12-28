@@ -2,7 +2,7 @@
   "name": "go-proxy",
   "description": "Admin frontend for the go-proxy.",
   "scripts": {
-    "build": "rm -Rf dist && webpack --mode production",
+    "build": "rm -Rf dist && NODE_ENV=production webpack --mode production",
     "start": "rm -Rf dist && webpack --watch --mode development"
   },
   "devDependencies": {
