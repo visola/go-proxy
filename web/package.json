@@ -13,6 +13,7 @@
     "webpack-cli": "^3.3.10"
   },
   "dependencies": {
+    "rxjs": "^6.5.4",
     "svelte": "^3.16.5"
   }
 }

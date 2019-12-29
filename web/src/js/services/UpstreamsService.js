@@ -1,13 +1,19 @@
-import { upstreams, loading } from '../stores/upstreamsStore';
+import { BehaviorSubject } from 'rxjs';
 
-export default {
+class UpstreamsService extends BehaviorSubject {
+  constructor() {
+    super();
+    this.next({loading: false, data: null});
+  }
+
   fetch() {
-    loading.set(true);
+    this.next({loading: true, data: null});
     return fetch('/upstreams')
       .then((response) => response.json())
       .then((data) => {
-        loading.set(false);
-        upstreams.set(data);
+        this.next({loading: false, data});
       });
-  },
-};
+  }
+}
+
+export default new UpstreamsService();

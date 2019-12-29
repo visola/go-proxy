@@ -1,42 +1,45 @@
 <script>
 import { onDestroy } from 'svelte';
 
-import { listeners, loading as loadingListeners, selectedListener } from '../stores/listenersStore';
-import ListenersService from '../services/ListenersService';
-
 import Listener from './Listener.svelte';
+import ListenerSelector from './ListenerSelector.svelte';
 
-ListenersService.fetch();
+import listenersService from '../services/listenersService';
 
-function setSelection(event) {
-  ListenersService.setSelected(event.target.value);
+let listeners;
+let loadingListeners = false;
+let selectedListener;
+
+const listenersSubscription = listenersService.subscribe(({ loading, data }) => {
+  loadingListeners = loading;
+  listeners = data;
+});
+
+onDestroy(() => {
+  listenersService.unsubscribe(listenersSubscription);
+});
+
+function selectedListenerChanged(event) {
+  selectedListener = event.detail;
 }
-</script>
 
+listenersService.fetch();
+</script>
 <div class="ui menu">
   <div class="header item">
     go-proxy
   </div>
 </div>
 
-{#if $loadingListeners || $listeners == null || $selectedListener == null}
+{#if loadingListeners || listeners == null }
   <p>Loading...</p>
 {:else}
   <div class="header-justified">
     <div>
-      <label>Listener: </label>
-      {#if $listeners.length == 1}
-        {$listeners[0].configuration.name}
-      {:else}
-        <select on:change={setSelection}>
-          {#each $listeners as listener, index}
-            <option value={index}>{listener.configuration.name} ({listener.configuration.port})</option>
-          {/each}
-        </select>
-      {/if}
+      <ListenerSelector listeners={listeners} on:changed={selectedListenerChanged} />
     </div>
 
-    <Listener listener={$selectedListener} />
+    <Listener listener={selectedListener} />
   </div>
   <hr />
 {/if}

@@ -1,23 +1,19 @@
-import { listeners, loading, selectedListener } from '../stores/listenersStore';
+import { BehaviorSubject } from 'rxjs';
 
-let allListeners;
-listeners.subscribe(v => allListeners = v);
+class ListenersService extends BehaviorSubject {
+  constructor() {
+    super();
+    this.next({loading: false, data: null});
+  }
 
-export default {
   fetch() {
-    loading.set(true);
+    this.next({loading: true, data: null});
     return fetch('/listeners')
       .then((response) => response.json())
       .then((data) => {
-        loading.set(false);
-        listeners.set(data);
-        selectedListener.set(data[0]);
+        this.next({loading: false, data});
       });
-  },
-
-  setSelected(index) {
-    if (index >= 0) {
-      selectedListener.set(allListeners[index]);
-    }
   }
 }
+
+export default new ListenersService();
