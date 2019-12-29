@@ -19,7 +19,6 @@ function setSelection(event) {
   </div>
 </div>
 
-<h2>Listeners</h2>
 {#if $loadingListeners || $listeners == null || $selectedListener == null}
   <p>Loading...</p>
 {:else}
@@ -34,5 +33,6 @@ function setSelection(event) {
     </select>
   {/if}
 
-  <Listener />
+  <hr />
+  <Listener listener={$selectedListener} />
 {/if}
