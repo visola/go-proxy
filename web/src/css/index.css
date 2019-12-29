@@ -1,0 +1,6 @@
+.header-justified {
+  display: flex;
+  flex: 2;
+  justify-content: space-between;
+  padding: 0 20px;
+}

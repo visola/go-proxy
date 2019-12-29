@@ -22,17 +22,21 @@ function setSelection(event) {
 {#if $loadingListeners || $listeners == null || $selectedListener == null}
   <p>Loading...</p>
 {:else}
-  {#if $listeners.length == 1}
-    <label>Listener: </label>{$listeners[0].configuration.name}
-  {:else}
-    <label>Listener: </label>
-    <select on:change={setSelection}>
-      {#each $listeners as listener, index}
-        <option value={index}>{listener.configuration.name} ({listener.configuration.port})</option>
-      {/each}
-    </select>
-  {/if}
+  <div class="header-justified">
+    <div>
+      <label>Listener: </label>
+      {#if $listeners.length == 1}
+        {$listeners[0].configuration.name}
+      {:else}
+        <select on:change={setSelection}>
+          {#each $listeners as listener, index}
+            <option value={index}>{listener.configuration.name} ({listener.configuration.port})</option>
+          {/each}
+        </select>
+      {/if}
+    </div>
 
+    <Listener listener={$selectedListener} />
+  </div>
   <hr />
-  <Listener listener={$selectedListener} />
 {/if}
