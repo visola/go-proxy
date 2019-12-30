@@ -16,4 +16,6 @@ class ListenersService extends BehaviorSubject {
   }
 }
 
-export default new ListenersService();
+const listenersService = new ListenersService();
+listenersService.fetch();
+export default listenersService;

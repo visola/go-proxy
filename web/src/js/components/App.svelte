@@ -5,6 +5,7 @@ import Listener from './Listener.svelte';
 import ListenerSelector from './ListenerSelector.svelte';
 
 import listenersService from '../services/listenersService';
+import upstreamsService from '../services/upstreamsService';
 
 let listeners;
 let loadingListeners = false;
@@ -22,8 +23,6 @@ onDestroy(() => {
 function selectedListenerChanged(event) {
   selectedListener = event.detail;
 }
-
-listenersService.fetch();
 </script>
 <div class="ui menu">
   <div class="header item">
@@ -35,11 +34,11 @@ listenersService.fetch();
   <p>Loading...</p>
 {:else}
   <div class="header-justified">
+    <Listener listener={selectedListener} />
+
     <div>
       <ListenerSelector listeners={listeners} on:changed={selectedListenerChanged} />
     </div>
-
-    <Listener listener={selectedListener} />
   </div>
   <hr />
 {/if}
