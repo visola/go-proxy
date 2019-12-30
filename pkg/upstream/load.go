@@ -80,6 +80,7 @@ func loadFromFile(pathToFile string) (upstreams []Upstream, err error) {
 	upstreams = make([]Upstream, 0)
 
 	rootUpstream := Upstream{
+		ProxyEndpoints:  make([]*ProxyEndpoint, 0),
 		StaticEndpoints: make([]*StaticEndpoint, 0),
 		Name:            nameFromFilePath(pathToFile),
 		Origin:          origin,

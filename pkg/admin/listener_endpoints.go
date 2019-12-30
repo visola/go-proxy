@@ -64,5 +64,14 @@ func enableUpstream(resp http.ResponseWriter, req *http.Request) {
 }
 
 func getListeners(resp http.ResponseWriter, req *http.Request) {
-	httputil.RespondWithJSON(listener.Listeners(), resp, req)
+	listenersMap := listener.Listeners()
+	listenersArray := make([]listener.Listener, len(listenersMap))
+
+	index := 0
+	for _, l := range listenersMap {
+		listenersArray[index] = l
+		index++
+	}
+
+	httputil.RespondWithJSON(listenersArray, resp, req)
 }
