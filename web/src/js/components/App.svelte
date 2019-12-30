@@ -3,9 +3,9 @@ import { onDestroy } from 'svelte';
 
 import Listener from './Listener.svelte';
 import ListenerSelector from './ListenerSelector.svelte';
+import Upstreams from './Upstreams.svelte';
 
 import listenersService from '../services/listenersService';
-import upstreamsService from '../services/upstreamsService';
 
 let listeners;
 let loadingListeners = false;
@@ -24,6 +24,7 @@ function selectedListenerChanged(event) {
   selectedListener = event.detail;
 }
 </script>
+
 <div class="ui menu">
   <div class="header item">
     go-proxy
@@ -41,4 +42,5 @@ function selectedListenerChanged(event) {
     </div>
   </div>
   <hr />
+  <Upstreams listener={selectedListener} />
 {/if}

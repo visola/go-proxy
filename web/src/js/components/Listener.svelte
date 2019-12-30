@@ -1,16 +1,16 @@
 <script>
-  export let listener;
+export let listener;
 
-  function getUrl(listener) {
-    if (isHttps(listener)) {
-      return `https://localhost:${listener.configuration.port}`;
-    }
-    return `http://localhost:${listener.configuration.port}`;
+function getUrl(listener) {
+  if (isHttps(listener)) {
+    return `https://localhost:${listener.configuration.port}`;
   }
+  return `http://localhost:${listener.configuration.port}`;
+}
 
-  function isHttps(listener) {
-    return listener.configuration.certificateFile != "" || listener.configuration.keyFile != "";
-  }
+function isHttps(listener) {
+  return listener.configuration.certificateFile != "" || listener.configuration.keyFile != "";
+}
 </script>
 
 {#if listener == null}

@@ -16,4 +16,6 @@ class UpstreamsService extends BehaviorSubject {
   }
 }
 
-export default new UpstreamsService();
+const upstreamsService = new UpstreamsService();
+upstreamsService.fetch();
+export default upstreamsService;
