@@ -1,6 +1,7 @@
 package upstream
 
 import (
+	"math/rand"
 	"sort"
 	"testing"
 
@@ -8,35 +9,38 @@ import (
 )
 
 func TestEndpointsSorting(t *testing.T) {
-	e1 := &StaticEndpoint{
-		BaseEndpoint: BaseEndpoint{
-			From: "/first/second/third",
-		},
+	expectedPaths := []string{
+		"/another/(.+)/forth",
+		"/first/second/on",
+		"/first/(.+)/on",
+		"/another/second",
+		"/another/(.+)",
+		"/single",
+		"/(.+)",
+		"/",
 	}
 
-	e2 := &StaticEndpoint{
-		BaseEndpoint: BaseEndpoint{
-			Regexp: "/first/(.+)/forth",
-		},
+	arr := make(Endpoints, len(expectedPaths))
+	for i, p := range expectedPaths {
+		if i%2 == 0 {
+			arr[i] = &StaticEndpoint{
+				BaseEndpoint: BaseEndpoint{From: p},
+			}
+		} else {
+			arr[i] = &StaticEndpoint{
+				BaseEndpoint: BaseEndpoint{Regexp: p},
+			}
+		}
 	}
 
-	e3 := &StaticEndpoint{
-		BaseEndpoint: BaseEndpoint{
-			From: "/",
-		},
-	}
+	rand.Seed(10)
+	rand.Shuffle(len(arr), func(i, j int) {
+		arr[i], arr[j] = arr[j], arr[i]
+	})
 
-	e4 := &StaticEndpoint{
-		BaseEndpoint: BaseEndpoint{
-			Regexp: "/another/(.+)",
-		},
-	}
-
-	arr := Endpoints{e2, e3, e1, e4}
 	sort.Sort(arr)
 
-	assert.Equal(t, e1, arr[0])
-	assert.Equal(t, e2, arr[1])
-	assert.Equal(t, e4, arr[2])
-	assert.Equal(t, e3, arr[3])
+	for i := 0; i < len(expectedPaths); i++ {
+		assert.Equal(t, expectedPaths[i], arr[i].Path())
+	}
 }

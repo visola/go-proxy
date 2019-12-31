@@ -26,5 +26,11 @@ func (a Endpoints) Less(i, j int) bool {
 		return len(pathParts1) > len(pathParts2)
 	}
 
-	return path1 > path2
+	for i, pathPart1 := range pathParts1 {
+		if len(pathPart1) != len(pathParts2[i]) {
+			return len(pathPart1) > len(pathParts2[i])
+		}
+	}
+
+	return path1 < path2
 }
