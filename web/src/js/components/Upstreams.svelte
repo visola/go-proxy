@@ -34,6 +34,23 @@ function updateEndpoints() {
     u.proxyEndpoints.forEach(addToEndpoints);
     u.staticEndpoints.forEach(addToEndpoints);
   });
+
+  endpoints.sort((e1, e2) => {
+    const path1 = e1.from == "" ? e1.regexp : e1.from;
+    const path2 = e2.from == "" ? e2.regexp : e2.from;
+
+    const partCountDiff = path2.split("/").length - path1.split("/").length;
+    if (partCountDiff != 0) {
+      return partCountDiff;
+    }
+
+    const pathLengthDiff = path2.length - path1.length;
+    if (pathLengthDiff != 0) {
+      return pathLengthDiff;
+    }
+
+    return path1.localeCompare(path2);
+  });
 }
 
 function upstreamSelected(checked, name) {
