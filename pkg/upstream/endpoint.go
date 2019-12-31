@@ -20,6 +20,7 @@ type HandleResult struct {
 type Endpoint interface {
 	Handle(*http.Request, http.ResponseWriter) HandleResult
 	Matches(*http.Request) bool
+	Path() string
 }
 
 // BaseEndpoint represents a base endpoint route
@@ -42,6 +43,15 @@ func (m *BaseEndpoint) Matches(req *http.Request) bool {
 	}
 
 	return false
+}
+
+// Path returns the matching path for an endpoint
+func (m *BaseEndpoint) Path() string {
+	path := m.From
+	if path == "" {
+		path = m.Regexp
+	}
+	return path
 }
 
 func (m *BaseEndpoint) ensureRegexp() *regexp.Regexp {
