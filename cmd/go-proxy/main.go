@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"path"
 	"strconv"
 
 	flag "github.com/spf13/pflag"
@@ -33,7 +34,7 @@ func main() {
 	listener.StartListening(listenerConfigurations)
 
 	if configDir, err := configuration.GetConfigurationDirectory(); err == nil {
-		upstream.Initialize(configDir)
+		upstream.Initialize(path.Join(configDir, "upstreams"))
 	} else {
 		log.Fatalf("Error while finding configuration directory: %v", err)
 	}
