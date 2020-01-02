@@ -22,29 +22,29 @@ This is what it can do for you:
 
 1. Download the latest release for your system [here](https://github.com/visola/go-proxy/releases/latest)
 2. Unzip it and make the executable available in your path
-3. Create a `~/.go-proxy` directory and add some mapping files
+3. Create a `~/.go-proxy/upstreams` directory and add some mapping files
 4. Run `go-proxy`
 
 You should see something like the following:
 
 ```
 $ go-proxy
-2019/12/31 13:08:59 Initializing go-proxy...
-2019/12/31 13:08:59 Initializing upstreams...
-2019/12/31 13:08:59 Opening admin server at: http://localhost:3000
-2019/12/31 13:08:59 Reading configuration directory: /Users/visola/.go-proxy
-2019/12/31 13:08:59 Starting proxy at: http://localhost:33080
-2019/12/31 13:08:59 Found 4 upstreams in file: /Users/visola/.go-proxy/search.yml
+2020/01/02 06:29:04 Initializing go-proxy...
+2020/01/02 06:29:04 Initializing upstreams...
+2020/01/02 06:29:04 Starting proxy at: http://localhost:33080
+2020/01/02 06:29:04 Reading configuration directory: /Users/visola/.go-proxy/upstreams
+2020/01/02 06:29:04 Opening admin server at: http://localhost:3000
+2020/01/02 06:29:04 Found 4 upstreams in file: /Users/visola/.go-proxy/upstreams/search.yml
 ```
 
 # Endpoints and Upstreams
 
 Endpoints are where requests end up being handled. They represent files on your disk or servers running locally or somewhere else. There are two types of endpoints: static and proxy. Static endpoints serve static files from disk. Proxy endpoints forward requests to HTTP/S servers.
 
-Endpoints are grouped inside Upstreams. Each upstream can have multiple endpoints configured. Upstreams are mapped in YAML files inside the `~/.go-proxy/` directory. Each file in the `~/.go-proxy` directory becomes an upstream named after the file. It can contain both types of endpoints. The following is a YAML file that contains a static and a proxy endpoints:
+Endpoints are grouped inside Upstreams. Each upstream can have multiple endpoints configured. Upstreams are mapped in YAML files inside the `~/.go-proxy/upstreams` directory. Each file in the `~/.go-proxy/upstreams` directory becomes an upstream named after the file. It can contain both types of endpoints. The following is a YAML file that contains a static and a proxy endpoints:
 
 ```yaml
-# ~/.go-proxy/search.yml
+# ~/.go-proxy/upstream/search.yml
 static:
   - from: /static
     to: /Users/visola/www
@@ -97,6 +97,36 @@ proxy:
 ```
 
 would match requests coming to `/index.html` to `https://www.server.com/index.html`. It also matches any subpath like `/images/questionmark.png` to `https://www.server.com/images/questionmark.png`.
+
+## Upstreams inside Upstreams
+
+An Upstream file inside the `~/.go-proxy/upstreams` directory can contain other upstreams mapped under the key `upstreams`. The following is an example of a YAML that would map 4 upstreams: search, bing, duck and google. The first name comes from the file name, the other three are named after the keys in `upstreams` map.
+
+```yaml
+# ~/go-proxy/upstreams/search.yml
+upstreams:
+  bing:
+    proxy:
+      - from: /
+        to: https://www.bing.com
+ 
+  duck:
+    proxy:
+      - from: /
+        to: https://duckduckgo.com/
+
+  google:
+    proxy:
+      - from: /
+        to: https://www.google.com
+
+static:
+  - from: /static
+    to: /Users/visola/temp/find-duplicate-files/
+
+  - from: /another
+    to: /Users/visola/temp/old_go_proxy/
+```
 
 # Listeners
 
