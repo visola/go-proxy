@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/visola/go-proxy/pkg/configuration"
 	"github.com/visola/go-proxy/pkg/httputil"
 	"github.com/visola/go-proxy/pkg/listener"
 	"github.com/visola/go-proxy/pkg/upstream"
@@ -54,6 +55,7 @@ func enableUpstream(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	listener.SetEnabledUpstreams(listenerPort, upstreamNames)
+	configuration.SaveToPersistedState()
 
 	result := UpstreamStateChangeResult{
 		Listener:  listener.Listeners()[listenerPort],
