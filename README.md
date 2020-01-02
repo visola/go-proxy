@@ -22,7 +22,7 @@ This is what it can do for you:
 
 1. Download the latest release for your system [here](https://github.com/visola/go-proxy/releases/latest)
 2. Unzip it and make the executable available in your path
-3. Create a `~/.go-proxy` directory and add a mappings file
+3. Create a `~/.go-proxy` directory and add some mapping files
 4. Run `go-proxy`
 
 You should see something like the following:
@@ -37,18 +37,78 @@ $ go-proxy
 2019/12/31 13:08:59 Found 4 upstreams in file: /Users/visola/.go-proxy/search.yml
 ```
 
-## HTTPS
+# Endpoints and Upstreams
 
-If you want to run using HTTPS, set the following two environment variables:
+Endpoints are where requests end up being handled. They represent files on your disk or servers running locally or somewhere else. There are two types of endpoints: static and proxy. Static endpoints serve static files from disk. Proxy endpoints forward requests to HTTP/S servers.
+
+Endpoints are grouped inside Upstreams. Each upstream can have multiple endpoints configured. Upstreams are mapped in YAML files inside the `~/.go-proxy/` directory. Each file in the `~/.go-proxy` directory becomes an upstream named after the file. It can contain both types of endpoints. The following is a YAML file that contains a static and a proxy endpoints:
+
+```yaml
+# ~/.go-proxy/search.yml
+static:
+  - from: /static
+    to: /Users/visola/www
+
+proxy:
+  - from: /
+    to: https://www.server.com
+```
+
+## Matching
+
+Endpoints match request paths using a from or a regexp definition. 
+
+The from matches any path requested that starts with the specified path. Example, `from: /static` matches all of the following:
 
 ```
-GO_PROXY_CERT_FILE=/path/to/server.crt
-GO_PROXY_CERT_KEY_FILE=/path/to/server.key
+/static/index.html
+/static/sub/main.js
+/static/sub1/sub2/sub3/sub4/sub.js
 ```
 
-# Usage
+Endpoints can also match using regular expressions. For example, `regexp: /static/js(.*\.chunk\.js)` matches all of the following:
 
-<!-- TODO - Fill this up -->
+```
+/static/js.chunk.js
+/static/js12abec3.chunk.js
+/static/js/subchunk/12abec3.chunk.js
+```
+
+## Static Endpoints
+
+Static endpoints serve files from a local directory. The following static endpoint configuration:
+
+```yaml
+static:
+  - from: /static
+    to: /Users/visola/www
+```
+
+would match a request coming to `/static/index.html` to `/Users/visola/www/index.html`. It also servers files in any subdirectory, e.g. `/static/js/main.js` would serve `/Users/visola/www/js/main.js`.
+
+## Proxy endpoints
+
+Proxy endpoints forward requests to another HTTP/S server and sends the response back as a normal proxy does. The following proxy endpoint:
+
+```yaml
+proxy:
+  - from: /
+    to: https://www.server.com
+```
+
+would match requests coming to `/index.html` to `https://www.server.com/index.html`. It also matches any subpath like `/images/questionmark.png` to `https://www.server.com/images/questionmark.png`.
+
+# Listeners
+
+go-proxy uses listeners to handle requests. Each listener listens to requests incoming in a specific port, using HTTP or HTTPS.
+
+Listeners can have different upstreams enabled to handle requests. If no upstreams are enabled, a listener will always return a 404.
+
+<!-- TODO - Explain how to configure listeners -->
+
+## Specificity
+
+<!-- TODO - Explain sorting by specificity -->
 
 # Building go-proxy
 
