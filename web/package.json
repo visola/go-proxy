@@ -1,0 +1,19 @@
+{
+  "name": "go-proxy",
+  "description": "Admin frontend for the go-proxy.",
+  "scripts": {
+    "build": "rm -Rf dist && NODE_ENV=production webpack --mode production",
+    "start": "rm -Rf dist && webpack --watch --mode development"
+  },
+  "devDependencies": {
+    "copy-webpack-plugin": "^5.1.1",
+    "html-webpack-plugin": "^3.2.0",
+    "svelte-loader": "^2.13.6",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10"
+  },
+  "dependencies": {
+    "rxjs": "^6.5.4",
+    "svelte": "^3.16.5"
+  }
+}

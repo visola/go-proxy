@@ -1,128 +1,198 @@
-## go-proxy
+# go-proxy
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/visola/go-proxy)](https://goreportcard.com/report/github.com/visola/go-proxy)
-[![Go Doc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](http://godoc.org/github.com/visola/go-proxy)
 [![Release](https://img.shields.io/github/release/visola/go-proxy.svg?style=flat-square)](https://github.com/visola/go-proxy/releases/latest)
+[![Build Status](https://travis-ci.com/visola/go-proxy.svg?branch=master)](https://travis-ci.com/visola/go-proxy)
+[![Go Report Card](https://goreportcard.com/badge/github.com/visola/go-proxy)](https://goreportcard.com/report/github.com/visola/go-proxy)
+[![Maintainability](https://api.codeclimate.com/v1/badges/efcd0e7b3ca56fdd79ee/maintainability)](https://codeclimate.com/github/visola/go-proxy/maintainability)
 
-A proxy to aid developers to run and debug multiple services or frontends locally.
+go-proxy is a server that helps developers work faster in the world of microservices and microfrontends. You run it locally to serve all local traffic from multiple sources into one place, acting as a gateway.
 
 <p style="text-align:center">
-  <img width="1000px" src="doc/go-proxy-demo.gif" />
+  <img width="600px" src="doc/go-proxy_overview.png" />
 </p>
 
+This is what it can do for you:
 
-## Getting Started
+- serve static files from disk
+- reverse proxy other http/s servers
+- it has an admin UI (and API) that can be used to quickly switch upstreams
+- multiple listeners in different ports that can act as different servers
 
-1. Download a release for your specific operating system and architecture [here](https://github.com/visola/go-proxy/releases)
+# Getting Started
+
+1. Download the latest release for your system [here](https://github.com/visola/go-proxy/releases/latest)
 2. Unzip it and make the executable available in your path
-3. Create the `~/.go-proxy` directory and add a mappings file
+3. Create a `~/.go-proxy/upstreams` directory and add some mapping files
 4. Run `go-proxy`
 
-If you want to run using HTTPS, set the following two environment variables:
-
-```
-GO_PROXY_CERT_FILE=/path/to/server.crt
-GO_PROXY_CERT_KEY_FILE=/path/to/server.key
-```
-
-If you don't have certificate and key files, the server will start using HTTP.
-
-This is a sample output you should get:
+You should see something like the following:
 
 ```
 $ go-proxy
-2018/04/04 10:15:13 Starting proxy server...
-Starting proxy at: https://localhost:33443
-2018/04/04 10:15:13 Starting admin server...
-Opening admin server at: http://localhost:1234
+2020/01/02 06:29:04 Initializing go-proxy...
+2020/01/02 06:29:04 Initializing upstreams...
+2020/01/02 06:29:04 Starting proxy at: http://localhost:33080
+2020/01/02 06:29:04 Reading configuration directory: /Users/visola/.go-proxy/upstreams
+2020/01/02 06:29:04 Opening admin server at: http://localhost:3000
+2020/01/02 06:29:04 Found 4 upstreams in file: /Users/visola/.go-proxy/upstreams/search.yml
 ```
 
-## Mappings
+# Endpoints and Upstreams
 
-Mappings go in the `~/.go-proxy` directory. They are YAML files that get loaded during startup. You can put everything in one file or have multiple files, whatever your preference is. All `.yaml` (or `.yml`) files will be read and loaded. You can enable/disable each mapping in the admin UI.
+Endpoints are where requests end up being handled. They represent files on your disk or servers running locally or somewhere else. There are two types of endpoints: static and proxy. Static endpoints serve static files from disk. Proxy endpoints forward requests to HTTP/S servers.
 
-A mapping maps a request path to some resource. The resource can be a local file or an HTTP server local or remote.
+Endpoints are grouped inside Upstreams. Each upstream can have multiple endpoints configured. Upstreams are mapped in YAML files inside the `~/.go-proxy/upstreams` directory. Each file in the `~/.go-proxy/upstreams` directory becomes an upstream named after the file. It can contain both types of endpoints. The following is a YAML file that contains a static and a proxy endpoints:
 
-To map to a local file (or directory), you add a `static` attribute to your yaml file, like this:
+```yaml
+# ~/.go-proxy/upstream/search.yml
+static:
+  - from: /static
+    to: /Users/visola/www
+
+proxy:
+  - from: /
+    to: https://www.server.com
+```
+
+## Matching
+
+Endpoints match request paths using a from or a regexp definition. 
+
+The from matches any path requested that starts with the specified path. Example, `from: /static` matches all of the following:
+
+```
+/static/index.html
+/static/sub/main.js
+/static/sub1/sub2/sub3/sub4/sub.js
+```
+
+Endpoints can also match using regular expressions. For example, `regexp: /static/js(.*\.chunk\.js)` matches all of the following:
+
+```
+/static/js.chunk.js
+/static/js12abec3.chunk.js
+/static/js/subchunk/12abec3.chunk.js
+```
+
+## Static Endpoints
+
+Static endpoints serve files from a local directory. The following static endpoint configuration:
 
 ```yaml
 static:
-  - from: /statics/some_javascript.js
-    to: /some/place/local/my_javascript.js
-  - from: /static_assets/
-    to: /another/directory/
+  - from: /static
+    to: /Users/visola/www
 ```
 
-To proxy the request to another HTTP server (local or remote), you add a `proxy` attribute instead, like the following:
+would match a request coming to `/static/index.html` to `/Users/visola/www/index.html`. It also servers files in any subdirectory, e.g. `/static/js/main.js` would serve `/Users/visola/www/js/main.js`.
+
+## Proxy endpoints
+
+Proxy endpoints forward requests to another HTTP/S server and sends the response back as a normal proxy does. The following proxy endpoint:
 
 ```yaml
 proxy:
-  - from: /static # from maps to anything that has this prefix
-    to: http://localhost:1243 # prefix from path, will be appended here
+  - from: /
+    to: https://www.server.com
 ```
 
-You can also map a regular expression, using a regexp in either, `static` or `proxy`:
+would match requests coming to `/index.html` to `https://www.server.com/index.html`. It also matches any subpath like `/images/questionmark.png` to `https://www.server.com/images/questionmark.png`.
+
+## Upstreams inside Upstreams
+
+An Upstream file inside the `~/.go-proxy/upstreams` directory can contain other upstreams mapped under the key `upstreams`. The following is an example of a YAML that would map 4 upstreams: search, bing, duck and google. The first name comes from the file name, the other three are named after the keys in `upstreams` map.
 
 ```yaml
-proxy:
-  - regexp: /static/js(.*\.chunk\.js)
-    to: http://127.0.0.1:3000/static/js$1
+# ~/go-proxy/upstreams/search.yml
+upstreams:
+  bing:
+    proxy:
+      - from: /
+        to: https://www.bing.com
+ 
+  duck:
+    proxy:
+      - from: /
+        to: https://duckduckgo.com/
+
+  google:
+    proxy:
+      - from: /
+        to: https://www.google.com
+
+static:
+  - from: /static
+    to: /Users/visola/temp/find-duplicate-files/
+
+  - from: /another
+    to: /Users/visola/temp/old_go_proxy/
 ```
 
-If you need to inject headers into a proxied request, you can do it using the `inject` attribute. The following is an example:
+# Listeners
 
-```yaml
-proxy:
-  - regexp: /some/path/(.*)
-    to: http://my.other.server.com/path/$1
-    inject:
-      headers:
-        AUTH_TOKEN: V2hhdCB3ZXJlIHlvdSB0aGlua2luZz8=
+go-proxy uses listeners to handle requests. Each listener listens to requests incoming in a specific port, using HTTP or HTTPS.
+
+Listeners can have different upstreams enabled to handle requests. If no upstreams are enabled, a listener will always return a 404.
+
+<!-- TODO - Explain how to configure listeners -->
+
+## Specificity
+
+<!-- TODO - Explain sorting by specificity -->
+
+# Building go-proxy
+
+## Pre-requisites
+
+Before anything, you'll need:
+- Go >1.13
+- Node.js >8.7.0
+
+## Building locally
+
+Just run the build bash script:
+
+```
+$ ./scrtips/build.sh
 ```
 
-## Building go-proxy
+This will run the tests, install all the dependencies and build the frontend using Webpack.
 
-### Pre-requisites
+If that worked, you can run the package script to generate the package for all plataforms:
 
-Before anything, you'll need (versions I have local, haven't tested with others):
-- Go >1.9.0
-- node >8.7.0
-
-Make sure you have all the dependencies installed:
-
-```bash
-# Install all Node dependencies
-$ npm install
-
-# Install all Go dependencies
-$ dep ensure
-
-# Install packr
-$ go get -u github.com/gobuffalo/packr/...
+```
+$ ./scripts/package.sh
 ```
 
-### Local development
+The output will be in the `build/packages` directory.
 
-To develop locally, first make sure `packr` doesn't have any boxes encoded as binaries by running the following:
+## Local development
+
+To serve the static files, `go-proxy` uses `packr`, which can point to local files or pack everything inside the final Go binary.
+
+You need to make sure that you have [packr](https://github.com/gobuffalo/packr) installed and available on your path. Normally the following command should do it:
+
+```
+$ go get -u github.com/gobuffalo/packr/v2/packr2
+```
+
+Run the following command to ensure that `packr` binary files do not exist:
 
 ```
 $ packr clean
 ```
 
-Then, start [parcel-bundler](https://parceljs.org/) server using the following:
+No you can start Webpack to watch the admin frontend with the following:
 
 ```
+$ cd web
 $ npm run start
 ```
 
-Then develop in Go like you normally would (`go install` -> `go-proxy`). Files will be automatically picked up from the `./dist` directory  and source maps will be loaded. Also, any changes in the static files will be automatically rebuilt by `parcel`.
+The above will block, so you might want to run it from a separated console.
 
-### Building the final package
+Now you can change the files and rerun like you would any other go application:
 
-There's a script that run the full build cycle. Just run:
-
-```bash
-$ bin/run.sh
 ```
-
-Inside the `build` directory, you'll see the generated packges for each architecture and operating system combination.
+$ go run cmd/go-proxy/main.go 
+```

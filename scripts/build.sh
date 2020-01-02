@@ -7,10 +7,5 @@ rm -Rf build
 mkdir build
 
 $SCRIPT_DIR/test.sh
-
-npm install
-npm run bundle
-
-go get -u github.com/gobuffalo/packr/...
-packr clean
-packr
+$SCRIPT_DIR/admin_frontend.sh
+$SCRIPT_DIR/packr.sh
