@@ -5,13 +5,13 @@ import (
 	"net/http"
 )
 
+const bufferSize = 4 * 1024 * 1024               // 4 KBs
 const maxStoredBodySize = 5 * 1024 * 1024 * 1024 // 5 MBs
 
-// TODO - Add tests for this
 func handleReadCloser(readCloser io.ReadCloser, executedURL string, req *http.Request, resp http.ResponseWriter) HandleResult {
 	defer readCloser.Close()
 	responseBytes := make([]byte, 0)
-	buffer := make([]byte, 512)
+	buffer := make([]byte, bufferSize)
 
 	for {
 		bytesRead, readError := readCloser.Read(buffer)

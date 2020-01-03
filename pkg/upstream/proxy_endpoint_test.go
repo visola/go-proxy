@@ -47,15 +47,17 @@ func TestProxyEndpointHandleFrom(t *testing.T) {
 
 	resp := httptest.NewRecorder()
 
-	proxyEndpoint.Handle(req, resp)
-	// TODO - assert that handle results contain correct information
+	handleResult := proxyEndpoint.Handle(req, resp)
 
 	assert.Equal(t, http.StatusOK, resp.Code)
+	assert.Equal(t, http.StatusOK, handleResult.ResponseCode)
 	assert.Equal(t, responseText, resp.Body.String())
+	assert.Equal(t, responseText, string(handleResult.ResponseBody))
 
 	respHeaders := resp.Header()
 	require.Equal(t, 1, len(respHeaders["Server"]))
 	assert.Equal(t, "test", respHeaders["Server"][0])
+	assert.Equal(t, "test", handleResult.ResponseHeaders["Server"][0])
 
 	assert.Equal(t, http.MethodPost, proxiedRequest.Method)
 	assert.Equal(t, "/some/test", proxiedRequest.URL.Path)
@@ -105,15 +107,17 @@ func TestProxyEndpointHandleProxy(t *testing.T) {
 
 	resp := httptest.NewRecorder()
 
-	proxyEndpoint.Handle(req, resp)
-	// TODO - assert that handle results contain correct information
+	handleResult := proxyEndpoint.Handle(req, resp)
 
 	assert.Equal(t, http.StatusOK, resp.Code)
+	assert.Equal(t, http.StatusOK, handleResult.ResponseCode)
 	assert.Equal(t, responseText, resp.Body.String())
+	assert.Equal(t, responseText, string(handleResult.ResponseBody))
 
 	respHeaders := resp.Header()
 	require.Equal(t, 1, len(respHeaders["Server"]))
 	assert.Equal(t, "test", respHeaders["Server"][0])
+	assert.Equal(t, "test", handleResult.ResponseHeaders["Server"][0])
 
 	assert.Equal(t, http.MethodPost, proxiedRequest.Method)
 	assert.Equal(t, "/some/second/first", proxiedRequest.URL.Path)
