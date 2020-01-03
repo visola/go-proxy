@@ -9,11 +9,11 @@ import (
 
 // HandleResult represents the result of an endpoint handling a request
 type HandleResult struct {
-	Body         io.ReadCloser
-	ErrorMessage string
-	ExecutedURL  string
-	Headers      map[string][]string
-	ResponseCode int
+	ErrorMessage    string
+	ExecutedURL     string
+	ResponseBody    io.ReadCloser
+	ResponseHeaders map[string][]string
+	ResponseCode    int
 }
 
 // Endpoint represents one route inside an Upstream

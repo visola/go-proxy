@@ -1,8 +1,6 @@
 package upstream
 
 import (
-	"bytes"
-	"io"
 	"io/ioutil"
 	"mime"
 	"net/http"
@@ -29,6 +27,24 @@ func (s *StaticEndpoint) Handle(req *http.Request, resp http.ResponseWriter) Han
 	return staticHandleResult(s, path.Join(s.To, req.URL.Path[len(s.From):]), req, resp)
 }
 
+func getContentType(file *os.File) string {
+	contentType := ""
+
+	contentType = mime.TypeByExtension(filepath.Ext(file.Name()))
+	if contentType != "" {
+		return contentType
+	}
+
+	buffer := make([]byte, 512)
+	_, readError := file.Read(buffer)
+	if readError != nil {
+		return ""
+	}
+
+	file.Seek(0, 0) // rewind the file
+	return http.DetectContentType(buffer)
+}
+
 func staticHandleResult(s *StaticEndpoint, pathToReturn string, req *http.Request, resp http.ResponseWriter) HandleResult {
 	executedURL := s.UpstreamName + ":" + s.To
 	file, err := os.Open(pathToReturn)
@@ -36,61 +52,22 @@ func staticHandleResult(s *StaticEndpoint, pathToReturn string, req *http.Reques
 	if os.IsNotExist(err) {
 		httputil.NotFound(req, resp, "File not found: "+pathToReturn)
 		return HandleResult{
-			Body:         ioutil.NopCloser(strings.NewReader("File not found: " + pathToReturn)),
 			ExecutedURL:  executedURL,
+			ResponseBody: ioutil.NopCloser(strings.NewReader("File not found: " + pathToReturn)),
 			ResponseCode: http.StatusNotFound,
 		}
 	}
 
 	if err != nil {
-		httputil.InternalError(req, resp, err)
-		return HandleResult{
-			Body:         ioutil.NopCloser(strings.NewReader(err.Error())),
-			ExecutedURL:  executedURL,
-			ResponseCode: http.StatusInternalServerError,
-		}
+		return internalServerError(executedURL, req, resp, err)
 	}
 
-	defer file.Close()
+	contentType := getContentType(file)
+	resp.Header().Set("Content-Type", contentType)
 
-	headers := make(map[string][]string)
-	buffer := make([]byte, 512)
-	contentType := ""
-	responseBytes := make([]byte, 0)
+	handleResult := handleReadCloser(file, executedURL, req, resp)
+	handleResult.ResponseCode = http.StatusOK
+	handleResult.ResponseHeaders = resp.Header()
 
-	for {
-		bytesRead, readError := file.Read(buffer)
-
-		if readError != nil && readError != io.EOF {
-			return HandleResult{
-				Body:         ioutil.NopCloser(strings.NewReader(err.Error())),
-				ExecutedURL:  executedURL,
-				ResponseCode: http.StatusInternalServerError,
-			}
-		}
-
-		if bytesRead == 0 {
-			break
-		}
-
-		if contentType == "" {
-			contentType = mime.TypeByExtension(filepath.Ext(file.Name()))
-			if contentType == "" {
-				contentType = http.DetectContentType(buffer)
-			}
-
-			headers["Content-Type"] = []string{contentType}
-			resp.Header().Set("Content-Type", contentType)
-		}
-
-		responseBytes = append(responseBytes, buffer[:bytesRead]...)
-		resp.Write(buffer[:bytesRead])
-	}
-
-	return HandleResult{
-		Body:         ioutil.NopCloser(bytes.NewReader(responseBytes)),
-		ExecutedURL:  executedURL,
-		Headers:      headers,
-		ResponseCode: http.StatusOK,
-	}
+	return handleResult
 }
