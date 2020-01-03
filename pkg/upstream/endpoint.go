@@ -1,7 +1,6 @@
 package upstream
 
 import (
-	"io"
 	"net/http"
 	"regexp"
 	"strings"
@@ -11,7 +10,7 @@ import (
 type HandleResult struct {
 	ErrorMessage    string
 	ExecutedURL     string
-	ResponseBody    io.ReadCloser
+	ResponseBody    []byte
 	ResponseHeaders map[string][]string
 	ResponseCode    int
 }

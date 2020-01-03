@@ -1,13 +1,11 @@
 package upstream
 
 import (
-	"io/ioutil"
 	"mime"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
-	"strings"
 
 	"github.com/visola/go-proxy/pkg/httputil"
 )
@@ -53,7 +51,7 @@ func staticHandleResult(s *StaticEndpoint, pathToReturn string, req *http.Reques
 		httputil.NotFound(req, resp, "File not found: "+pathToReturn)
 		return HandleResult{
 			ExecutedURL:  executedURL,
-			ResponseBody: ioutil.NopCloser(strings.NewReader("File not found: " + pathToReturn)),
+			ResponseBody: []byte("File not found: " + pathToReturn),
 			ResponseCode: http.StatusNotFound,
 		}
 	}

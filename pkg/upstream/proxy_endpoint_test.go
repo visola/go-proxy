@@ -48,6 +48,7 @@ func TestProxyEndpointHandleFrom(t *testing.T) {
 	resp := httptest.NewRecorder()
 
 	proxyEndpoint.Handle(req, resp)
+	// TODO - assert that handle results contain correct information
 
 	assert.Equal(t, http.StatusOK, resp.Code)
 	assert.Equal(t, responseText, resp.Body.String())
@@ -105,6 +106,7 @@ func TestProxyEndpointHandleProxy(t *testing.T) {
 	resp := httptest.NewRecorder()
 
 	proxyEndpoint.Handle(req, resp)
+	// TODO - assert that handle results contain correct information
 
 	assert.Equal(t, http.StatusOK, resp.Code)
 	assert.Equal(t, responseText, resp.Body.String())

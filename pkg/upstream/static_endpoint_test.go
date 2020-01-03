@@ -14,6 +14,7 @@ import (
 )
 
 func TestStaticEndpointHandle(t *testing.T) {
+	// TODO - assert that handle results contain correct information
 	t.Run("404 when file not found", testutil.WithTempDir(t, testFileNotFound))
 	t.Run("500 if error", testutil.WithTempDir(t, testReadError))
 	t.Run("Matches file using from", testutil.WithTempDir(t, testMatchUsingFrom))
@@ -53,13 +54,14 @@ func testMatchUsingFrom(t *testing.T, tempDir string) {
 	req := httptest.NewRequest(http.MethodGet, "http://nowhere.com/test/hello.txt", nil)
 	resp := httptest.NewRecorder()
 
-	staticEndpoint.Handle(req, resp)
+	handleResponse := staticEndpoint.Handle(req, resp)
 
 	assert.Equal(t, http.StatusOK, resp.Code)
 
 	respBody, respErr := ioutil.ReadAll(resp.Result().Body)
 	require.Nil(t, respErr)
 	assert.Equal(t, fileContent, string(respBody))
+	assert.Equal(t, fileContent, string(handleResponse.ResponseBody))
 }
 
 func testMatchUsingRegexp(t *testing.T, tempDir string) {
@@ -79,13 +81,14 @@ func testMatchUsingRegexp(t *testing.T, tempDir string) {
 	req := httptest.NewRequest(http.MethodGet, "http://nowhere.com/test/hello.some", nil)
 	resp := httptest.NewRecorder()
 
-	staticEndpoint.Handle(req, resp)
+	handleResponse := staticEndpoint.Handle(req, resp)
 
 	assert.Equal(t, http.StatusOK, resp.Code)
 
 	respBody, respErr := ioutil.ReadAll(resp.Result().Body)
 	require.Nil(t, respErr)
 	assert.Equal(t, fileContent, string(respBody))
+	assert.Equal(t, fileContent, string(handleResponse.ResponseBody))
 }
 
 func testReadError(t *testing.T, tempDir string) {
