@@ -34,7 +34,7 @@ func startListener(listernerConfiguration ListenerConfiguration) {
 		return
 	}
 
-	fmt.Printf("Starting proxy at: https://localhost:%d\n", listernerConfiguration.Port)
+	log.Printf("Starting proxy at: https://localhost:%d\n", listernerConfiguration.Port)
 	if err := http.ListenAndServeTLS(fmt.Sprintf(":%d", listernerConfiguration.Port), listernerConfiguration.CertificateFile, listernerConfiguration.KeyFile, proxyServer); err != nil {
 		log.Fatal(err)
 	}

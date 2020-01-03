@@ -31,7 +31,10 @@ func (p *ProxyEndpoint) Handle(req *http.Request, resp http.ResponseWriter) Hand
 		if parseErr != nil {
 			return internalServerError(p.UpstreamName+":[error]", req, resp, parseErr)
 		}
-		newURL.Path = newURL.Path + "/" + req.URL.Path[len(p.From):]
+		concatPath := req.URL.Path[len(p.From):]
+		if concatPath != "" {
+			newURL.Path = newURL.Path + "/" + concatPath
+		}
 	}
 
 	return proxyHandleResult(p, newURL, req, resp)
@@ -50,7 +53,7 @@ func createHTTPClient() *http.Client {
 }
 
 func proxyHandleResult(p *ProxyEndpoint, newURL *url.URL, req *http.Request, resp http.ResponseWriter) HandleResult {
-	executedURL := p.UpstreamName + ":" + p.To
+	executedURL := ""
 
 	defer req.Body.Close()
 	bodyInBytes, readBodyErr := ioutil.ReadAll(req.Body)
@@ -66,6 +69,7 @@ func proxyHandleResult(p *ProxyEndpoint, newURL *url.URL, req *http.Request, res
 		}
 	}
 	newURL.RawQuery = newQuery.Encode()
+	executedURL = newURL.String()
 
 	proxiedReq, proxiedReqErr := http.NewRequest(req.Method, newURL.String(), bytes.NewBuffer(bodyInBytes))
 	if proxiedReqErr != nil {
@@ -111,6 +115,11 @@ func proxyHandleResult(p *ProxyEndpoint, newURL *url.URL, req *http.Request, res
 	handleResult := handleReadCloser(proxiedResp.Body, executedURL, req, resp)
 	handleResult.ResponseCode = proxiedResp.StatusCode
 	handleResult.ResponseHeaders = resp.Header()
+
+	if len(bodyInBytes) > maxStoredBodySize {
+		bodyInBytes = bodyInBytes[:maxStoredBodySize]
+	}
+	handleResult.RequestBody = bodyInBytes
 
 	return handleResult
 }

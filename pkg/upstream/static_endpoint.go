@@ -44,7 +44,7 @@ func getContentType(file *os.File) string {
 }
 
 func staticHandleResult(s *StaticEndpoint, pathToReturn string, req *http.Request, resp http.ResponseWriter) HandleResult {
-	executedURL := s.UpstreamName + ":" + s.To
+	executedURL := pathToReturn
 	file, err := os.Open(pathToReturn)
 
 	if os.IsNotExist(err) {
