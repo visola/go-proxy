@@ -3,6 +3,7 @@ package upstream
 import (
 	"bytes"
 	"crypto/tls"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -12,24 +13,24 @@ import (
 // ProxyEndpoint proxy requests to another HTTP/S server
 type ProxyEndpoint struct {
 	BaseEndpoint
-	Headers map[string][]string
-	To      string `json:"to"`
+	Headers map[string][]string `json:"headers"`
+	To      string              `json:"to"`
 }
 
 // Handle handles requests proxying the content to another HTTP server
-func (p *ProxyEndpoint) Handle(req *http.Request, resp http.ResponseWriter) HandleResult {
+func (p *ProxyEndpoint) Handle(req *http.Request) (int, map[string][]string, io.ReadCloser) {
 	var newURL *url.URL
 	var parseErr error
 
 	if p.Regexp != "" {
 		newURL, parseErr = url.Parse(replaceRegexp(req.URL.Path, p.To, p.ensureRegexp()))
 		if parseErr != nil {
-			return internalServerError(p.UpstreamName+":[error]", req, resp, parseErr)
+			return returnError(parseErr)
 		}
 	} else {
 		newURL, parseErr = url.Parse(p.To)
 		if parseErr != nil {
-			return internalServerError(p.UpstreamName+":[error]", req, resp, parseErr)
+			return returnError(parseErr)
 		}
 		concatPath := req.URL.Path[len(p.From):]
 		if concatPath != "" {
@@ -37,7 +38,7 @@ func (p *ProxyEndpoint) Handle(req *http.Request, resp http.ResponseWriter) Hand
 		}
 	}
 
-	return proxyHandleResult(p, newURL, req, resp)
+	return proxyHandleResult(p, newURL, req)
 }
 
 func createHTTPClient() *http.Client {
@@ -52,13 +53,11 @@ func createHTTPClient() *http.Client {
 	}
 }
 
-func proxyHandleResult(p *ProxyEndpoint, newURL *url.URL, req *http.Request, resp http.ResponseWriter) HandleResult {
-	executedURL := ""
-
+func proxyHandleResult(p *ProxyEndpoint, newURL *url.URL, req *http.Request) (int, map[string][]string, io.ReadCloser) {
 	defer req.Body.Close()
 	bodyInBytes, readBodyErr := ioutil.ReadAll(req.Body)
 	if readBodyErr != nil {
-		return internalServerError(executedURL, req, resp, readBodyErr)
+		return returnError(readBodyErr)
 	}
 
 	// Copy parameters
@@ -69,11 +68,10 @@ func proxyHandleResult(p *ProxyEndpoint, newURL *url.URL, req *http.Request, res
 		}
 	}
 	newURL.RawQuery = newQuery.Encode()
-	executedURL = newURL.String()
 
 	proxiedReq, proxiedReqErr := http.NewRequest(req.Method, newURL.String(), bytes.NewBuffer(bodyInBytes))
 	if proxiedReqErr != nil {
-		return internalServerError(executedURL, req, resp, proxiedReqErr)
+		return returnError(proxiedReqErr)
 	}
 
 	// Copy request headers
@@ -92,8 +90,10 @@ func proxyHandleResult(p *ProxyEndpoint, newURL *url.URL, req *http.Request, res
 
 	proxiedResp, respErr := createHTTPClient().Do(proxiedReq)
 	if respErr != nil {
-		return internalServerError(executedURL, req, resp, respErr)
+		return returnError(respErr)
 	}
+
+	headers := make(map[string][]string)
 
 	// Copy response headers
 	for name, values := range proxiedResp.Header {
@@ -105,21 +105,14 @@ func proxyHandleResult(p *ProxyEndpoint, newURL *url.URL, req *http.Request, res
 					value = req.URL.Host + value[len(p.To):]
 				}
 			}
-			resp.Header().Add(name, value)
+
+			currentValues, exists := headers[name]
+			if !exists {
+				currentValues = append(currentValues, value)
+			}
+			headers[name] = currentValues
 		}
 	}
 
-	// Copy status
-	resp.WriteHeader(proxiedResp.StatusCode)
-
-	handleResult := handleReadCloser(proxiedResp.Body, executedURL, req, resp)
-	handleResult.ResponseCode = proxiedResp.StatusCode
-	handleResult.ResponseHeaders = resp.Header()
-
-	if len(bodyInBytes) > maxStoredBodySize {
-		bodyInBytes = bodyInBytes[:maxStoredBodySize]
-	}
-	handleResult.RequestBody = bodyInBytes
-
-	return handleResult
+	return proxiedResp.StatusCode, headers, proxiedResp.Body
 }

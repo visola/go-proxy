@@ -29,12 +29,9 @@ func testFileNotFound(t *testing.T, tempDir string) {
 	}
 
 	req := httptest.NewRequest(http.MethodGet, "http://nowhere.com/test/hello.txt", nil)
-	resp := httptest.NewRecorder()
 
-	handleResult := staticEndpoint.Handle(req, resp)
-
-	assert.Equal(t, http.StatusNotFound, resp.Code)
-	assert.Equal(t, http.StatusNotFound, handleResult.ResponseCode)
+	status, _, _ := staticEndpoint.Handle(req)
+	assert.Equal(t, http.StatusNotFound, status)
 }
 
 func testMatchUsingFrom(t *testing.T, tempDir string) {
@@ -52,19 +49,16 @@ func testMatchUsingFrom(t *testing.T, tempDir string) {
 	}
 
 	req := httptest.NewRequest(http.MethodGet, "http://nowhere.com/test/hello.txt", nil)
-	resp := httptest.NewRecorder()
 
-	handleResult := staticEndpoint.Handle(req, resp)
+	status, headers, body := staticEndpoint.Handle(req)
 
-	assert.Equal(t, http.StatusOK, resp.Code)
-	assert.Equal(t, http.StatusOK, handleResult.ResponseCode)
+	assert.Equal(t, http.StatusOK, status)
 
-	respBody, respErr := ioutil.ReadAll(resp.Result().Body)
+	respBody, respErr := ioutil.ReadAll(body)
 	require.Nil(t, respErr)
 	assert.Equal(t, fileContent, string(respBody))
-	assert.Equal(t, fileContent, string(handleResult.ResponseBody))
 
-	assert.Equal(t, "text/plain; charset=utf-8", handleResult.ResponseHeaders["Content-Type"][0])
+	assert.Equal(t, "text/plain; charset=utf-8", headers["Content-Type"][0])
 }
 
 func testMatchUsingRegexp(t *testing.T, tempDir string) {
@@ -82,19 +76,16 @@ func testMatchUsingRegexp(t *testing.T, tempDir string) {
 	}
 
 	req := httptest.NewRequest(http.MethodGet, "http://nowhere.com/test/hello.some", nil)
-	resp := httptest.NewRecorder()
 
-	handleResult := staticEndpoint.Handle(req, resp)
+	status, headers, body := staticEndpoint.Handle(req)
 
-	assert.Equal(t, http.StatusOK, resp.Code)
-	assert.Equal(t, http.StatusOK, handleResult.ResponseCode)
+	assert.Equal(t, http.StatusOK, status)
 
-	respBody, respErr := ioutil.ReadAll(resp.Result().Body)
+	respBody, respErr := ioutil.ReadAll(body)
 	require.Nil(t, respErr)
 	assert.Equal(t, fileContent, string(respBody))
-	assert.Equal(t, fileContent, string(handleResult.ResponseBody))
 
-	assert.Equal(t, "text/plain; charset=utf-8", handleResult.ResponseHeaders["Content-Type"][0])
+	assert.Equal(t, "text/plain; charset=utf-8", headers["Content-Type"][0])
 }
 
 func testReadError(t *testing.T, tempDir string) {
@@ -112,10 +103,8 @@ func testReadError(t *testing.T, tempDir string) {
 	}
 
 	req := httptest.NewRequest(http.MethodGet, "http://nowhere.com/test/hello.txt", nil)
-	resp := httptest.NewRecorder()
 
-	handleResult := staticEndpoint.Handle(req, resp)
+	status, _, _ := staticEndpoint.Handle(req)
 
-	assert.Equal(t, http.StatusInternalServerError, resp.Code)
-	assert.Equal(t, http.StatusInternalServerError, handleResult.ResponseCode)
+	assert.Equal(t, http.StatusInternalServerError, status)
 }

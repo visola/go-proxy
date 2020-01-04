@@ -45,19 +45,16 @@ func TestProxyEndpointHandleFrom(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "http://nowhere.com/test?param2=two", strings.NewReader(bodyToSend))
 	req.Header.Add("Cookie", "cookie=delicious")
 
-	resp := httptest.NewRecorder()
+	status, headers, body := proxyEndpoint.Handle(req)
 
-	handleResult := proxyEndpoint.Handle(req, resp)
+	assert.Equal(t, http.StatusOK, status)
 
-	assert.Equal(t, http.StatusOK, resp.Code)
-	assert.Equal(t, http.StatusOK, handleResult.ResponseCode)
-	assert.Equal(t, responseText, resp.Body.String())
-	assert.Equal(t, responseText, string(handleResult.ResponseBody))
+	bodyContent, readErr := ioutil.ReadAll(body)
+	require.Nil(t, readErr)
+	assert.Equal(t, responseText, string(bodyContent))
 
-	respHeaders := resp.Header()
-	require.Equal(t, 1, len(respHeaders["Server"]))
-	assert.Equal(t, "test", respHeaders["Server"][0])
-	assert.Equal(t, "test", handleResult.ResponseHeaders["Server"][0])
+	require.Equal(t, 1, len(headers["Server"]))
+	assert.Equal(t, "test", headers["Server"][0])
 
 	assert.Equal(t, http.MethodPost, proxiedRequest.Method)
 	assert.Equal(t, "/some/test", proxiedRequest.URL.Path)
@@ -105,19 +102,16 @@ func TestProxyEndpointHandleProxy(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "http://nowhere.com/first/second?param2=two", strings.NewReader(bodyToSend))
 	req.Header.Add("Cookie", "cookie=delicious")
 
-	resp := httptest.NewRecorder()
+	status, headers, body := proxyEndpoint.Handle(req)
 
-	handleResult := proxyEndpoint.Handle(req, resp)
+	assert.Equal(t, http.StatusOK, status)
 
-	assert.Equal(t, http.StatusOK, resp.Code)
-	assert.Equal(t, http.StatusOK, handleResult.ResponseCode)
-	assert.Equal(t, responseText, resp.Body.String())
-	assert.Equal(t, responseText, string(handleResult.ResponseBody))
+	bodyContent, readErr := ioutil.ReadAll(body)
+	require.Nil(t, readErr)
+	assert.Equal(t, responseText, string(bodyContent))
 
-	respHeaders := resp.Header()
-	require.Equal(t, 1, len(respHeaders["Server"]))
-	assert.Equal(t, "test", respHeaders["Server"][0])
-	assert.Equal(t, "test", handleResult.ResponseHeaders["Server"][0])
+	require.Equal(t, 1, len(headers["Server"]))
+	assert.Equal(t, "test", headers["Server"][0])
 
 	assert.Equal(t, http.MethodPost, proxiedRequest.Method)
 	assert.Equal(t, "/some/second/first", proxiedRequest.URL.Path)

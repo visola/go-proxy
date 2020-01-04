@@ -1,32 +1,17 @@
 package upstream
 
 import (
-	"fmt"
+	"io"
 	"net/http"
 	"regexp"
 	"strings"
 )
 
-// HandleResult represents the result of an endpoint handling a request
-type HandleResult struct {
-	ErrorMessage    string
-	ExecutedURL     string
-	HandledBy       string
-	RequestURL      string
-	RequestBody     []byte
-	RequestHeaders  map[string][]string
-	ResponseBody    []byte
-	ResponseHeaders map[string][]string
-	ResponseCode    int
-	Runtime         int64
-}
-
 // Endpoint represents one route inside an Upstream
 type Endpoint interface {
-	Handle(*http.Request, http.ResponseWriter) HandleResult
+	Handle(*http.Request) (int, map[string][]string, io.ReadCloser)
 	Matches(*http.Request) bool
 	Path() string
-	Source() string
 }
 
 // BaseEndpoint represents a base endpoint route
@@ -58,11 +43,6 @@ func (m *BaseEndpoint) Path() string {
 		path = m.Regexp
 	}
 	return path
-}
-
-// Source returns a mapping that indicates where this endpoint was loaded from
-func (m *BaseEndpoint) Source() string {
-	return fmt.Sprintf("%s:%s", m.UpstreamName, m.Path())
 }
 
 func (m *BaseEndpoint) ensureRegexp() *regexp.Regexp {

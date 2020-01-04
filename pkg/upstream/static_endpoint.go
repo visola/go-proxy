@@ -1,13 +1,14 @@
 package upstream
 
 import (
+	"bytes"
+	"io"
+	"io/ioutil"
 	"mime"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
-
-	"github.com/visola/go-proxy/pkg/httputil"
 )
 
 // StaticEndpoint is an endpoint that responds with file from disk
@@ -17,12 +18,12 @@ type StaticEndpoint struct {
 }
 
 // Handle handles incoming request matching to files in disk
-func (s *StaticEndpoint) Handle(req *http.Request, resp http.ResponseWriter) HandleResult {
+func (s *StaticEndpoint) Handle(req *http.Request) (int, map[string][]string, io.ReadCloser) {
 	if s.Regexp != "" {
-		return staticHandleResult(s, replaceRegexp(req.URL.Path, s.To, s.ensureRegexp()), req, resp)
+		return staticHandleResult(s, replaceRegexp(req.URL.Path, s.To, s.ensureRegexp()), req)
 	}
 
-	return staticHandleResult(s, path.Join(s.To, req.URL.Path[len(s.From):]), req, resp)
+	return staticHandleResult(s, path.Join(s.To, req.URL.Path[len(s.From):]), req)
 }
 
 func getContentType(file *os.File) string {
@@ -43,29 +44,20 @@ func getContentType(file *os.File) string {
 	return http.DetectContentType(buffer)
 }
 
-func staticHandleResult(s *StaticEndpoint, pathToReturn string, req *http.Request, resp http.ResponseWriter) HandleResult {
-	executedURL := pathToReturn
+func staticHandleResult(s *StaticEndpoint, pathToReturn string, req *http.Request) (int, map[string][]string, io.ReadCloser) {
 	file, err := os.Open(pathToReturn)
 
 	if os.IsNotExist(err) {
-		httputil.NotFound(req, resp, "File not found: "+pathToReturn)
-		return HandleResult{
-			ExecutedURL:  executedURL,
-			ResponseBody: []byte("File not found: " + pathToReturn),
-			ResponseCode: http.StatusNotFound,
-		}
+		return http.StatusNotFound, nil, ioutil.NopCloser(bytes.NewReader([]byte("File not found: " + pathToReturn)))
 	}
 
 	if err != nil {
-		return internalServerError(executedURL, req, resp, err)
+		return returnError(err)
 	}
 
-	contentType := getContentType(file)
-	resp.Header().Set("Content-Type", contentType)
+	headers := map[string][]string{
+		"Content-Type": []string{getContentType(file)},
+	}
 
-	handleResult := handleReadCloser(file, executedURL, req, resp)
-	handleResult.ResponseCode = http.StatusOK
-	handleResult.ResponseHeaders = resp.Header()
-
-	return handleResult
+	return http.StatusOK, headers, file
 }
