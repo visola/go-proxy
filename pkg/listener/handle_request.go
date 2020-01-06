@@ -20,12 +20,14 @@ const (
 	maxStoredBodySize = 5 * 1024 * 1024 * 1024 // 5 MBs
 )
 
-type handleBodyAndHeaders struct {
+// HandleBodyAndHeaders stores headers and body for a request or response
+type HandleBodyAndHeaders struct {
 	Body    []byte              `json:"body"`
 	Headers map[string][]string `json:"headers"`
 }
 
-type handleResult struct {
+// HandleResult stores information about handled requests
+type HandleResult struct {
 	Error       string `json:"error"`
 	ExecutedURL string `json:"executedURL"`
 	ID          string `json:"id"`
@@ -33,13 +35,14 @@ type handleResult struct {
 	StatusCode  int    `json:"statusCode"`
 	URL         string `json:"url"`
 
-	Request  handleBodyAndHeaders `json:"request"`
-	Response handleBodyAndHeaders `json:"response"`
+	Request  HandleBodyAndHeaders `json:"request"`
+	Response HandleBodyAndHeaders `json:"response"`
 
-	Timings handleTimings `json:"timings"`
+	Timings HandleTimings `json:"timings"`
 }
 
-type handleTimings struct {
+// HandleTimings stores information about the timings
+type HandleTimings struct {
 	Completed int64 `json:"completed"`
 	Handled   int64 `json:"handled"`
 	Matched   int64 `json:"matched"`
@@ -63,14 +66,17 @@ func findEndpoints(listenerToHandle Listener) []upstream.Endpoint {
 
 func handleRequest(listenerToHandle Listener, req *http.Request, resp http.ResponseWriter) {
 	result := newHandleResult(req)
+	RequestHandlingChanged(result)
 
 	for _, candidateEndpoint := range findEndpoints(listenerToHandle) {
 		if candidateEndpoint.Matches(req) {
 			result.Timings.Matched = time.Now().UnixNano()
+			RequestHandlingChanged(result)
 
 			statusCode, headers, body := candidateEndpoint.Handle(req)
 			result.StatusCode = statusCode
 			result.Timings.Handled = time.Now().UnixNano()
+			RequestHandlingChanged(result)
 
 			if headers == nil {
 				headers = make(map[string][]string)
@@ -103,6 +109,7 @@ func handleRequest(listenerToHandle Listener, req *http.Request, resp http.Respo
 	}
 
 	result.Timings.Completed = time.Now().UnixNano()
+	RequestHandlingChanged(result)
 }
 
 func handleReadCloser(readCloser io.ReadCloser, resp http.ResponseWriter) ([]byte, error) {
@@ -130,14 +137,14 @@ func handleReadCloser(readCloser io.ReadCloser, resp http.ResponseWriter) ([]byt
 	return responseBytes, nil
 }
 
-func newHandleResult(req *http.Request) handleResult {
-	return handleResult{
+func newHandleResult(req *http.Request) HandleResult {
+	return HandleResult{
 		ID: uuid.New().String(),
-		Request: handleBodyAndHeaders{
+		Request: HandleBodyAndHeaders{
 			Headers: req.Header,
 		},
-		Response: handleBodyAndHeaders{},
-		Timings: handleTimings{
+		Response: HandleBodyAndHeaders{},
+		Timings: HandleTimings{
 			Started: time.Now().UnixNano(),
 		},
 		URL: req.URL.String(),

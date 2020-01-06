@@ -15,7 +15,9 @@ func StartAdminServer(port int) error {
 	adminServer := mux.NewRouter()
 
 	registerListenerEndpoints(adminServer)
+	registerRequestsEndpoints(adminServer)
 	registerUpstreamEndpoints(adminServer)
+
 	registerStaticEndpoints(adminServer)
 	adminServer.HandleFunc("/ping", pong).Methods(http.MethodGet)
 	return http.ListenAndServe(fmt.Sprintf(":%d", port), adminServer)
