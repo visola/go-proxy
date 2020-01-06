@@ -15,7 +15,7 @@ class ListenersService extends BehaviorSubject {
     this.data.loading = true;
     this.data.data = null;
     this.next(this.data);
-    return fetch('/listeners')
+    return fetch('/api/listeners')
       .then((response) => response.json())
       .then((data) => {
         this.data.loading = false;
@@ -36,7 +36,7 @@ class ListenersService extends BehaviorSubject {
       headers: { 'Content-type': 'application/json'},
       method: 'PUT',
     };
-    return fetch(`/listeners/${toUpdate.configuration.port}/upstreams`, options)
+    return fetch(`/api/listeners/${toUpdate.configuration.port}/upstreams`, options)
       .then((r) => r.json())
       .then((data) => {
         const newListener = data.listener;

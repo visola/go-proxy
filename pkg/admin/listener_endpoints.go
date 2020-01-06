@@ -20,8 +20,8 @@ type UpstreamStateChangeResult struct {
 }
 
 func registerListenerEndpoints(router *mux.Router) {
-	router.HandleFunc("/listeners", getListeners).Methods(http.MethodGet)
-	router.HandleFunc("/listeners/{listenerPort}/upstreams", enableUpstream).Methods(http.MethodPut)
+	router.HandleFunc("/api/listeners", getListeners).Methods(http.MethodGet)
+	router.HandleFunc("/api/listeners/{listenerPort}/upstreams", enableUpstream).Methods(http.MethodPut)
 }
 
 func enableUpstream(resp http.ResponseWriter, req *http.Request) {

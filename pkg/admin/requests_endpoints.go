@@ -9,7 +9,7 @@ import (
 )
 
 func registerRequestsEndpoints(router *mux.Router) {
-	router.HandleFunc("/requests", getRequests).Methods(http.MethodGet)
+	router.HandleFunc("/api/requests", getRequests).Methods(http.MethodGet)
 }
 
 func getRequests(resp http.ResponseWriter, req *http.Request) {

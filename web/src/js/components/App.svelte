@@ -1,46 +1,11 @@
 <script>
-import { onDestroy } from 'svelte';
-
-import Listener from './Listener.svelte';
-import ListenerSelector from './ListenerSelector.svelte';
-import Upstreams from './Upstreams.svelte';
-
-import listenersService from '../services/listenersService';
-
-let listeners;
-let loadingListeners = false;
-let selectedListener;
-
-const listenersSubscription = listenersService.subscribe(({ loading, data }) => {
-  loadingListeners = loading;
-  listeners = data;
-});
-
-onDestroy(() => {
-  listenersService.unsubscribe(listenersSubscription);
-});
-
-function selectedListenerChanged(event) {
-  selectedListener = event.detail;
-}
+import ListenersPage from './ListenersPage.svelte';
+import RequestsPage from './RequestsPage.svelte';
+import Route from './Route.svelte';
+import TopMenu from './TopMenu.svelte';
 </script>
 
-<div class="ui menu">
-  <div class="header item">
-    go-proxy
-  </div>
-</div>
-
-{#if loadingListeners || listeners == null }
-  <p>Loading...</p>
-{:else}
-  <div class="header-justified">
-    <Listener listener={selectedListener} />
-
-    <div>
-      <ListenerSelector listeners={listeners} on:changed={selectedListenerChanged} />
-    </div>
-  </div>
-  <hr />
-  <Upstreams listener={selectedListener} />
-{/if}
+<TopMenu />
+<Route path="/"><RequestsPage /></Route>
+<Route path="/listeners"><ListenersPage /></Route>
+<Route path="/requests"><RequestsPage /></Route>
