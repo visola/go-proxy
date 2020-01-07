@@ -15,11 +15,9 @@ fi
 PACKAGES=$(go list ./...)
 for package in ${PACKAGES}
 do
-  go test -coverprofile=$TEMP_COVERAGE $package
-  if [ -f $TEMP_COVERAGE ]; then
-    cat $TEMP_COVERAGE | grep -v "mode:" | sort -r >> $COVERAGE_OUTPUT
-    rm $TEMP_COVERAGE
-  fi
+  go test -cover -coverprofile=$TEMP_COVERAGE $package
+  cat $TEMP_COVERAGE | grep -v "mode:" | sort -r >> $COVERAGE_OUTPUT
+  rm $TEMP_COVERAGE
 done
 
 if [ -f $HTML_REPORT ]; then
