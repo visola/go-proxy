@@ -4,3 +4,23 @@
   justify-content: space-between;
   padding: 0 20px;
 }
+
+.status_client_error {
+  background: #fff5f5;
+}
+
+.status_loading {
+  background: #eeeeee;
+}
+
+.status_redirect {
+  background: #ffffe9;
+}
+
+.status_server_error {
+  background: #e0a5a5;
+}
+
+.status_success {
+  background: #f5fff5;
+}

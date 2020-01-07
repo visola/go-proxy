@@ -15,6 +15,26 @@ const subscription = requestsService.subscribe(({ loading, data }) => {
   requests = data;
 });
 
+function getStatusClass(statusCode) {
+  if (statusCode == 0) {
+    return "status_loading";
+  }
+
+  if (statusCode < 300) {
+    return "status_success";
+  }
+
+  if (statusCode < 400) {
+    return "status_redirect";
+  }
+
+  if (statusCode < 500) {
+    return "status_client_error";
+  }
+
+  return "status_server_error";
+}
+
 onDestroy(() => subscription.unsubscribe());
 
 onMount(() => {
@@ -35,7 +55,7 @@ onMount(() => {
     </thead>
     <tbody>
       {#each requests as request }
-        <tr>
+        <tr class="{getStatusClass(request.statusCode)}">
           <td>
             {#if request.timings.completed == 0}
               <div class="ui active inline loader tiny"></div>
