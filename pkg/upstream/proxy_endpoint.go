@@ -108,8 +108,9 @@ func proxyHandleResult(p *ProxyEndpoint, newURL *url.URL, req *http.Request) (in
 
 			currentValues, exists := headers[name]
 			if !exists {
-				currentValues = append(currentValues, value)
+				currentValues = make([]string, 0)
 			}
+			currentValues = append(currentValues, value)
 			headers[name] = currentValues
 		}
 	}

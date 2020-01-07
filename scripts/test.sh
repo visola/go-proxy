@@ -6,6 +6,10 @@ COVERAGE_OUTPUT=c.out
 TEMP_COVERAGE=build/temp_cover.out
 HTML_REPORT=build/coverage.html
 
+export GO_PROXY_CERT_FILE=
+export GO_PROXY_KEY_FILE=
+export GO_PROXY_PORT=33080
+
 echo "mode: set" > $COVERAGE_OUTPUT
 
 if [ -f $TEMP_COVERAGE ]; then

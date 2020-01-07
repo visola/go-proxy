@@ -26,6 +26,8 @@ func TestProxyEndpointHandleFrom(t *testing.T) {
 		require.Nil(t, readErr)
 
 		w.Header().Add("Server", "test")
+		w.Header().Add("Set-Cookie", "cookie1")
+		w.Header().Add("Set-Cookie", "cookie2")
 		w.WriteHeader(200)
 		w.Write([]byte(responseText))
 	}))
@@ -56,6 +58,10 @@ func TestProxyEndpointHandleFrom(t *testing.T) {
 	require.Equal(t, 1, len(headers["Server"]))
 	assert.Equal(t, "test", headers["Server"][0])
 
+	require.Equal(t, 2, len(headers["Set-Cookie"]))
+	assert.Equal(t, "cookie1", headers["Set-Cookie"][0])
+	assert.Equal(t, "cookie2", headers["Set-Cookie"][1])
+
 	assert.Equal(t, http.MethodPost, proxiedRequest.Method)
 	assert.Equal(t, "/some/test", proxiedRequest.URL.Path)
 
@@ -83,6 +89,8 @@ func TestProxyEndpointHandleProxy(t *testing.T) {
 		require.Nil(t, readErr)
 
 		w.Header().Add("Server", "test")
+		w.Header().Add("Set-Cookie", "cookie1")
+		w.Header().Add("Set-Cookie", "cookie2")
 		w.WriteHeader(200)
 		w.Write([]byte(responseText))
 	}))
@@ -112,6 +120,10 @@ func TestProxyEndpointHandleProxy(t *testing.T) {
 
 	require.Equal(t, 1, len(headers["Server"]))
 	assert.Equal(t, "test", headers["Server"][0])
+
+	require.Equal(t, 2, len(headers["Set-Cookie"]))
+	assert.Equal(t, "cookie1", headers["Set-Cookie"][0])
+	assert.Equal(t, "cookie2", headers["Set-Cookie"][1])
 
 	assert.Equal(t, http.MethodPost, proxiedRequest.Method)
 	assert.Equal(t, "/some/second/first", proxiedRequest.URL.Path)
