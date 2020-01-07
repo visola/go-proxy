@@ -63,7 +63,7 @@ onMount(() => {
               {request.statusCode}
             {/if}
           </td>
-          <td>
+          <td title={request.url}>
             {#if request.url.length >= 50}
               {request.url.substring(0, 47)}...
             {:else}
