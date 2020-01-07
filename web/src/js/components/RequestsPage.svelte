@@ -12,12 +12,7 @@ const subscription = requestsService.subscribe(({ loading, data }) => {
     return;
   }
 
-  const dataArray = Object.values(data);
-  dataArray.sort((r1, r2) => {
-    return r2.timings.started - r1.timings.started;
-  });
-
-  requests = dataArray;
+  requests = data;
 });
 
 onDestroy(() => subscription.unsubscribe());
@@ -41,8 +36,19 @@ onMount(() => {
     <tbody>
       {#each requests as request }
         <tr>
-          <td>{request.timings.completed == 0 ? '-' : request.statusCode}</td>
-          <td>{request.url}</td>
+          <td>
+            {#if request.timings.completed == 0}
+              <div class="ui active inline loader tiny"></div>
+            {:else}
+              {request.statusCode}
+            {/if}
+          </td>
+          <td>
+            {#if request.url.length >= 50}
+              {request.url.substring(0, 47)}...
+            {:else}
+              {request.url}
+            {/if}
           <td>
             {#if request.timings.completed == 0}
               <div class="ui active inline loader tiny"></div>

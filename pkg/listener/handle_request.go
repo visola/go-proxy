@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/visola/go-proxy/pkg/event"
 	"github.com/visola/go-proxy/pkg/httputil"
 	"github.com/visola/go-proxy/pkg/upstream"
 )
@@ -19,35 +20,6 @@ const (
 	bufferSize        = 4 * 1024 * 1024        // 4 KBs
 	maxStoredBodySize = 5 * 1024 * 1024 * 1024 // 5 MBs
 )
-
-// HandleBodyAndHeaders stores headers and body for a request or response
-type HandleBodyAndHeaders struct {
-	Body    []byte              `json:"body"`
-	Headers map[string][]string `json:"headers"`
-}
-
-// HandleResult stores information about handled requests
-type HandleResult struct {
-	Error       string `json:"error"`
-	ExecutedURL string `json:"executedURL"`
-	ID          string `json:"id"`
-	HandledBy   string `json:"handledBy"`
-	StatusCode  int    `json:"statusCode"`
-	URL         string `json:"url"`
-
-	Request  HandleBodyAndHeaders `json:"request"`
-	Response HandleBodyAndHeaders `json:"response"`
-
-	Timings HandleTimings `json:"timings"`
-}
-
-// HandleTimings stores information about the timings
-type HandleTimings struct {
-	Completed int64 `json:"completed"`
-	Handled   int64 `json:"handled"`
-	Matched   int64 `json:"matched"`
-	Started   int64 `json:"started"`
-}
 
 func findEndpoints(listenerToHandle Listener) []upstream.Endpoint {
 	allEnabledEndpoints := make(upstream.Endpoints, 0)
@@ -137,14 +109,14 @@ func handleReadCloser(readCloser io.ReadCloser, resp http.ResponseWriter) ([]byt
 	return responseBytes, nil
 }
 
-func newHandleResult(req *http.Request) HandleResult {
-	return HandleResult{
+func newHandleResult(req *http.Request) event.HandleResult {
+	return event.HandleResult{
 		ID: uuid.New().String(),
-		Request: HandleBodyAndHeaders{
+		Request: event.HandleBodyAndHeaders{
 			Headers: req.Header,
 		},
-		Response: HandleBodyAndHeaders{},
-		Timings: HandleTimings{
+		Response: event.HandleBodyAndHeaders{},
+		Timings: event.HandleTimings{
 			Started: time.Now().UnixNano(),
 		},
 		URL: req.URL.String(),

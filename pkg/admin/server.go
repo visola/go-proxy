@@ -17,6 +17,7 @@ func StartAdminServer(port int) error {
 	registerListenerEndpoints(adminServer)
 	registerRequestsEndpoints(adminServer)
 	registerUpstreamEndpoints(adminServer)
+	registerWebsocketEndpoint(adminServer)
 
 	registerStaticEndpoints(adminServer)
 	adminServer.HandleFunc("/ping", pong).Methods(http.MethodGet)

@@ -9,6 +9,7 @@ require (
 	github.com/gobuffalo/packr/v2 v2.7.1
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/mux v1.7.3
+	github.com/gorilla/websocket v1.4.1
 	github.com/markbates/pkger v0.13.0 // indirect
 	github.com/rogpeppe/go-internal v1.5.1 // indirect
 	github.com/spf13/pflag v1.0.5
