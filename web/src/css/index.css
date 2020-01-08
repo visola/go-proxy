@@ -5,6 +5,55 @@
   padding: 0 20px;
 }
 
+label {
+  font-weight: bold;
+}
+
+.requests {
+  display: inline-block;
+  overflow-y: auto;
+}
+
+.requests tr {
+  transition: all 1s;
+}
+
+.requests tr:hover {
+  cursor: pointer;
+}
+
+.requests td:first-child, .requests th:first-child {
+  width: 30px;
+}
+
+.requests td:nth-child(2), .requests th:nth-child(2) {
+  width: 350px;
+}
+
+.requests td:nth-child(3), .requests th:nth-child(3) {
+  width: 460px;
+}
+
+.requests tr.selected td {
+  border: 1px solid black;
+}
+
+.request-detail {
+  display: inline-block;
+  flex-grow: 1;
+  max-width: calc(100% - 450px);
+  margin-left: 5px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.requests-page {
+  display: flex;
+  flex: 2;
+  flex-wrap: nowrap;
+  height: calc(100% - 4em);
+}
+
 .status_client_error {
   background: #fff5f5;
 }

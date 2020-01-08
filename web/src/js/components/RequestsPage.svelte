@@ -1,11 +1,13 @@
 <script>
 import  { onDestroy, onMount } from 'svelte';
 
+import RequestDetails from './RequestDetails.svelte';
+import Requests from './Requests.svelte';
 import requestsService from '../services/requestsService';
 
-const MAX_LENGTH = 100;
 let loadingRequests = false;
 let requests = null;
+let selectedRequest = null;
 
 const subscription = requestsService.subscribe(({ loading, data }) => {
   loadingRequests = loading;
@@ -14,33 +16,20 @@ const subscription = requestsService.subscribe(({ loading, data }) => {
   }
 
   requests = data;
+
+  const selectedId = window.location.hash.substring(1);
+  selectedRequest = requestsService.findById(selectedId);
 });
 
-function getStatusClass(statusCode) {
-  if (statusCode == 0) {
-    return "status_loading";
+function setSelectedRequest(id) {
+  if (selectedRequest != null && selectedRequest.id == id) {
+    history.pushState("", document.title, window.location.pathname + window.location.search);
+    selectedRequest = null;
+    return;  
   }
 
-  if (statusCode < 300) {
-    return "status_success";
-  }
-
-  if (statusCode < 400) {
-    return "status_redirect";
-  }
-
-  if (statusCode < 500) {
-    return "status_client_error";
-  }
-
-  return "status_server_error";
-}
-
-function trimToMax(text) {
-  if (text.length > MAX_LENGTH) {
-    return text.substring(0, MAX_LENGTH - 3) + "...";
-  }
-  return text;
+  window.location.hash = id;
+  selectedRequest = requestsService.findById(id);
 }
 
 onDestroy(() => subscription.unsubscribe());
@@ -53,40 +42,15 @@ onMount(() => {
 {#if loadingRequests == true || requests == null}
   <p>Loading...</p>
 {:else}
-  <table class="ui celled table">
-    <thead>
-      <tr>
-        <th>Status Code</th>
-        <th>Path</th>
-        <th>Executed Path</th>
-        <th>Timings</th>
-      </tr>
-    </thead>
-    <tbody>
-      {#each requests as request }
-        <tr class="{getStatusClass(request.statusCode)}">
-          <td>
-            {#if request.timings.completed == 0}
-              <div class="ui active inline loader tiny"></div>
-            {:else}
-              {request.statusCode}
-            {/if}
-          </td>
-          <td title={request.url}>
-            {trimToMax(request.url)}
-          </td>
-          <td title={request.executedURL}>
-            {trimToMax(request.executedURL)}
-          </td>
-          <td>
-            {#if request.timings.completed == 0}
-              <div class="ui active inline loader tiny"></div>
-            {:else}
-              {Math.round((request.timings.completed - request.timings.started) / 1000000)}ms
-            {/if}
-          </td>
-        </tr>
-      {/each}
-    </tbody>
-  </table>
+  <div class="requests-page">
+    <Requests
+      {requests}
+      on:requestClicked={(e) => setSelectedRequest(e.detail)}
+      selected={selectedRequest}
+      short={selectedRequest != null}
+    />
+    {#if selectedRequest != null}
+      <RequestDetails request={selectedRequest} />
+    {/if}
+  </div>
 {/if}

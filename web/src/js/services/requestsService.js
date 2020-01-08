@@ -29,6 +29,10 @@ class RequestsService extends BehaviorSubject {
       });
   }
 
+  findById(id) {
+    return this.requests[id];
+  }
+
   publish() {
     const dataArray = Object.values(this.requests);
     dataArray.sort((r1, r2) => {
