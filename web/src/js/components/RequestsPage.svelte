@@ -3,6 +3,7 @@ import  { onDestroy, onMount } from 'svelte';
 
 import requestsService from '../services/requestsService';
 
+const MAX_LENGTH = 100;
 let loadingRequests = false;
 let requests = null;
 
@@ -35,6 +36,13 @@ function getStatusClass(statusCode) {
   return "status_server_error";
 }
 
+function trimToMax(text) {
+  if (text.length > MAX_LENGTH) {
+    return text.substring(0, MAX_LENGTH - 3) + "...";
+  }
+  return text;
+}
+
 onDestroy(() => subscription.unsubscribe());
 
 onMount(() => {
@@ -50,6 +58,7 @@ onMount(() => {
       <tr>
         <th>Status Code</th>
         <th>Path</th>
+        <th>Executed Path</th>
         <th>Timings</th>
       </tr>
     </thead>
@@ -64,11 +73,11 @@ onMount(() => {
             {/if}
           </td>
           <td title={request.url}>
-            {#if request.url.length >= 50}
-              {request.url.substring(0, 47)}...
-            {:else}
-              {request.url}
-            {/if}
+            {trimToMax(request.url)}
+          </td>
+          <td title={request.executedURL}>
+            {trimToMax(request.executedURL)}
+          </td>
           <td>
             {#if request.timings.completed == 0}
               <div class="ui active inline loader tiny"></div>

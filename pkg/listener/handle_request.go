@@ -1,8 +1,10 @@
 package listener
 
 import (
+	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"sort"
 	"time"
@@ -40,12 +42,26 @@ func handleRequest(listenerToHandle Listener, req *http.Request, resp http.Respo
 	result := newHandleResult(req)
 	RequestHandlingChanged(result)
 
+	var readErr error
+	result.Request.Body, readErr = ioutil.ReadAll(req.Body)
+	if readErr != nil {
+		httputil.InternalError(req, resp, readErr)
+		result.StatusCode = http.StatusNotFound
+		result.Response.Body = []byte(readErr.Error())
+		result.Timings.Completed = time.Now().UnixNano()
+		RequestHandlingChanged(result)
+		return
+	}
+
+	req.Body = ioutil.NopCloser(bytes.NewBuffer(result.Request.Body))
+
 	for _, candidateEndpoint := range findEndpoints(listenerToHandle) {
 		if candidateEndpoint.Matches(req) {
 			result.Timings.Matched = time.Now().UnixNano()
 			RequestHandlingChanged(result)
 
-			statusCode, headers, body := candidateEndpoint.Handle(req)
+			statusCode, executedURL, headers, body := candidateEndpoint.Handle(req)
+			result.ExecutedURL = executedURL
 			result.StatusCode = statusCode
 			result.Timings.Handled = time.Now().UnixNano()
 			RequestHandlingChanged(result)

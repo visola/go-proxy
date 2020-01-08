@@ -18,7 +18,7 @@ type StaticEndpoint struct {
 }
 
 // Handle handles incoming request matching to files in disk
-func (s *StaticEndpoint) Handle(req *http.Request) (int, map[string][]string, io.ReadCloser) {
+func (s *StaticEndpoint) Handle(req *http.Request) (int, string, map[string][]string, io.ReadCloser) {
 	if s.Regexp != "" {
 		return staticHandleResult(s, replaceRegexp(req.URL.Path, s.To, s.ensureRegexp()), req)
 	}
@@ -44,11 +44,11 @@ func getContentType(file *os.File) string {
 	return http.DetectContentType(buffer)
 }
 
-func staticHandleResult(s *StaticEndpoint, pathToReturn string, req *http.Request) (int, map[string][]string, io.ReadCloser) {
+func staticHandleResult(s *StaticEndpoint, pathToReturn string, req *http.Request) (int, string, map[string][]string, io.ReadCloser) {
 	file, err := os.Open(pathToReturn)
 
 	if os.IsNotExist(err) {
-		return http.StatusNotFound, nil, ioutil.NopCloser(bytes.NewReader([]byte("File not found: " + pathToReturn)))
+		return http.StatusNotFound, pathToReturn, nil, ioutil.NopCloser(bytes.NewReader([]byte("File not found: " + pathToReturn)))
 	}
 
 	if err != nil {
@@ -59,5 +59,5 @@ func staticHandleResult(s *StaticEndpoint, pathToReturn string, req *http.Reques
 		"Content-Type": []string{getContentType(file)},
 	}
 
-	return http.StatusOK, headers, file
+	return http.StatusOK, pathToReturn, headers, file
 }

@@ -47,13 +47,14 @@ func TestProxyEndpointHandleFrom(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "http://nowhere.com/test?param2=two", strings.NewReader(bodyToSend))
 	req.Header.Add("Cookie", "cookie=delicious")
 
-	status, headers, body := proxyEndpoint.Handle(req)
+	status, executedURL, headers, body := proxyEndpoint.Handle(req)
 
 	assert.Equal(t, http.StatusOK, status)
 
 	bodyContent, readErr := ioutil.ReadAll(body)
 	require.Nil(t, readErr)
 	assert.Equal(t, responseText, string(bodyContent))
+	assert.Equal(t, ts.URL+"/some/test?param1=one&param2=two", executedURL)
 
 	require.Equal(t, 1, len(headers["Server"]))
 	assert.Equal(t, "test", headers["Server"][0])
@@ -110,13 +111,14 @@ func TestProxyEndpointHandleProxy(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "http://nowhere.com/first/second?param2=two", strings.NewReader(bodyToSend))
 	req.Header.Add("Cookie", "cookie=delicious")
 
-	status, headers, body := proxyEndpoint.Handle(req)
+	status, executedURL, headers, body := proxyEndpoint.Handle(req)
 
 	assert.Equal(t, http.StatusOK, status)
 
 	bodyContent, readErr := ioutil.ReadAll(body)
 	require.Nil(t, readErr)
 	assert.Equal(t, responseText, string(bodyContent))
+	assert.Equal(t, ts.URL+"/some/second/first?param1=one&param2=two", executedURL)
 
 	require.Equal(t, 1, len(headers["Server"]))
 	assert.Equal(t, "test", headers["Server"][0])

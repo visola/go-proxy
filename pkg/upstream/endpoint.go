@@ -9,7 +9,7 @@ import (
 
 // Endpoint represents one route inside an Upstream
 type Endpoint interface {
-	Handle(*http.Request) (int, map[string][]string, io.ReadCloser)
+	Handle(*http.Request) (int, string, map[string][]string, io.ReadCloser)
 	Matches(*http.Request) bool
 	Path() string
 }

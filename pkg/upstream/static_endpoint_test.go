@@ -30,8 +30,9 @@ func testFileNotFound(t *testing.T, tempDir string) {
 
 	req := httptest.NewRequest(http.MethodGet, "http://nowhere.com/test/hello.txt", nil)
 
-	status, _, _ := staticEndpoint.Handle(req)
+	status, executedPath, _, _ := staticEndpoint.Handle(req)
 	assert.Equal(t, http.StatusNotFound, status)
+	assert.Equal(t, path.Join(tempDir, "/hello.txt"), executedPath)
 }
 
 func testMatchUsingFrom(t *testing.T, tempDir string) {
@@ -50,7 +51,7 @@ func testMatchUsingFrom(t *testing.T, tempDir string) {
 
 	req := httptest.NewRequest(http.MethodGet, "http://nowhere.com/test/hello.txt", nil)
 
-	status, headers, body := staticEndpoint.Handle(req)
+	status, executedPath, headers, body := staticEndpoint.Handle(req)
 
 	assert.Equal(t, http.StatusOK, status)
 
@@ -59,6 +60,7 @@ func testMatchUsingFrom(t *testing.T, tempDir string) {
 	assert.Equal(t, fileContent, string(respBody))
 
 	assert.Equal(t, "text/plain; charset=utf-8", headers["Content-Type"][0])
+	assert.Equal(t, tempFile, executedPath)
 }
 
 func testMatchUsingRegexp(t *testing.T, tempDir string) {
@@ -77,13 +79,14 @@ func testMatchUsingRegexp(t *testing.T, tempDir string) {
 
 	req := httptest.NewRequest(http.MethodGet, "http://nowhere.com/test/hello.some", nil)
 
-	status, headers, body := staticEndpoint.Handle(req)
+	status, executedPath, headers, body := staticEndpoint.Handle(req)
 
 	assert.Equal(t, http.StatusOK, status)
 
 	respBody, respErr := ioutil.ReadAll(body)
 	require.Nil(t, respErr)
 	assert.Equal(t, fileContent, string(respBody))
+	assert.Equal(t, tempFile, executedPath)
 
 	assert.Equal(t, "text/plain; charset=utf-8", headers["Content-Type"][0])
 }
@@ -104,7 +107,8 @@ func testReadError(t *testing.T, tempDir string) {
 
 	req := httptest.NewRequest(http.MethodGet, "http://nowhere.com/test/hello.txt", nil)
 
-	status, _, _ := staticEndpoint.Handle(req)
+	status, executedPath, _, _ := staticEndpoint.Handle(req)
 
 	assert.Equal(t, http.StatusInternalServerError, status)
+	assert.Equal(t, "", executedPath)
 }

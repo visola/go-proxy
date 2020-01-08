@@ -18,7 +18,7 @@ type ProxyEndpoint struct {
 }
 
 // Handle handles requests proxying the content to another HTTP server
-func (p *ProxyEndpoint) Handle(req *http.Request) (int, map[string][]string, io.ReadCloser) {
+func (p *ProxyEndpoint) Handle(req *http.Request) (int, string, map[string][]string, io.ReadCloser) {
 	var newURL *url.URL
 	var parseErr error
 
@@ -53,7 +53,7 @@ func createHTTPClient() *http.Client {
 	}
 }
 
-func proxyHandleResult(p *ProxyEndpoint, newURL *url.URL, req *http.Request) (int, map[string][]string, io.ReadCloser) {
+func proxyHandleResult(p *ProxyEndpoint, newURL *url.URL, req *http.Request) (int, string, map[string][]string, io.ReadCloser) {
 	defer req.Body.Close()
 	bodyInBytes, readBodyErr := ioutil.ReadAll(req.Body)
 	if readBodyErr != nil {
@@ -115,5 +115,5 @@ func proxyHandleResult(p *ProxyEndpoint, newURL *url.URL, req *http.Request) (in
 		}
 	}
 
-	return proxiedResp.StatusCode, headers, proxiedResp.Body
+	return proxiedResp.StatusCode, proxiedReq.URL.String(), headers, proxiedResp.Body
 }

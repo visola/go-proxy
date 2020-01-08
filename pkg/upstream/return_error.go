@@ -7,6 +7,6 @@ import (
 	"net/http"
 )
 
-func returnError(err error) (int, map[string][]string, io.ReadCloser) {
-	return http.StatusInternalServerError, nil, ioutil.NopCloser(bytes.NewReader([]byte(err.Error())))
+func returnError(err error) (int, string, map[string][]string, io.ReadCloser) {
+	return http.StatusInternalServerError, "", nil, ioutil.NopCloser(bytes.NewReader([]byte(err.Error())))
 }
