@@ -8,7 +8,7 @@ class UpstreamsService extends BehaviorSubject {
 
   fetch() {
     this.next({loading: true, data: null});
-    return fetch('/upstreams')
+    return fetch('/api/upstreams')
       .then((response) => response.json())
       .then((data) => {
         this.next({loading: false, data});

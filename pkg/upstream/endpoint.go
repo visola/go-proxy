@@ -7,18 +7,9 @@ import (
 	"strings"
 )
 
-// HandleResult represents the result of an endpoint handling a request
-type HandleResult struct {
-	Body         io.ReadCloser
-	ErrorMessage string
-	ExecutedURL  string
-	Headers      map[string][]string
-	ResponseCode int
-}
-
 // Endpoint represents one route inside an Upstream
 type Endpoint interface {
-	Handle(*http.Request, http.ResponseWriter) HandleResult
+	Handle(*http.Request) (int, string, map[string][]string, io.ReadCloser)
 	Matches(*http.Request) bool
 	Path() string
 }

@@ -1,16 +1,29 @@
 package listener
 
 import (
+	"bytes"
+	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"sort"
+	"time"
 
+	"github.com/google/uuid"
+	"github.com/visola/go-proxy/pkg/event"
 	"github.com/visola/go-proxy/pkg/httputil"
 	"github.com/visola/go-proxy/pkg/upstream"
 )
 
-func handleRequest(listenerToHandle Listener, req *http.Request, resp http.ResponseWriter) {
-	handled := false
+const noHandlerMatchedMessage = "Nothing configured to handle this request."
 
+// Constants to process the request and response bodies
+const (
+	bufferSize        = 4 * 1024 * 1024        // 4 KBs
+	maxStoredBodySize = 5 * 1024 * 1024 * 1024 // 5 MBs
+)
+
+func findEndpoints(listenerToHandle Listener) []upstream.Endpoint {
 	allEnabledEndpoints := make(upstream.Endpoints, 0)
 	for _, enabledUpstream := range listenerToHandle.EnabledUpstreams {
 		candidateUpstream, existsUpstream := upstream.Upstreams()[enabledUpstream]
@@ -22,16 +35,107 @@ func handleRequest(listenerToHandle Listener, req *http.Request, resp http.Respo
 	}
 
 	sort.Sort(allEnabledEndpoints)
+	return allEnabledEndpoints
+}
 
-	for _, candidateEndpoint := range allEnabledEndpoints {
+func handleRequest(listenerToHandle Listener, req *http.Request, resp http.ResponseWriter) {
+	result := newHandleResult(req)
+	RequestHandlingChanged(result)
+
+	var readErr error
+	result.Request.Body, readErr = ioutil.ReadAll(req.Body)
+	if readErr != nil {
+		httputil.InternalError(req, resp, readErr)
+		result.StatusCode = http.StatusNotFound
+		result.Response.Body = []byte(readErr.Error())
+		result.Timings.Completed = time.Now().UnixNano()
+		RequestHandlingChanged(result)
+		return
+	}
+
+	req.Body = ioutil.NopCloser(bytes.NewBuffer(result.Request.Body))
+
+	for _, candidateEndpoint := range findEndpoints(listenerToHandle) {
 		if candidateEndpoint.Matches(req) {
-			candidateEndpoint.Handle(req, resp)
-			handled = true
+			result.Timings.Matched = time.Now().UnixNano()
+			RequestHandlingChanged(result)
+
+			statusCode, executedURL, headers, body := candidateEndpoint.Handle(req)
+			result.ExecutedURL = executedURL
+			result.StatusCode = statusCode
+			result.Timings.Handled = time.Now().UnixNano()
+			RequestHandlingChanged(result)
+
+			if headers == nil {
+				headers = make(map[string][]string)
+			}
+
+			result.Response.Headers = headers
+			for name, values := range headers {
+				for _, value := range values {
+					resp.Header().Add(name, value)
+				}
+			}
+
+			resp.WriteHeader(statusCode)
+
+			bodyBytes, responseError := handleReadCloser(body, resp)
+			if responseError == nil {
+				result.Response.Body = bodyBytes
+			} else {
+				result.Error = fmt.Sprintf("Error while reading response: %s", responseError.Error())
+			}
+
 			break
 		}
 	}
 
-	if !handled {
-		httputil.NotFound(req, resp, "Nothing configured to handle this request.")
+	if result.Timings.Matched == 0 {
+		httputil.NotFound(req, resp, noHandlerMatchedMessage)
+		result.StatusCode = http.StatusNotFound
+		result.Response.Body = []byte(noHandlerMatchedMessage)
+	}
+
+	result.Timings.Completed = time.Now().UnixNano()
+	RequestHandlingChanged(result)
+}
+
+func handleReadCloser(readCloser io.ReadCloser, resp http.ResponseWriter) ([]byte, error) {
+	defer readCloser.Close()
+
+	responseBytes := make([]byte, 0)
+	buffer := make([]byte, bufferSize)
+	for {
+		bytesRead, readError := readCloser.Read(buffer)
+
+		if readError != nil && readError != io.EOF {
+			return nil, readError
+		}
+
+		if bytesRead == 0 {
+			break
+		}
+
+		if len(responseBytes) < maxStoredBodySize {
+			responseBytes = append(responseBytes, buffer[:bytesRead]...)
+		}
+		resp.Write(buffer[:bytesRead])
+	}
+
+	return responseBytes, nil
+}
+
+func newHandleResult(req *http.Request) event.HandleResult {
+	return event.HandleResult{
+		ID:     uuid.New().String(),
+		Method: req.Method,
+		Request: event.HandleBodyAndHeaders{
+			Headers: req.Header,
+		},
+		Response: event.HandleBodyAndHeaders{},
+		Timings: event.HandleTimings{
+			Started: time.Now().UnixNano(),
+		},
+		URL: req.URL.String(),
 	}
 }

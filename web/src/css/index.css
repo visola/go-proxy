@@ -4,3 +4,91 @@
   justify-content: space-between;
   padding: 0 20px;
 }
+
+i.button.close {
+  cursor: pointer;
+  position: absolute;
+  right: 0;
+}
+
+label {
+  font-weight: bold;
+}
+
+.requests {
+  display: inline-block;
+  overflow-y: auto;
+}
+
+.requests tr {
+  transition: all 1s;
+}
+
+.requests tr td {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.requests tr:hover {
+  cursor: pointer;
+}
+
+.requests td:first-child, .requests th:first-child {
+  width: 30px;
+}
+
+.requests td:nth-child(2), .requests th:nth-child(2) {
+  width: 30px;
+}
+
+.requests td:nth-child(3), .requests th:nth-child(3) {
+  width: 450px;
+}
+
+.requests td:nth-child(4), .requests th:nth-child(4) {
+  width: 500px;
+}
+
+.requests tr td {
+  border: 1px solid transparent;
+}
+
+.requests tr.selected td {
+  border: 1px solid black;
+}
+
+.request-detail {
+  display: inline-block;
+  flex-grow: 1;
+  max-width: calc(100% - 602px);
+  margin-left: 5px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-top: 5px;
+}
+
+.requests-page {
+  display: flex;
+  flex: 2;
+  flex-wrap: nowrap;
+  max-height: calc(100% - 4em);
+}
+
+.status_client_error {
+  background: #fff5f5;
+}
+
+.status_loading {
+  background: #eeeeee;
+}
+
+.status_redirect {
+  background: #ffffe9;
+}
+
+.status_server_error {
+  background: #e0a5a5;
+}
+
+.status_success {
+  background: #f5fff5;
+}

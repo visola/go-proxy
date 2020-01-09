@@ -1,46 +1,24 @@
 <script>
-import { onDestroy } from 'svelte';
+import ListenersPage from './ListenersPage.svelte';
+import RequestsPage from './RequestsPage.svelte';
+import Route from './Route.svelte';
+import TopMenu from './TopMenu.svelte';
 
-import Listener from './Listener.svelte';
-import ListenerSelector from './ListenerSelector.svelte';
-import Upstreams from './Upstreams.svelte';
-
-import listenersService from '../services/listenersService';
-
-let listeners;
-let loadingListeners = false;
-let selectedListener;
-
-const listenersSubscription = listenersService.subscribe(({ loading, data }) => {
-  loadingListeners = loading;
-  listeners = data;
-});
-
-onDestroy(() => {
-  listenersService.unsubscribe(listenersSubscription);
-});
-
-function selectedListenerChanged(event) {
-  selectedListener = event.detail;
-}
+const routes = [{
+  component: RequestsPage,
+  label: "Requests",
+  paths: ["/", "/requests"],
+},{
+  component: ListenersPage,
+  label: "Listeners",
+  paths: ["/listeners"],
+}];
 </script>
 
-<div class="ui menu">
-  <div class="header item">
-    go-proxy
-  </div>
-</div>
+<TopMenu {routes} />
 
-{#if loadingListeners || listeners == null }
-  <p>Loading...</p>
-{:else}
-  <div class="header-justified">
-    <Listener listener={selectedListener} />
-
-    <div>
-      <ListenerSelector listeners={listeners} on:changed={selectedListenerChanged} />
-    </div>
-  </div>
-  <hr />
-  <Upstreams listener={selectedListener} />
-{/if}
+{#each routes as route}
+  {#each route.paths as path}
+    <Route path={path}><svelte:component this={route.component} /></Route>
+  {/each}
+{/each}

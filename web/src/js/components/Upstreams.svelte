@@ -18,6 +18,15 @@ const upstreamsSubscription = upstreamsService.subscribe(({ loading, data }) => 
   loadingUpstreams = loading;
   upstreams = data;
   updateEndpoints();
+});  
+
+afterUpdate(() => {
+  updateEndpoints();
+});
+
+onDestroy(() => {
+  listenersSubscription.unsubscribe();
+  upstreamsSubscription.unsubscribe();
 });
 
 function updateEndpoints() {
@@ -62,15 +71,6 @@ function upstreamSelected(checked, name) {
   }
   listenersService.setEnabledUpstreams(listener, listener.enabledUpstreams);
 }
-
-afterUpdate(() => {
-  updateEndpoints();
-});
-
-onDestroy(() => {
-  listenersService.unsubscribe(listenersSubscription);
-  upstreamsService.unsubscribe(upstreamsSubscription);
-});
 </script>
 
 {#if listener != null && upstreams != null}

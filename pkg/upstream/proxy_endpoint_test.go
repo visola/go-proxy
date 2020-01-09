@@ -26,6 +26,8 @@ func TestProxyEndpointHandleFrom(t *testing.T) {
 		require.Nil(t, readErr)
 
 		w.Header().Add("Server", "test")
+		w.Header().Add("Set-Cookie", "cookie1")
+		w.Header().Add("Set-Cookie", "cookie2")
 		w.WriteHeader(200)
 		w.Write([]byte(responseText))
 	}))
@@ -45,16 +47,21 @@ func TestProxyEndpointHandleFrom(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "http://nowhere.com/test?param2=two", strings.NewReader(bodyToSend))
 	req.Header.Add("Cookie", "cookie=delicious")
 
-	resp := httptest.NewRecorder()
+	status, executedURL, headers, body := proxyEndpoint.Handle(req)
 
-	proxyEndpoint.Handle(req, resp)
+	assert.Equal(t, http.StatusOK, status)
 
-	assert.Equal(t, http.StatusOK, resp.Code)
-	assert.Equal(t, responseText, resp.Body.String())
+	bodyContent, readErr := ioutil.ReadAll(body)
+	require.Nil(t, readErr)
+	assert.Equal(t, responseText, string(bodyContent))
+	assert.Equal(t, ts.URL+"/some/test?param1=one&param2=two", executedURL)
 
-	respHeaders := resp.Header()
-	require.Equal(t, 1, len(respHeaders["Server"]))
-	assert.Equal(t, "test", respHeaders["Server"][0])
+	require.Equal(t, 1, len(headers["Server"]))
+	assert.Equal(t, "test", headers["Server"][0])
+
+	require.Equal(t, 2, len(headers["Set-Cookie"]))
+	assert.Equal(t, "cookie1", headers["Set-Cookie"][0])
+	assert.Equal(t, "cookie2", headers["Set-Cookie"][1])
 
 	assert.Equal(t, http.MethodPost, proxiedRequest.Method)
 	assert.Equal(t, "/some/test", proxiedRequest.URL.Path)
@@ -83,6 +90,8 @@ func TestProxyEndpointHandleProxy(t *testing.T) {
 		require.Nil(t, readErr)
 
 		w.Header().Add("Server", "test")
+		w.Header().Add("Set-Cookie", "cookie1")
+		w.Header().Add("Set-Cookie", "cookie2")
 		w.WriteHeader(200)
 		w.Write([]byte(responseText))
 	}))
@@ -102,16 +111,21 @@ func TestProxyEndpointHandleProxy(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "http://nowhere.com/first/second?param2=two", strings.NewReader(bodyToSend))
 	req.Header.Add("Cookie", "cookie=delicious")
 
-	resp := httptest.NewRecorder()
+	status, executedURL, headers, body := proxyEndpoint.Handle(req)
 
-	proxyEndpoint.Handle(req, resp)
+	assert.Equal(t, http.StatusOK, status)
 
-	assert.Equal(t, http.StatusOK, resp.Code)
-	assert.Equal(t, responseText, resp.Body.String())
+	bodyContent, readErr := ioutil.ReadAll(body)
+	require.Nil(t, readErr)
+	assert.Equal(t, responseText, string(bodyContent))
+	assert.Equal(t, ts.URL+"/some/second/first?param1=one&param2=two", executedURL)
 
-	respHeaders := resp.Header()
-	require.Equal(t, 1, len(respHeaders["Server"]))
-	assert.Equal(t, "test", respHeaders["Server"][0])
+	require.Equal(t, 1, len(headers["Server"]))
+	assert.Equal(t, "test", headers["Server"][0])
+
+	require.Equal(t, 2, len(headers["Set-Cookie"]))
+	assert.Equal(t, "cookie1", headers["Set-Cookie"][0])
+	assert.Equal(t, "cookie2", headers["Set-Cookie"][1])
 
 	assert.Equal(t, http.MethodPost, proxiedRequest.Method)
 	assert.Equal(t, "/some/second/first", proxiedRequest.URL.Path)

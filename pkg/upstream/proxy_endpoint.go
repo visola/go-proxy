@@ -8,36 +8,37 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-
-	"github.com/visola/go-proxy/pkg/httputil"
 )
 
 // ProxyEndpoint proxy requests to another HTTP/S server
 type ProxyEndpoint struct {
 	BaseEndpoint
-	Headers map[string][]string
-	To      string `json:"to"`
+	Headers map[string][]string `json:"headers"`
+	To      string              `json:"to"`
 }
 
 // Handle handles requests proxying the content to another HTTP server
-func (p *ProxyEndpoint) Handle(req *http.Request, resp http.ResponseWriter) HandleResult {
+func (p *ProxyEndpoint) Handle(req *http.Request) (int, string, map[string][]string, io.ReadCloser) {
 	var newURL *url.URL
 	var parseErr error
 
 	if p.Regexp != "" {
 		newURL, parseErr = url.Parse(replaceRegexp(req.URL.Path, p.To, p.ensureRegexp()))
 		if parseErr != nil {
-			return internalServerError(p.UpstreamName+":[error]", req, resp, parseErr)
+			return returnError(parseErr)
 		}
 	} else {
 		newURL, parseErr = url.Parse(p.To)
 		if parseErr != nil {
-			return internalServerError(p.UpstreamName+":[error]", req, resp, parseErr)
+			return returnError(parseErr)
 		}
-		newURL.Path = newURL.Path + "/" + req.URL.Path[len(p.From):]
+		concatPath := req.URL.Path[len(p.From):]
+		if concatPath != "" {
+			newURL.Path = newURL.Path + "/" + concatPath
+		}
 	}
 
-	return proxyHandleResult(p, newURL, req, resp)
+	return proxyHandleResult(p, newURL, req)
 }
 
 func createHTTPClient() *http.Client {
@@ -52,22 +53,11 @@ func createHTTPClient() *http.Client {
 	}
 }
 
-func internalServerError(executedURL string, req *http.Request, resp http.ResponseWriter, err error) HandleResult {
-	httputil.InternalError(req, resp, err)
-	return HandleResult{
-		Body:         ioutil.NopCloser(strings.NewReader(err.Error())),
-		ExecutedURL:  executedURL,
-		ResponseCode: http.StatusInternalServerError,
-	}
-}
-
-func proxyHandleResult(p *ProxyEndpoint, newURL *url.URL, req *http.Request, resp http.ResponseWriter) HandleResult {
-	executedURL := p.UpstreamName + ":" + p.To
-
+func proxyHandleResult(p *ProxyEndpoint, newURL *url.URL, req *http.Request) (int, string, map[string][]string, io.ReadCloser) {
 	defer req.Body.Close()
 	bodyInBytes, readBodyErr := ioutil.ReadAll(req.Body)
 	if readBodyErr != nil {
-		return internalServerError(executedURL, req, resp, readBodyErr)
+		return returnError(readBodyErr)
 	}
 
 	// Copy parameters
@@ -81,14 +71,7 @@ func proxyHandleResult(p *ProxyEndpoint, newURL *url.URL, req *http.Request, res
 
 	proxiedReq, proxiedReqErr := http.NewRequest(req.Method, newURL.String(), bytes.NewBuffer(bodyInBytes))
 	if proxiedReqErr != nil {
-		return internalServerError(executedURL, req, resp, proxiedReqErr)
-	}
-
-	// Inject headers
-	for name, values := range p.Headers {
-		for _, value := range values {
-			proxiedReq.Header.Add(name, value)
-		}
+		return returnError(proxiedReqErr)
 	}
 
 	// Copy request headers
@@ -98,12 +81,19 @@ func proxyHandleResult(p *ProxyEndpoint, newURL *url.URL, req *http.Request, res
 		}
 	}
 
-	proxiedResp, respErr := createHTTPClient().Do(proxiedReq)
-	if respErr != nil {
-		return internalServerError(executedURL, req, resp, respErr)
+	// Inject headers
+	for name, values := range p.Headers {
+		for _, value := range values {
+			proxiedReq.Header.Add(name, value)
+		}
 	}
 
-	defer proxiedResp.Body.Close()
+	proxiedResp, respErr := createHTTPClient().Do(proxiedReq)
+	if respErr != nil {
+		return returnError(respErr)
+	}
+
+	headers := make(map[string][]string)
 
 	// Copy response headers
 	for name, values := range proxiedResp.Header {
@@ -115,34 +105,15 @@ func proxyHandleResult(p *ProxyEndpoint, newURL *url.URL, req *http.Request, res
 					value = req.URL.Host + value[len(p.To):]
 				}
 			}
-			resp.Header().Add(name, value)
+
+			currentValues, exists := headers[name]
+			if !exists {
+				currentValues = make([]string, 0)
+			}
+			currentValues = append(currentValues, value)
+			headers[name] = currentValues
 		}
 	}
 
-	// Copy status
-	resp.WriteHeader(proxiedResp.StatusCode)
-
-	responseBytes := make([]byte, 0)
-	buffer := make([]byte, 512)
-	for {
-		bytesRead, readError := proxiedResp.Body.Read(buffer)
-
-		if readError != nil && readError != io.EOF {
-			return internalServerError(executedURL, req, resp, readError)
-		}
-
-		if bytesRead == 0 {
-			break
-		}
-
-		responseBytes = append(responseBytes, buffer[:bytesRead]...)
-		resp.Write(buffer[:bytesRead])
-	}
-
-	return HandleResult{
-		// TODO - Fill body
-		ExecutedURL: executedURL,
-		// TODO - Fill headers
-		ResponseCode: proxiedResp.StatusCode,
-	}
+	return proxiedResp.StatusCode, proxiedReq.URL.String(), headers, proxiedResp.Body
 }
