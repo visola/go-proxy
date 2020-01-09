@@ -22,7 +22,7 @@ const subscription = requestsService.subscribe(({ loading, data }) => {
 });
 
 function setSelectedRequest(id) {
-  if (selectedRequest != null && selectedRequest.id == id) {
+  if (id == null || (selectedRequest != null && selectedRequest.id == id)) {
     history.pushState("", document.title, window.location.pathname + window.location.search);
     selectedRequest = null;
     return;  
@@ -50,7 +50,7 @@ onMount(() => {
       short={selectedRequest != null}
     />
     {#if selectedRequest != null}
-      <RequestDetails request={selectedRequest} />
+      <RequestDetails request={selectedRequest} on:close={() => setSelectedRequest(null)} />
     {/if}
   </div>
 {/if}

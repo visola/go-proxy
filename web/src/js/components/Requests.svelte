@@ -7,7 +7,7 @@ export let short = false;
 
 const dispatch = createEventDispatcher();
 
-const MAX_LENGTH = 100;
+const MAX_LENGTH = 50;
 export let selected = {};
 
 function getStatusClass(statusCode) {

@@ -5,6 +5,12 @@
   padding: 0 20px;
 }
 
+i.button.close {
+  cursor: pointer;
+  position: absolute;
+  right: 0;
+}
+
 label {
   font-weight: bold;
 }
@@ -16,6 +22,10 @@ label {
 
 .requests tr {
   transition: all 1s;
+}
+
+.requests tr td {
+  font-family: 'Courier New', Courier, monospace;
 }
 
 .requests tr:hover {
@@ -31,11 +41,15 @@ label {
 }
 
 .requests td:nth-child(3), .requests th:nth-child(3) {
-  width: 350px;
+  width: 450px;
 }
 
 .requests td:nth-child(4), .requests th:nth-child(4) {
   width: 500px;
+}
+
+.requests tr td {
+  border: 1px solid transparent;
 }
 
 .requests tr.selected td {
@@ -45,10 +59,11 @@ label {
 .request-detail {
   display: inline-block;
   flex-grow: 1;
-  max-width: calc(100% - 450px);
+  max-width: calc(100% - 602px);
   margin-left: 5px;
   overflow-x: hidden;
   overflow-y: auto;
+  padding-top: 5px;
 }
 
 .requests-page {
