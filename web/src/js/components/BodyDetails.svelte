@@ -5,6 +5,7 @@ const TEXT_CONTENT_TYPES = [
   'text/css',
   'text/html',
   'text/plain',
+  'application/x-www-form-urlencoded',
   'application/x-javascript',
   'application/javascript',
   'application/json'

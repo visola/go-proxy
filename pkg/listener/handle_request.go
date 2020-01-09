@@ -127,7 +127,8 @@ func handleReadCloser(readCloser io.ReadCloser, resp http.ResponseWriter) ([]byt
 
 func newHandleResult(req *http.Request) event.HandleResult {
 	return event.HandleResult{
-		ID: uuid.New().String(),
+		ID:     uuid.New().String(),
+		Method: req.Method,
 		Request: event.HandleBodyAndHeaders{
 			Headers: req.Header,
 		},

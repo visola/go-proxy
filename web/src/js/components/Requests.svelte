@@ -42,47 +42,53 @@ function trimToMax(text) {
 }
 </script>
 
-<table class="ui celled table requests collapsing">
-  <thead>
-    <tr>
-      <th>Status Code</th>
-      <th>Path</th>
-      {#if !short}
-        <th>Executed Path</th>
-        <th>Timings</th>
-      {/if}
-    </tr>
-  </thead>
-  <tbody>
-    {#each requests as request (request.id)}
-      <tr
-        class:selected={selected != null && request.id == selected.id}
-        class="{getStatusClass(request.statusCode)}"
-        on:click|preventDefault={() => handleRequestSelected(request.id)}
-      >
-        <td>
-          {#if request.timings.completed == 0}
-            <div class="ui active inline loader tiny"></div>
-          {:else}
-            {request.statusCode}
-          {/if}
-        </td>
-        <td title={request.url}>
-          {trimToMax(request.url)}
-        </td>
+{#if requests.length == 0}
+  <p style="margin-left: 10px;">Nothing here. Execute some requests to see the data.</p>
+{:else}
+  <table class="ui celled table requests collapsing">
+    <thead>
+      <tr>
+        <th>Status Code</th>
+        <th>Method</th>
+        <th>Path</th>
         {#if !short}
-          <td title={request.executedURL}>
-            {trimToMax(request.executedURL)}
-          </td>
+          <th>Executed Path</th>
+          <th>Timings</th>
+        {/if}
+      </tr>
+    </thead>
+    <tbody>
+      {#each requests as request (request.id)}
+        <tr
+          class:selected={selected != null && request.id == selected.id}
+          class="{getStatusClass(request.statusCode)}"
+          on:click|preventDefault={() => handleRequestSelected(request.id)}
+        >
           <td>
             {#if request.timings.completed == 0}
               <div class="ui active inline loader tiny"></div>
             {:else}
-              {Math.round((request.timings.completed - request.timings.started) / 1000000)}ms
+              {request.statusCode}
             {/if}
           </td>
-        {/if}
-      </tr>
-    {/each}
-  </tbody>
-</table>
+          <td>{request.method}</td>
+          <td title={request.url}>
+            {trimToMax(request.url)}
+          </td>
+          {#if !short}
+            <td title={request.executedURL}>
+              {trimToMax(request.executedURL)}
+            </td>
+            <td>
+              {#if request.timings.completed == 0}
+                <div class="ui active inline loader tiny"></div>
+              {:else}
+                {Math.round((request.timings.completed - request.timings.started) / 1000000)}ms
+              {/if}
+            </td>
+          {/if}
+        </tr>
+      {/each}
+    </tbody>
+  </table>
+{/if}

@@ -27,6 +27,7 @@ type HandleResult struct {
 	ExecutedURL string `json:"executedURL"`
 	ID          string `json:"id"`
 	HandledBy   string `json:"handledBy"`
+	Method      string `json:"method"`
 	StatusCode  int    `json:"statusCode"`
 	URL         string `json:"url"`
 
