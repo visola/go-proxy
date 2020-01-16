@@ -1,5 +1,5 @@
 <script>
-import { createEventDispatcher } from 'svelte';
+import { beforeUpdate, createEventDispatcher } from 'svelte';
 import { elasticOut } from 'svelte/easing';
 
 export let requests;
@@ -40,9 +40,20 @@ function trimToMax(text) {
   }
   return text;
 }
+
+const MAX_REQUESTS = 100;
+let filteredRequests = [];
+beforeUpdate(() => {
+  if (requests == null) {
+    filteredRequests = [];
+    return;
+  }
+
+  filteredRequests = requests.slice(0, MAX_REQUESTS);
+});
 </script>
 
-{#if requests.length == 0}
+{#if filteredRequests.length == 0}
   <p style="margin-left: 10px;">Nothing here. Execute some requests to see the data.</p>
 {:else}
   <table class="ui celled table requests collapsing">
@@ -58,7 +69,7 @@ function trimToMax(text) {
       </tr>
     </thead>
     <tbody>
-      {#each requests as request (request.id)}
+      {#each filteredRequests as request (request.id)}
         <tr
           class:selected={selected != null && request.id == selected.id}
           class="{getStatusClass(request.statusCode)}"
