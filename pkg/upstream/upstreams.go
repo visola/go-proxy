@@ -1,19 +1,17 @@
 package upstream
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/visola/go-proxy/pkg/configuration"
+)
 
 // Upstream represents a place where requests can be directed to
 type Upstream struct {
-	Name            string            `json:"name"`
-	Origin          Origin            `json:"origin"`
-	ProxyEndpoints  []*ProxyEndpoint  `json:"proxyEndpoints"`
-	StaticEndpoints []*StaticEndpoint `json:"staticEndpoints"`
-}
-
-// Origin is where the upstream was loaded from
-type Origin struct {
-	File     string `json:"file"`
-	LoadedAt int64  `json:"loadedAt"`
+	Name            string               `json:"name"`
+	Origin          configuration.Origin `json:"origin"`
+	ProxyEndpoints  []*ProxyEndpoint     `json:"proxyEndpoints"`
+	StaticEndpoints []*StaticEndpoint    `json:"staticEndpoints"`
 }
 
 // Endpoints returns all the endpoints available for the upstream

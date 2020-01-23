@@ -9,25 +9,28 @@ import (
 
 func TestSetEnabledUpstreams(t *testing.T) {
 	listenerPort := 8000
+	listenerName := "test"
 
-	ActivateListener(ListenerConfiguration{
-		Port: listenerPort,
-	})
+	currentListeners = map[string]*Listener{
+		listenerName: &Listener{
+			Port: listenerPort,
+		},
+	}
 
 	upstreamNames := []string{"backend", "frontend"}
-	SetEnabledUpstreams(listenerPort, upstreamNames)
-	assertEnabledUpstreamsInListener(t, listenerPort, upstreamNames)
+	SetEnabledUpstreams(listenerName, upstreamNames)
+	assertEnabledUpstreamsInListener(t, listenerName, upstreamNames)
 
 	newUpstreamNames := []string{"cluster1", "cluster2"}
-	SetEnabledUpstreams(listenerPort, newUpstreamNames)
-	assertEnabledUpstreamsInListener(t, listenerPort, newUpstreamNames)
+	SetEnabledUpstreams(listenerName, newUpstreamNames)
+	assertEnabledUpstreamsInListener(t, listenerName, newUpstreamNames)
 }
 
-func assertEnabledUpstreamsInListener(t *testing.T, listenerPort int, upstreamNames []string) {
+func assertEnabledUpstreamsInListener(t *testing.T, listenerName string, upstreamNames []string) {
 	listeners := Listeners()
 	require.Equal(t, 1, len(listeners), "Should contain one listener")
 
-	l := listeners[listenerPort]
+	l := listeners[listenerName]
 	require.Equal(t, 2, len(l.EnabledUpstreams), "Should have activated upstreams")
 	assert.Equal(t, upstreamNames, l.EnabledUpstreams)
 }

@@ -4,10 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/visola/go-proxy/pkg/configuration"
 	"github.com/visola/go-proxy/pkg/httputil"
 	"github.com/visola/go-proxy/pkg/listener"
 	"github.com/visola/go-proxy/pkg/upstream"
@@ -21,7 +19,7 @@ type UpstreamStateChangeResult struct {
 
 func registerListenerEndpoints(router *mux.Router) {
 	router.HandleFunc("/api/listeners", getListeners).Methods(http.MethodGet)
-	router.HandleFunc("/api/listeners/{listenerPort}/upstreams", enableUpstream).Methods(http.MethodPut)
+	router.HandleFunc("/api/listeners/{listenerName}/upstreams", enableUpstream).Methods(http.MethodPut)
 }
 
 func enableUpstream(resp http.ResponseWriter, req *http.Request) {
@@ -33,11 +31,7 @@ func enableUpstream(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	listenerPort, portError := strconv.Atoi(mux.Vars(req)["listenerPort"])
-	if portError != nil {
-		httputil.InternalError(req, resp, portError)
-		return
-	}
+	listenerName := mux.Vars(req)["listenerName"]
 
 	loadedUpstreams := make([]upstream.Upstream, 0)
 	for _, upstreamName := range upstreamNames {
@@ -49,16 +43,21 @@ func enableUpstream(resp http.ResponseWriter, req *http.Request) {
 		loadedUpstreams = append(loadedUpstreams, loadedUpstream)
 	}
 
-	if _, ok := listener.Listeners()[listenerPort]; !ok {
-		httputil.NotFound(req, resp, fmt.Sprintf("Listener not found with port: %d", listenerPort))
+	toChange, ok := listener.Listeners()[listenerName]
+	if !ok {
+		httputil.NotFound(req, resp, fmt.Sprintf("Listener not found with name: %s", listenerName))
 		return
 	}
 
-	listener.SetEnabledUpstreams(listenerPort, upstreamNames)
-	configuration.SaveToPersistedState()
+	listener.SetEnabledUpstreams(listenerName, upstreamNames)
+	saveErr := listener.Save(&toChange)
+	if saveErr != nil {
+		httputil.InternalError(req, resp, saveErr)
+		return
+	}
 
 	result := UpstreamStateChangeResult{
-		Listener:  listener.Listeners()[listenerPort],
+		Listener:  toChange,
 		Upstreams: loadedUpstreams,
 	}
 

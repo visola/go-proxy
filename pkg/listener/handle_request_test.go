@@ -22,10 +22,8 @@ func TestHandleRequest(t *testing.T) {
 
 func testNoEnabledUpstreams(t *testing.T) {
 	listenerToHandle := Listener{
-		Configuration: ListenerConfiguration{
-			Port: 80,
-		},
 		EnabledUpstreams: make([]string, 0),
+		Port:             80,
 	}
 
 	req := httptest.NewRequest(http.MethodGet, "http://nowhere.com/test", strings.NewReader("Some Body"))
@@ -45,10 +43,8 @@ func testWithEnabledUpstreamNoEndpoints(t *testing.T) {
 	})
 
 	listenerToHandle := Listener{
-		Configuration: ListenerConfiguration{
-			Port: 80,
-		},
 		EnabledUpstreams: []string{upstreamName},
+		Port:             80,
 	}
 
 	req := httptest.NewRequest(http.MethodGet, "http://nowhere.com/test", strings.NewReader("Some Body"))
@@ -81,10 +77,8 @@ func testWithMatchingStaticEndpoint(t *testing.T, tempDir string) {
 	})
 
 	listenerToHandle := Listener{
-		Configuration: ListenerConfiguration{
-			Port: 80,
-		},
 		EnabledUpstreams: []string{upstreamName},
+		Port:             80,
 	}
 
 	req := httptest.NewRequest(http.MethodGet, "http://nowhere.com/test/hello.txt", nil)

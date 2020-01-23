@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/visola/go-proxy/pkg/configuration"
 	"gopkg.in/yaml.v2"
 )
 
@@ -72,7 +73,7 @@ func loadFromFile(pathToFile string) (upstreams []Upstream, err error) {
 		return upstreams, statsErr
 	}
 
-	origin := Origin{
+	origin := configuration.Origin{
 		File:     pathToFile,
 		LoadedAt: stats.ModTime().Unix(),
 	}
