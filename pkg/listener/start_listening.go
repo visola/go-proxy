@@ -22,7 +22,7 @@ func startListener(toStart *Listener) {
 	})
 
 	proxyServer.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		handleRequest(*toStart, req, w)
+		handleRequest(*currentListeners[toStart.Name], req, w)
 	})
 
 	if toStart.CertificateFile == "" || toStart.KeyFile == "" {
