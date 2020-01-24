@@ -12,7 +12,7 @@ type Listener struct {
 	EnabledUpstreams []string             `json:"enabledUpstreams" yaml:"enabledUpstreams"`
 	KeyFile          string               `json:"keyFile" yaml:"keyFile"`
 	Name             string               `json:"name"`
-	Origin           configuration.Origin `json:"origin" yaml:"-"`
+	Origin           configuration.Origin `json:"-" yaml:"-"`
 	Port             int                  `json:"port"`
 }
 
@@ -28,23 +28,4 @@ func Listeners() map[string]Listener {
 		result[k] = *v
 	}
 	return result
-}
-
-// SetEnabledUpstreams sets the array of upstreams that are enabled for a specific listener
-func SetEnabledUpstreams(listenerName string, upstreamsToEnable []string) {
-	l, exist := currentListeners[listenerName]
-
-	if !exist {
-		return
-	}
-
-	currentListenersMutex.Lock()
-	defer currentListenersMutex.Unlock()
-
-	l.EnabledUpstreams = make([]string, 0)
-	for _, u := range upstreamsToEnable {
-		l.EnabledUpstreams = append(l.EnabledUpstreams, u)
-	}
-
-	currentListeners[listenerName] = l
 }

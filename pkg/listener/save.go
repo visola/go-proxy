@@ -36,6 +36,7 @@ func Save(toSave *Listener) error {
 		LoadedAt: time.Now().Unix(),
 	}
 
+	currentListeners[toSave.Name] = toSave
 	return ioutil.WriteFile(pathToSave, data, 0644)
 }
 
