@@ -15,9 +15,10 @@ func ensureListener() error {
 	}
 
 	defaultListener := &Listener{
-		Name: defaultName,
-		Origin: configuration.Origin{},
-		Port: defaultPort,
+		EnabledUpstreams: make([]string, 0),
+		Name:             defaultName,
+		Origin:           configuration.Origin{},
+		Port:             defaultPort,
 	}
 
 	currentListeners[defaultName] = defaultListener
