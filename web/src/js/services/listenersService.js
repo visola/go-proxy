@@ -19,7 +19,7 @@ class ListenersService extends BehaviorSubject {
       .then((response) => response.json())
       .then((data) => {
         this.data.loading = false;
-        data.sort((l1, l2) => l1.port - l2.port);
+        data.sort((l1, l2) => l1.name - l2.name);
         this.data.data = data;
         this.next(this.data);
       });
