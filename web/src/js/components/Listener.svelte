@@ -3,13 +3,13 @@ export let listener;
 
 function getUrl(listener) {
   if (isHttps(listener)) {
-    return `https://localhost:${listener.configuration.port}`;
+    return `https://localhost:${listener.port}`;
   }
-  return `http://localhost:${listener.configuration.port}`;
+  return `http://localhost:${listener.port}`;
 }
 
 function isHttps(listener) {
-  return listener.configuration.certificateFile != "" || listener.configuration.keyFile != "";
+  return listener.certificateFile != "" || listener.keyFile != "";
 }
 </script>
 
@@ -17,9 +17,9 @@ function isHttps(listener) {
   <!-- Nothing -->
 {:else}
   <div>
-    {listener.configuration.name}
+    {listener.name}
     <a href={getUrl(listener)} target="_blank"><i class="external alternate icon"></i></a>
-    <div class="ui label large">Port<div class="detail">{listener.configuration.port}</div></div>
+    <div class="ui label large">Port<div class="detail">{listener.port}</div></div>
     <div class="ui label large {isHttps(listener) ? 'green' : 'orange'}">
       HTTPS
       <div class="detail"><i class="{isHttps(listener) ? 'lock' : 'unlock'} alternate icon"></i></div>

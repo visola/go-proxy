@@ -20,11 +20,11 @@ function setSelection(event) {
 <div>
   <label>Listener: </label>
   {#if listeners.length == 1}
-    {listeners[0].configuration.name}
+    {listeners[0].name}
   {:else}
     <select on:change={setSelection}>
       {#each listeners as listener, index}
-        <option value={index}>{listener.configuration.name} ({listener.configuration.port})</option>
+        <option value={index}>{listener.name} ({listener.port})</option>
       {/each}
     </select>
   {/if}
