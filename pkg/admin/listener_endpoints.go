@@ -3,11 +3,10 @@ package admin
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/visola/go-proxy/pkg/configuration"
 	"github.com/visola/go-proxy/pkg/httputil"
 	"github.com/visola/go-proxy/pkg/listener"
 	"github.com/visola/go-proxy/pkg/upstream"
@@ -21,48 +20,7 @@ type UpstreamStateChangeResult struct {
 
 func registerListenerEndpoints(router *mux.Router) {
 	router.HandleFunc("/api/listeners", getListeners).Methods(http.MethodGet)
-	router.HandleFunc("/api/listeners/{listenerPort}/upstreams", enableUpstream).Methods(http.MethodPut)
-}
-
-func enableUpstream(resp http.ResponseWriter, req *http.Request) {
-	decoder := json.NewDecoder(req.Body)
-	var upstreamNames []string
-	decodeErr := decoder.Decode(&upstreamNames)
-	if decodeErr != nil {
-		httputil.InternalError(req, resp, decodeErr)
-		return
-	}
-
-	listenerPort, portError := strconv.Atoi(mux.Vars(req)["listenerPort"])
-	if portError != nil {
-		httputil.InternalError(req, resp, portError)
-		return
-	}
-
-	loadedUpstreams := make([]upstream.Upstream, 0)
-	for _, upstreamName := range upstreamNames {
-		loadedUpstream, ok := upstream.Upstreams()[upstreamName]
-		if !ok {
-			httputil.NotFound(req, resp, fmt.Sprintf("Upstrem not found: %s", upstreamName))
-			return
-		}
-		loadedUpstreams = append(loadedUpstreams, loadedUpstream)
-	}
-
-	if _, ok := listener.Listeners()[listenerPort]; !ok {
-		httputil.NotFound(req, resp, fmt.Sprintf("Listener not found with port: %d", listenerPort))
-		return
-	}
-
-	listener.SetEnabledUpstreams(listenerPort, upstreamNames)
-	configuration.SaveToPersistedState()
-
-	result := UpstreamStateChangeResult{
-		Listener:  listener.Listeners()[listenerPort],
-		Upstreams: loadedUpstreams,
-	}
-
-	httputil.RespondWithJSON(result, resp, req)
+	router.HandleFunc("/api/listeners/{listenerName}", updateListener).Methods(http.MethodPut)
 }
 
 func getListeners(resp http.ResponseWriter, req *http.Request) {
@@ -76,4 +34,31 @@ func getListeners(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	httputil.RespondWithJSON(listenersArray, resp, req)
+}
+
+func updateListener(resp http.ResponseWriter, req *http.Request) {
+	listenerName := mux.Vars(req)["listenerName"]
+
+	loadedListener, ok := listener.Listeners()[listenerName]
+	if !ok {
+		httputil.NotFound(req, resp, fmt.Sprintf("Listener not found: %s", listenerName))
+		return
+	}
+
+	defer req.Body.Close()
+	requestData, readErr := ioutil.ReadAll(req.Body)
+	if readErr != nil {
+		httputil.InternalError(req, resp, readErr)
+	}
+
+	var sentIn listener.Listener
+	json.Unmarshal(requestData, &sentIn)
+
+	loadedListener.CertificateFile = sentIn.CertificateFile
+	loadedListener.EnabledUpstreams = sentIn.EnabledUpstreams
+	loadedListener.KeyFile = sentIn.KeyFile
+	loadedListener.Port = sentIn.Port
+
+	listener.Save(&loadedListener)
+	httputil.RespondWithJSON(loadedListener, resp, req)
 }

@@ -69,7 +69,7 @@ function upstreamSelected(checked, name) {
     const indexOf = listener.enabledUpstreams.indexOf(name);
     listener.enabledUpstreams.splice(indexOf, 1);
   }
-  listenersService.setEnabledUpstreams(listener, listener.enabledUpstreams);
+  listenersService.save(listener);
 }
 </script>
 

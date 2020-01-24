@@ -19,9 +19,15 @@ fi
 PACKAGES=$(go list ./...)
 for package in ${PACKAGES}
 do
+  package_name=$(go list -f '{{.Name}}' ${package})
+  file_to_create=$(go list -f '{{.Dir}}/{{.Name}}_test.go' ${package})
+  if [ ! -f "${file_to_create}" ]; then
+    echo "package ${package_name}" > $file_to_create
+  fi
+
   go test -cover -coverprofile=$TEMP_COVERAGE $package
   cat $TEMP_COVERAGE | grep -v "mode:" | sort -r >> $COVERAGE_OUTPUT
-  rm $TEMP_COVERAGE
+  rm $TEMP_COVERAGE $file_to_create
 done
 
 if [ -f $HTML_REPORT ]; then

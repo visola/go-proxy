@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/visola/go-proxy/pkg/configuration"
 	"github.com/visola/go-proxy/pkg/testutil"
 )
 
@@ -21,7 +22,7 @@ upstreams:
 	tempFile := testutil.CreateTempFile(t, fileName, fileContent)
 	defer os.Remove(tempFile.Name())
 
-	origin := Origin{
+	origin := configuration.Origin{
 		File:     tempFile.Name(),
 		LoadedAt: 10,
 	}

@@ -19,32 +19,30 @@ class ListenersService extends BehaviorSubject {
       .then((response) => response.json())
       .then((data) => {
         this.data.loading = false;
-        data.sort((l1, l2) => l1.configuration.port - l2.configuration.port);
+        data.sort((l1, l2) => l1.name - l2.name);
         this.data.data = data;
         this.next(this.data);
       });
   }
 
-  setEnabledUpstreams(listener, upstreamNames) {
+  save(listener) {
     this.data.saving = true;
-    const toUpdate = this.data.data.find((l) => l.configuration.port == listener.configuration.port);
-    toUpdate.enabledUpstreams = upstreamNames;
     this.next(this.data);
 
     const options = {
-      body: JSON.stringify(toUpdate.enabledUpstreams),
+      body: JSON.stringify(listener),
       headers: { 'Content-type': 'application/json'},
       method: 'PUT',
     };
-    return fetch(`/api/listeners/${toUpdate.configuration.port}/upstreams`, options)
+    return fetch(`/api/listeners/${listener.name}`, options)
       .then((r) => r.json())
       .then((data) => {
-        const newListener = data.listener;
-        const indexOf = this.data.data.indexOf((l) => l.configuration.name == newListener.configuration.name);
+        const newListener = data;
+        const indexOf = this.data.data.indexOf((l) => l.name == newListener.name);
         this.data.data[indexOf] = newListener;
         this.data.saving = false;
         this.next(this.data);
-      })
+      });
   }
 }
 

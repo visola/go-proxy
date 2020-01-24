@@ -4,13 +4,14 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/visola/go-proxy/pkg/configuration"
 )
 
 func TestUpstreamsPerFile(t *testing.T) {
 	// Ensure no upstreams
 	upstreams = make(map[string]Upstream, 0)
 
-	firstOrigin := Origin{
+	firstOrigin := configuration.Origin{
 		File:     "/some/place/first",
 		LoadedAt: 10,
 	}
@@ -26,7 +27,7 @@ func TestUpstreamsPerFile(t *testing.T) {
 		},
 	})
 
-	secondOrigin := Origin{
+	secondOrigin := configuration.Origin{
 		File:     "/another/file/second",
 		LoadedAt: 20,
 	}
