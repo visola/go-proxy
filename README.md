@@ -132,13 +132,45 @@ static:
 
 go-proxy uses listeners to handle requests. Each listener listens to requests incoming in a specific port, using HTTP or HTTPS.
 
-Listeners can have different upstreams enabled to handle requests. If no upstreams are enabled, a listener will always return a 404.
+When you start go-proxy for the first time, it will create a default listener for you. Listeners can have different upstreams enabled to handle requests. The default listener will have no enabled upstreams so it will only respond with 404s.
 
-<!-- TODO - Explain how to configure listeners -->
+Listener configurations are stored in the `~/.go-proxy/listeners` directory by default. You can change that by setting the `GO_PROXY_CONFIGURATION_DIR` environment variable.
 
-## Specificity
+In that directory there will be a `default.yml` file if you've already started the proxy once. The name of the listener comes from the file or from the the attribute `name` in the YAML.
 
-<!-- TODO - Explain sorting by specificity -->
+The following is the default listener that is created for you:
+
+```
+$ cat ~/.go-proxy/listeners/default.yml
+certificateFile: ""
+enabledUpstreams: []
+keyFile: ""
+name: Default
+port: 33080
+```
+
+You can manually edit this file. For now, it doesn't get reloaded but you can restart the proxy to pick up changes. The only changes you actually need to do in the file are: port and add certificate/key file for HTTPS.
+
+To enable/disable upstreams, you can use the admin UI, normally running on port `3000`. The following is a screenshot of the Admin UI with the default listener:
+
+<p style="text-align:center">
+  <img width="600px" src="doc/admin_ui.png" />
+</p>
+
+De/Selecting the checkboxes in this screen, changes the YAML files where the listeners were loaded from. It will also dynamically change what upstreams the listener will use to handle incoming requests (no need to restart if done from the Admin UI).
+
+When you have multiple listeners, you can enable/disable upstreams independently for each listener from the Admin UI. A select box will show on the top right hand side that can be used to select which listener you want to change:
+
+<p style="text-align:center">
+  <img width="600px" src="doc/multiple_listeners.png" />
+</p>
+
+## HTTPS
+
+To enable HTTPS for a listener, just set the two parameters in the YAML:
+
+- `certificateFile`: Path to the CRT or PEM file to use.
+- `keyFile`: Path to the KEY file to use.
 
 # Building go-proxy
 
