@@ -41,7 +41,10 @@ func AddUpstreams(allToAdd []Upstream) {
 	defer upstreamsMutex.Unlock()
 
 	for _, toAdd := range allToAdd {
-		upstreams[toAdd.Name] = toAdd
+		_, exists := upstreams[toAdd.Name]
+		if !exists {
+			upstreams[toAdd.Name] = toAdd
+		}
 	}
 }
 
