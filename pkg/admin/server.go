@@ -14,6 +14,7 @@ func StartAdminServer(port int) error {
 
 	adminServer := mux.NewRouter()
 
+	registerCustomDirectoriesEndpoints(adminServer)
 	registerListenerEndpoints(adminServer)
 	registerRequestsEndpoints(adminServer)
 	registerUpstreamEndpoints(adminServer)

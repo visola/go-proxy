@@ -24,15 +24,25 @@ func AddCustomDirectory(toAdd string) {
 		}
 	}
 
-	customDirectoriesMutex.Lock()
-	defer customDirectoriesMutex.Unlock()
-
-	customDirectories = append(customDirectories, toAdd)
+	saveCustomDirectories(append(customDirectories, toAdd))
 }
 
 // CustomDirectories return all the custom directories configured
 func CustomDirectories() []string {
 	return customDirectories
+}
+
+// RemoveCustomDirectory removes a specific directory from the list
+func RemoveCustomDirectory(toRemove string) {
+	newState := make([]string, len(customDirectories)-1)
+	j := 0
+	for i := range newState {
+		if customDirectories[j] != toRemove {
+			newState[i] = customDirectories[j]
+		}
+		j++
+	}
+	saveCustomDirectories(newState)
 }
 
 // SetCustomDirectories sets the current state to passed in state
@@ -44,12 +54,7 @@ func SetCustomDirectories(newState []string) {
 		newState = make([]string, 0)
 	}
 
-	customDirectories = make([]string, len(newState))
-	for i, d := range newState {
-		customDirectories[i] = d
-	}
-
-	saveCustomDirectories()
+	saveCustomDirectories(newState)
 }
 
 func loadCustomDirectories() error {
@@ -77,7 +82,10 @@ func loadCustomDirectories() error {
 	return nil
 }
 
-func saveCustomDirectories() error {
+func saveCustomDirectories(toSave []string) error {
+	customDirectoriesMutex.Lock()
+	defer customDirectoriesMutex.Unlock()
+
 	configDir, err := configuration.GetConfigurationDirectory()
 	if err != nil {
 		return err
@@ -85,6 +93,7 @@ func saveCustomDirectories() error {
 
 	persistedStateFile := filepath.Join(configDir, currentCustomDirectoriesFile)
 
+	customDirectories = toSave
 	data, marshalErr := yaml.Marshal(customDirectories)
 	if marshalErr != nil {
 		return marshalErr

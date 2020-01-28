@@ -15,6 +15,10 @@ func isGoProxyUpstreamsFile(pathToFile string) bool {
 
 // ScanFilesInDirectories scans a set of directories to search for upstreams
 func ScanFilesInDirectories(dirsToScan []string) []Upstream {
+	if len(dirsToScan) == 0 {
+		return make([]Upstream, 0)
+	}
+
 	log.Printf("Scanning for upstream files in: %s\n", dirsToScan)
 	started := time.Now().UnixNano()
 	result := make([]Upstream, 0)
