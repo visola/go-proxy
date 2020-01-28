@@ -48,6 +48,14 @@ func AddUpstreams(allToAdd []Upstream) {
 	}
 }
 
+// ClearUpstreams remove all previously configured upstreams
+func ClearUpstreams() {
+	upstreamsMutex.Lock()
+	defer upstreamsMutex.Unlock()
+
+	upstreams = make(map[string]Upstream, 0)
+}
+
 // Upstreams return a map containing all upstreams loaded
 func Upstreams() map[string]Upstream {
 	return upstreams
