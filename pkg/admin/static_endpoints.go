@@ -7,7 +7,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var staticRoots = []string{"/listeners", "/requests"}
+var staticRoots = []string{"/custom-directories", "/listeners", "/requests"}
 
 func registerStaticEndpoints(router *mux.Router) {
 	box := packr.NewBox("../../web/dist") // Relative to this file

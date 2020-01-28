@@ -1,3 +1,7 @@
+.clickable {
+  cursor: pointer;
+}
+
 .header-justified {
   display: flex;
   flex: 2;
@@ -13,6 +17,19 @@ i.button.close {
 
 label {
   font-weight: bold;
+}
+
+ol, ul {
+  padding: 0;
+}
+
+ol > li, ul > li {
+  padding: 2px 5px;
+  transition: all 0.4s;
+}
+
+ol > li:hover, ul > li:hover {
+  background: #FEFEE0;
 }
 
 .requests {
