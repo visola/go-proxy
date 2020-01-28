@@ -52,7 +52,10 @@ func updateListener(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	var sentIn listener.Listener
-	json.Unmarshal(requestData, &sentIn)
+	if err := json.Unmarshal(requestData, &sentIn); err != nil {
+		httputil.InternalError(req, resp, err)
+		return
+	}
 
 	loadedListener.CertificateFile = sentIn.CertificateFile
 	loadedListener.EnabledUpstreams = sentIn.EnabledUpstreams
