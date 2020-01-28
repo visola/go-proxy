@@ -15,8 +15,13 @@ import (
 )
 
 func TestHandleRequest(t *testing.T) {
+	upstream.ClearUpstreams()
 	t.Run("No enabled upstreams", testNoEnabledUpstreams)
+
+	upstream.ClearUpstreams()
 	t.Run("Enabled upstream with no endpoints", testWithEnabledUpstreamNoEndpoints)
+
+	upstream.ClearUpstreams()
 	t.Run("Enabled upstream with endpoints", testutil.WithTempDir(t, testWithMatchingStaticEndpoint))
 }
 

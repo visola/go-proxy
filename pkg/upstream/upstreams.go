@@ -41,8 +41,19 @@ func AddUpstreams(allToAdd []Upstream) {
 	defer upstreamsMutex.Unlock()
 
 	for _, toAdd := range allToAdd {
-		upstreams[toAdd.Name] = toAdd
+		_, exists := upstreams[toAdd.Name]
+		if !exists {
+			upstreams[toAdd.Name] = toAdd
+		}
 	}
+}
+
+// ClearUpstreams remove all previously configured upstreams
+func ClearUpstreams() {
+	upstreamsMutex.Lock()
+	defer upstreamsMutex.Unlock()
+
+	upstreams = make(map[string]Upstream, 0)
 }
 
 // Upstreams return a map containing all upstreams loaded

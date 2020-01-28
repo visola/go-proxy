@@ -17,6 +17,15 @@ func Initialize(baseDir string) {
 		go processFilesToLoad()
 	}
 
+	loadCustomDirectories()
+
+	go func() {
+		for {
+			AddUpstreams(ScanFilesInDirectories(customDirectories))
+			time.Sleep(1 * time.Minute)
+		}
+	}()
+
 	go findFilesInConfiguratonDirectory(baseDir)
 	go func() {
 		for {

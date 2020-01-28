@@ -1,4 +1,5 @@
 <script>
+import CustomDirectoriesPage from './CustomDirectoriesPage.svelte';
 import ListenersPage from './ListenersPage.svelte';
 import RequestsPage from './RequestsPage.svelte';
 import Route from './Route.svelte';
@@ -12,6 +13,10 @@ const routes = [{
   component: ListenersPage,
   label: "Listeners",
   paths: ["/listeners"],
+},{
+  component: CustomDirectoriesPage,
+  label: "Custom Directories",
+  paths: ["/custom-directories"],
 }];
 </script>
 
