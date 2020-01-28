@@ -2,31 +2,17 @@ package listener
 
 import (
 	"io/ioutil"
-	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/visola/go-proxy/pkg/configuration"
+	"github.com/visola/go-proxy/pkg/testutil"
 )
 
 func TestLoadFromFile(t *testing.T) {
-	tempDir, err := ioutil.TempDir("", "goproxytest")
-	if err != nil {
-		assert.FailNow(t, "Error while creating temp dir", err)
-	}
-
-	defer os.RemoveAll(tempDir)
-
-	previousConfigDir := os.Getenv(configuration.ConfigDirectoryEnvironmentVariable)
-	defer func() {
-		os.Setenv(configuration.ConfigDirectoryEnvironmentVariable, previousConfigDir)
-	}()
-
-	os.Setenv(configuration.ConfigDirectoryEnvironmentVariable, tempDir)
-
-	contentWithName := `
+	testutil.WithConfigurationDirectory(t, func(t *testing.T, tempDir string) {
+		contentWithName := `
 certificateFile: /path/to/some.crt
 enabledUpstreams:
   - one
@@ -36,9 +22,9 @@ name: My Listener
 port: 10000
 `
 
-	testFile(t, filepath.Join(tempDir, "another.yml"), contentWithName, "My Listener")
+		testFile(t, filepath.Join(tempDir, "another.yml"), contentWithName, "My Listener")
 
-	contentWithoutName := `
+		contentWithoutName := `
 certificateFile: /path/to/some.crt
 enabledUpstreams:
   - one
@@ -46,8 +32,8 @@ enabledUpstreams:
 keyFile: /path/to/some.key
 port: 10000
 `
-
-	testFile(t, filepath.Join(tempDir, "SomeName.yml"), contentWithoutName, "SomeName")
+		testFile(t, filepath.Join(tempDir, "SomeName.yml"), contentWithoutName, "SomeName")
+	})(t)
 }
 
 func testFile(t *testing.T, tempFile string, content string, expectedName string) {
