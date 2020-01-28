@@ -36,24 +36,12 @@ func CustomDirectories() []string {
 func RemoveCustomDirectory(toRemove string) {
 	newState := make([]string, len(customDirectories)-1)
 	j := 0
-	for i := range newState {
-		if customDirectories[j] != toRemove {
-			newState[i] = customDirectories[j]
+	for _, c := range customDirectories {
+		if c != toRemove {
+			newState[j] = c
+			j++
 		}
-		j++
 	}
-	saveCustomDirectories(newState)
-}
-
-// SetCustomDirectories sets the current state to passed in state
-func SetCustomDirectories(newState []string) {
-	customDirectoriesMutex.Lock()
-	defer customDirectoriesMutex.Unlock()
-
-	if newState == nil {
-		newState = make([]string, 0)
-	}
-
 	saveCustomDirectories(newState)
 }
 
