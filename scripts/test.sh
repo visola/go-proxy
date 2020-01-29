@@ -4,13 +4,18 @@ set -e
 # Code Climate tool requires the file to be named c.out and to be in the project root
 COVERAGE_OUTPUT=c.out
 TEMP_COVERAGE=build/temp_cover.out
+FINAL_COVERAGE=build/go_coverage.out
 HTML_REPORT=build/coverage.html
 
 export GO_PROXY_CERT_FILE=
 export GO_PROXY_KEY_FILE=
 export GO_PROXY_PORT=33080
 
-echo "mode: set" > $COVERAGE_OUTPUT
+if [ ! -d build ]; then
+  mkdir build
+fi
+
+echo "mode: set" > $FINAL_COVERAGE
 
 if [ -f $TEMP_COVERAGE ]; then
   rm $TEMP_COVERAGE
@@ -26,7 +31,7 @@ do
   fi
 
   go test -cover -coverprofile=$TEMP_COVERAGE $package
-  cat $TEMP_COVERAGE | grep -v "mode:" | sort -r >> $COVERAGE_OUTPUT
+  cat $TEMP_COVERAGE | grep -v "mode:" | sort -r >> $FINAL_COVERAGE
   rm $TEMP_COVERAGE $file_to_create
 done
 
@@ -34,4 +39,12 @@ if [ -f $HTML_REPORT ]; then
   rm $HTML_REPORT
 fi
 
-go tool cover -html=$COVERAGE_OUTPUT -o $HTML_REPORT
+go tool cover -html=$FINAL_COVERAGE -o $HTML_REPORT
+go tool cover -func=$FINAL_COVERAGE | grep '^total:'
+
+pushd web >> /dev/null
+if [ ! -d "node_modules" ]; then
+  npm install
+fi
+npm run test
+popd >> /dev/null

@@ -2,7 +2,6 @@ package configuration
 
 import (
 	"os"
-	"os/user"
 )
 
 // ConfigDirectoryEnvironmentVariable stores the name of the environment variable used to load the configuration directory name
@@ -15,9 +14,6 @@ func GetConfigurationDirectory() (string, error) {
 		return fromEnv, nil
 	}
 
-	user, err := user.Current()
-	if err != nil {
-		return "", err
-	}
-	return user.HomeDir + "/.go-proxy", nil
+	homeDir, err := os.UserHomeDir()
+	return homeDir + "/.go-proxy", err
 }
