@@ -17,11 +17,16 @@ echo "Formatting reports..."
 $CC_REPORTER format-coverage -t gocov $BUILD_DIR/go_coverage.out -o $GO_FORMATTED_REPORT --prefix github.com/visola/go-proxy
 
 pushd web > /dev/null
-$CC_REPORTER format-coverage -t lcov $BUILD_DIR/lcov.info -o $FE_FORMATTED_REPORT
+$CC_REPORTER format-coverage -t lcov $BUILD_DIR/lcov.info -o $FE_FORMATTED_REPORT --add-prefix web
 popd > /dev/null
 
 echo "Generating combine report..."
 $CC_REPORTER sum-coverage -o $SUMMED_REPORT $GO_FORMATTED_REPORT $FE_FORMATTED_REPORT
 
+echo "Files covered in report:"
+cat $SUMMED_REPORT | jq '.source_files[].name' -r | sort
+
 echo "Uploading report..."
 $CC_REPORTER upload-coverage -i $SUMMED_REPORT
+
+echo "Done."
