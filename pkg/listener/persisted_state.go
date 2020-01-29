@@ -18,7 +18,11 @@ func LoadFromPersistedState() error {
 	}
 
 	listenersDir := filepath.Join(configDir, listenerSubDirectory)
-	if _, err := os.Stat(listenersDir); os.IsNotExist(err) {
+	if _, err := os.Stat(listenersDir); err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+
 		return err
 	}
 
