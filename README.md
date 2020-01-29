@@ -4,6 +4,7 @@
 [![Build Status](https://travis-ci.com/visola/go-proxy.svg?branch=master)](https://travis-ci.com/visola/go-proxy)
 [![Go Report Card](https://goreportcard.com/badge/github.com/visola/go-proxy)](https://goreportcard.com/report/github.com/visola/go-proxy)
 [![Maintainability](https://api.codeclimate.com/v1/badges/efcd0e7b3ca56fdd79ee/maintainability)](https://codeclimate.com/github/visola/go-proxy/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/efcd0e7b3ca56fdd79ee/test_coverage)](https://codeclimate.com/github/visola/go-proxy/test_coverage)
 
 go-proxy is a server that helps developers work faster in the world of microservices and microfrontends. You run it locally to serve all local traffic from multiple sources into one place, acting as a gateway.
 
