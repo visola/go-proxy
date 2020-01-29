@@ -3,11 +3,20 @@
   "description": "Admin frontend for the go-proxy.",
   "scripts": {
     "build": "rm -Rf dist && NODE_ENV=production webpack --mode production",
-    "start": "rm -Rf dist && webpack --watch --mode development"
+    "start": "rm -Rf dist && webpack --watch --mode development",
+    "test": "jest src"
   },
   "devDependencies": {
+    "@babel/core": "^7.8.3",
+    "@babel/preset-env": "^7.8.3",
+    "@testing-library/jest-dom": "^5.0.2",
+    "@testing-library/svelte": "^1.11.0",
+    "babel-jest": "^25.1.0",
     "copy-webpack-plugin": "^5.1.1",
     "html-webpack-plugin": "^3.2.0",
+    "jest": "^25.1.0",
+    "sinon": "^8.1.1",
+    "svelte-jester": "^1.0.3",
     "svelte-loader": "^2.13.6",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10"
@@ -15,5 +24,27 @@
   "dependencies": {
     "rxjs": "^6.5.4",
     "svelte": "^3.16.5"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "coverageDirectory": "../build",
+    "collectCoverageFrom": [
+      "src/**/*.{js,svelte}"
+    ],
+    "coverageReporters": [
+      "lcov",
+      "text-summary"
+    ],
+    "moduleFileExtensions": [
+      "js",
+      "svelte"
+    ],
+    "setupFilesAfterEnv": [
+      "@testing-library/jest-dom/extend-expect"
+    ],
+    "transform": {
+      "^.+\\.js$": "babel-jest",
+      "^.+\\.svelte$": "svelte-jester"
+    }
   }
 }

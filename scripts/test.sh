@@ -36,3 +36,10 @@ fi
 
 go tool cover -html=$COVERAGE_OUTPUT -o $HTML_REPORT
 go tool cover -func=c.out | grep '^total:'
+
+pushd web >> /dev/null
+if [ -d node_modules]; then
+  npm install
+fi
+npm run test
+popd >> /dev/null
