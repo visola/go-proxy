@@ -35,3 +35,4 @@ if [ -f $HTML_REPORT ]; then
 fi
 
 go tool cover -html=$COVERAGE_OUTPUT -o $HTML_REPORT
+go tool cover -func=c.out | grep '^total:'
