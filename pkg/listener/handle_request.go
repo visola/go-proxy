@@ -42,9 +42,9 @@ func handleRequest(listenerToHandle Listener, req *http.Request, resp http.Respo
 	result := newHandleResult(req)
 	RequestHandlingChanged(result)
 
-	defer req.Body.Close()
 	var readErr error
 	result.Request.Body, readErr = ioutil.ReadAll(req.Body)
+	req.Body.Close()
 	if readErr != nil {
 		httputil.InternalError(req, resp, readErr)
 		result.StatusCode = http.StatusNotFound

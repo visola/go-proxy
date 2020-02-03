@@ -8,6 +8,12 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
+)
+
+var (
+	httpClient      *http.Client
+	httpClientMutex sync.Mutex
 )
 
 // ProxyEndpoint proxy requests to another HTTP/S server
@@ -42,15 +48,21 @@ func (p *ProxyEndpoint) Handle(req *http.Request) (int, string, map[string][]str
 }
 
 func createHTTPClient() *http.Client {
-	return &http.Client{
-		// Do not auto-follow redirects
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		},
+	httpClientMutex.Lock()
+	defer httpClientMutex.Unlock()
+
+	if httpClient == nil {
+		httpClient = &http.Client{
+			// Do not auto-follow redirects
+			CheckRedirect: func(req *http.Request, via []*http.Request) error {
+				return http.ErrUseLastResponse
+			},
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			},
+		}
 	}
+	return httpClient
 }
 
 func proxyHandleResult(p *ProxyEndpoint, newURL *url.URL, req *http.Request) (int, string, map[string][]string, io.ReadCloser) {
