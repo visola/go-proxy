@@ -6,7 +6,6 @@ import (
 	"os"
 	"path"
 	"strings"
-	"time"
 )
 
 func isGoProxyUpstreamsFile(pathToFile string) bool {
@@ -19,8 +18,6 @@ func ScanFilesInDirectories(dirsToScan []string) []Upstream {
 		return make([]Upstream, 0)
 	}
 
-	log.Printf("Scanning for upstream files in: %s\n", dirsToScan)
-	started := time.Now().UnixNano()
 	result := make([]Upstream, 0)
 	totalFiles := 0
 	filesFound := 0
@@ -58,7 +55,6 @@ func ScanFilesInDirectories(dirsToScan []string) []Upstream {
 		}
 	}
 
-	log.Printf("Finished scanning for %d files in %dms. Found %d files.", totalFiles, (time.Now().UnixNano()-started)/1000/1000, filesFound)
 	return result
 }
 
