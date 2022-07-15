@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "rxjs": "^6.5.4",
-    "svelte": "^3.16.5"
+    "svelte": "^3.49.0"
   },
   "jest": {
     "collectCoverage": true,
